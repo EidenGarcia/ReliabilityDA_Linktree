@@ -11,18 +11,19 @@ body {
     background-color: #f0f0f0; /* Change the background color as needed */
 }
 
-.center-container {
-    text-align: center;
-}
-
-.center-image {
+.portal-image {
     max-width: 100%;
     height: auto;
     margin-bottom: 20px;
 }
+
 .portal-title {
     font-size: 24px;
     margin-bottom: 20px;
+}
+
+.portal-links {
+    display: flex;
 }
 
 .portal-link {
