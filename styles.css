@@ -20,6 +20,10 @@ body {
     height: auto;
     margin-bottom: 20px;
 }
+.portal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
 
 .portal-link {
     display: block;
