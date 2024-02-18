@@ -5,20 +5,48 @@ body {
 
 .portal-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     height: 100vh;
     background-color: #f0f0f0; /* Change the background color as needed */
 }
 
-.center-container {
+.portal-image {
+    max-width: 50%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.portal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.title-container {
+    position: relative;
     text-align: center;
 }
 
-.center-image {
-    max-width: 100%;
+.title-background {
+    width: 100%;
     height: auto;
-    margin-bottom: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.title-text {
+    position: relative;
+    z-index: 1;
+    color: white; /* Adjust text color as needed */
+    /* You can add more styling to the title text if desired */
+}
+.portal-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .portal-link {
@@ -35,5 +63,11 @@ body {
 }
 
 .portal-link:hover {
-    background-color: #FFFFFF; /* Change the hover background color as needed */
+    background-color: #e0e0e0; /* Change the hover background color as needed */
+}
+
+.guide-image {
+    max-width: 50%;
+    height: auto;
+    margin-bottom: 10px;
 }
