@@ -21,23 +21,26 @@
             height: auto;
         }
 	.portal-links {
-	    display: grid;
-	    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adjust the minimum and maximum width as needed */
-	    grid-gap: 10px; /* Adjust the gap between images as needed */
+	    display: flex;
+	    justify-content: space-around;
+	    align-items: flex-start;
+	    flex-wrap: wrap;
 	    background-color: #f0f0f0; /* Change the background color as needed */
 	}
-
 	.guide-link {
 	    text-align: center;
+	    margin: 10px;
 	    text-decoration: none;
 	    color: black;
+	    display: block;
+	    width: calc(33.33% - 20px); /* Adjust the width as needed */
+	    flex-grow: 1;
+	    max-width: 300px; /* Adjust maximum width as needed */
 	}
 	
 	.guide-link img {
 	    width: 100%;
 	    height: auto;
-	    display: block;
-	    margin: 0 auto; /* Centers the images horizontally */
 	}
     </style>
 </head>
