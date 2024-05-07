@@ -27,28 +27,50 @@
         .header img {
             max-width: 50%;
             height: auto;
-            margin-bottom: 20px;/
+            margin-bottom: 20px;
         }
 
         .header h2 {
-            color: #333; /* Adjust the color as needed */
-            margin: 0; /* Remove default margin */
+            color: #333; 
+            margin: 0; 
         }
 
         .portal-links {
             text-align: center;
-            margin-top: 20px; /* Adjust the top margin as needed */
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 10px; /* Gap between buttons */
+        }
+
+        .old-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .new-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .portal-link {
             display: block;
-            margin: 10px 0;
             text-decoration: none;
-            color: #333; /* Adjust the color as needed */
-            background-color: #fff; /* Adjust the background color as needed */
+            color: #333;
+            background-color: #fff;
             padding: 10px;
-            border-radius: 8px; /* Add rounded corners */
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px; /* Adjust spacing between buttons */
+            width: 200px; /* Set fixed width for buttons */
+        }
+
+        .new-button {
+            background-color: #00ab41; /* Green */
         }
     </style>
 </head>
@@ -58,12 +80,21 @@
         <h2>Reliability DA - Field Forms</h2>
     </div>
     <div class="portal-links">
-        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUM1JUVEpSS0ZLQVVZWVJLQ1BIRjFLRUtGMCQlQCN0PWcu" class="portal-link">Quarterly Logs</a>
-        <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u" class="portal-link">SensorOn</a>
-        <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUNjBDMTREQU83MUE3NjFHRVVPQ0hIQlNMQiQlQCN0PWcu" class="portal-link">Commissioning In-Service</a>
-        <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu" class="portal-link">Legacy In-Service</a>
-        <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQlBTSUFMNTdHTkNSU1YwOEJZQjYwSUVMWi4u" class="portal-link">Recloser Issue</a>
-        <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u" class="portal-link">Vehicle Request</a>
+        <div class="old-buttons">
+            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUM1JUVEpSS0ZLQVVZWVJLQ1BIRjFLRUtGMCQlQCN0PWcu" class="portal-link">Quarterly Logs</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u" class="portal-link">SensorOn</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUNjBDMTREQU83MUE3NjFHRVVPQ0hIQlNMQiQlQCN0PWcu" class="portal-link">Commissioning In-Service</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu" class="portal-link">Legacy In-Service</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQlBTSUFMNTdHTkNSU1YwOEJZQjYwSUVMWi4u" class="portal-link">Recloser Issue</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u" class="portal-link">Vehicle Request</a>
+        </div>
+        <div class="new-buttons">
+            <!-- New Buttons -->
+            <a href="#" class="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Shared%20Documents/Quarterly_&_Events_Recloser/Three%20Phase%20Recloser%20-%20Quarterly%20Log%20Data%20Check%20List.xlsx">Quarterly Logs (.xlsx)</a>
+            <a href="#" class="portal-link new-button">SensorOn (.xlsx)</a>
+            <a href="#" class="https://aeepr.sharepoint.com/sites/Reliability889/Shared%20Documents/Three%20Phase%20Recloser%20In-Service%20Checklist.xlsx">Commissioning (.xlsx)</a>
+            <a href="#" class="https://aeepr.sharepoint.com/sites/Reliability889/Shared%20Documents/Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx">Legacy In-Service (.xlsx)</a>
+        </div>
     </div>
 </body>
 </html>
