@@ -9,8 +9,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: space-between;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
@@ -37,19 +37,10 @@
 
         .portal-links {
             text-align: center;
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Two columns */
-            gap: 10px; /* Gap between buttons */
-            height: auto; /* Adjust height automatically */
-        }
-
-        .old-buttons,
-        .new-buttons {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            margin-bottom: 20px; /* Original spacing between buttons */
         }
 
         .portal-link {
@@ -62,15 +53,17 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
             margin-bottom: 10px; /* Adjust spacing between buttons */
             width: 200px; /* Set fixed width for buttons */
+            max-width: 100%; /* Set max width */
         }
 
         .new-button {
-            width: 200px;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
             margin-bottom: 10px;
             text-align: center;
+            width: 200px; /* Set fixed width for buttons */
+            max-width: 100%; /* Set max width */
         }
 
         /* Define unique colors for new buttons */
@@ -88,6 +81,19 @@
 
         .purple-button {
             background-color: #00ab41; /* Purple */
+        }
+
+        @media screen and (min-width: 600px) {
+            .portal-links {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .portal-links .old-buttons,
+            .portal-links .new-buttons {
+                margin-bottom: 0;
+                margin-right: 20px; /* Add space between button groups */
+            }
         }
     </style>
 </head>
