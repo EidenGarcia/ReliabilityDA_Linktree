@@ -101,6 +101,7 @@
     <div class="header">
         <img src="LUMA Logo.jpg" alt="Header Image">
         <h2>Reliability DA - Field Forms</h2>
+        <p id="lastUpdated"></p>
     </div>
     <div class="portal-links">
         <div class="old-buttons">
@@ -119,5 +120,16 @@
             <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B29573DAD-7464-44A9-B533-C62F7790D8E0%7D&file=Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button purple-button">Legacy In-Service (.xlsx)</a>
         </div>
     </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2024-05-14T14:03'); // Set your fixed date and time here
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
 </body>
 </html>
