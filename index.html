@@ -47,17 +47,33 @@
             text-align: center;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
+
+        .last-updated {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="portal-container">
         <img src="LUMA Logo.jpg" alt="Wave Image" class="portal-image">
         <h1 class="portal-title">Reliability DA - LinkTree</h1>
+        <p class="last-updated" id="lastUpdated"></p>
         <div class="portal-links">
-        	<a href="guides5.html" class="portal-link">Guideline Library</a>
+            <a href="guides5.html" class="portal-link">Guideline Library</a>
             <a href="da_forms.html" class="portal-link">Microsoft Forms</a>
             <a href="da_trackers.html" class="portal-link">Trackers & Reports</a>
         </div>
     </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
 </body>
 </html>
