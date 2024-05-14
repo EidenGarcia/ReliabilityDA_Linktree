@@ -86,7 +86,7 @@
 
     <script>
         function updateLastUpdated() {
-            const fixedDate = new Date('2024-05-14T14:07'); // Set your fixed date and time here
+            const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
             const formattedDate = fixedDate.toLocaleDateString('en-US', options);
             document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
