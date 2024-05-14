@@ -72,6 +72,7 @@
     <div class="header">
         <img src="LUMA Logo.jpg" alt="Header Image">
         <h2>Reliability DA - Trackers & Reports</h2>
+        <p id="lastUpdated"></p>
     </div>
     <div class="portal-links">
         <a href="https://cp-luma-da-tracker.azurewebsites.net" class="portal-link purple-button">Database</a>
@@ -82,6 +83,16 @@
         <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B010D8B9E-04EB-446A-8827-DAEED87203CE%7D&file=Feeder%20Head%20Imbalance%20%25_V2.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">SensorOn - Feeder Head Imbalance (.xlsx)</a>
         <a href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Lists/Recloser%20Issue%20tracker/AllItems.aspx?xsdata=MDV8MDF8fDk2YjkwMGM5YzZkMjQxMjZlOGU3MDhkYjc3ZTJjYTVjfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2MzgyMzU1ODgxNDQ0NTc5NTl8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMM1JsWVcxekx6RTVPbUZhTVd0eU5rZEtWRUpFWTFOVGEwZDZYMlpmTnpKRFNXVmhibU5QTUdJM1JFazJPSEJ4T0dkVlZUUXhRSFJvY21WaFpDNTBZV04yTWk5amFHRnVibVZzY3k4eE9UcGhXakZyY2paSFNsUkNSR05UVTJ0SGVsOW1YemN5UTBsbFlXNWpUekJpTjBSSk5qaHdjVGhuVlZVME1VQjBhSEpsWVdRdWRHRmpkakl2YldWemMyRm5aWE12TVRZNE56azJNakF4TWpnME1nPT18YTViNTQ1NTFhNjMyNDM0OWU4ZTcwOGRiNzdlMmNhNWN8YzkzOTBhYTUwZjAxNGE4Njk0ZjAzNDMwMzM4NzRkODQ%3D&sdata=cnVMSGg0OEFuRTlYbW1HTEYzRW5yWXg2NVIzRXdhdnQrQndPS3A1WmlyMD0%3D" class="portal-link orange-button">Recloser Issue Tracker (SharePoint)</a>
     </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2024-05-14T14:07'); // Set your fixed date and time here
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
 </body>
 </html>
-
