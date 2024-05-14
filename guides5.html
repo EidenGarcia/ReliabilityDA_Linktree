@@ -13,9 +13,10 @@
             position: relative;
         }
 
-        .header {
+        .header-container {
             text-align: center;
             background-color: #f0f0f0; /* Change the background color as needed */
+            margin-bottom: 20px; /* Added margin */
         }
 
         .header img {
@@ -60,11 +61,12 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="LUMA Logo.jpg" alt="Header Image" class="header-image">
-        <h2>Reliability DA - Guideline Library</h2>
+    <div class="header-container">
+        <div class="header">
+            <img src="LUMA Logo.jpg" alt="Header Image" class="header-image">
+            <h2>Reliability DA - Guideline Library</h2>
+            <p id="lastUpdated"></p>
     </div>
-    <p class="last-updated" id="lastUpdated"></p>
 
     <div class="portal-links">
         <div class="column">
