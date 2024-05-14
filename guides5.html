@@ -10,6 +10,7 @@
             padding: 0;
             font-family: 'Arial', sans-serif;
             background-color: #f0f0f0; /* Change the background color as needed */
+            position: relative;
         }
 
         .header {
@@ -50,6 +51,12 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .last-updated {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -57,6 +64,7 @@
         <img src="LUMA Logo.jpg" alt="Header Image" class="header-image">
         <h2>Reliability DA - Guideline Library</h2>
     </div>
+    <p class="last-updated" id="lastUpdated"></p>
 
     <div class="portal-links">
         <div class="column">
@@ -77,5 +85,16 @@
         </div>
         <!-- Add more guide links as needed -->
     </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
 </body>
 </html>
