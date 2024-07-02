@@ -9,14 +9,14 @@
             margin: 0;
             padding: 0;
             font-family: 'Arial', sans-serif;
-            background-color: #f0f0f0; /* Change the background color as needed */
+            background-color: #f0f0f0;
             position: relative;
         }
 
         .header-container {
             text-align: center;
-            background-color: #f0f0f0; /* Change the background color as needed */
-            margin-bottom: 20px; /* Added margin */
+            background-color: #f0f0f0;
+            margin-bottom: 20px;
         }
 
         .header img {
@@ -29,7 +29,7 @@
             justify-content: space-around;
             align-items: flex-start;
             flex-wrap: wrap;
-            background-color: #f0f0f0; /* Change the background color as needed */
+            background-color: #f0f0f0;
         }
 
         .guide-link {
@@ -38,19 +38,21 @@
             text-decoration: none;
             color: black;
             display: block;
+            width: 100%; /* Ensure the link takes full width */
         }
 
         .guide-image {
-            max-width: 100%; /* Set maximum width to 100% */
-            height: auto;
-            margin-bottom: 10px; /* Adjust spacing between images */
+            width: 100%; /* Set width to 100% of the parent container */
+            height: auto; /* Maintain aspect ratio */
+            margin-bottom: 10px;
         }
 
         .column {
-            flex: 1; /* Equal width columns */
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 45%; /* Adjust width of each column as needed */
         }
 
         .last-updated {
@@ -85,12 +87,11 @@
                 <img src="Reliability_Recomendation_Guidelines1_.PNG" alt="Guide Image" class="guide-image">
             </a>
         </div>
-        <!-- Add more guide links as needed -->
     </div>
 
     <script>
         function updateLastUpdated() {
-            const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
+            const fixedDate = new Date('2024-05-14T14:08');
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
             const formattedDate = fixedDate.toLocaleDateString('en-US', options);
             document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
