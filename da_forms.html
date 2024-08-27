@@ -1,96 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DA Trackers & Reports</title>
+    <title>DA Forms</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: space-between;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-        }
-
         .header {
             text-align: center;
             width: 100%;
-            padding: 0px;
+            padding: 10px;
             box-sizing: border-box;
             background-color: #f0f0f0;
         }
 
-        .header img {
-            max-width: 50%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
         .header h2 {
-            color: #333;
-            margin: 0;
+            color: #333; 
+            margin: 0; 
         }
 
         .portal-links {
             text-align: center;
-            margin-top: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px; /* Original spacing between buttons */
         }
 
         .portal-link {
             display: block;
-            margin: 10px 0;
             text-decoration: none;
             color: #333;
+            background-color: #fff;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px; /* Adjust spacing between buttons */
+            width: 200px; /* Set fixed width for buttons */
+            max-width: 100%; /* Set max width */
         }
 
-        /* Define unique colors for each button */
+        .new-button {
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+            text-align: center;
+            width: 200px; /* Set fixed width for buttons */
+            max-width: 100%; /* Set max width */
+        }
+
+        /* Define unique colors for new buttons */
         .green-button {
-            background-color: #ff9933; /* Green */
+            background-color: #00ab41; /* Green */
         }
 
         .blue-button {
-            background-color: #00ab41; /* Blue */
+            background-color: #40C5AF; /* Blue */
         }
 
         .orange-button {
-            background-color: #40c5af; /* Orange */
+            background-color: #00ab41; /* Orange */
         }
 
         .purple-button {
-            background-color: #fff; /* Purple */
+            background-color: #00ab41; /* Purple */
+        }
+
+        @media screen and (min-width: 600px) {
+            .portal-links {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .portal-links .old-buttons,
+            .portal-links .new-buttons {
+                margin-bottom: 0;
+                margin-right: 20px; /* Add space between button groups */
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <img src="LUMA Logo.jpg" alt="Header Image">
-        <h2>Reliability DA - Trackers & Reports</h2>
+        <h2>Reliability DA - Field Forms</h2>
         <p id="lastUpdated"></p>
-    </div>
     <div class="portal-links">
-        <a href="https://cp-luma-da-tracker.azurewebsites.net" class="portal-link purple-button">Database</a>
-        <a href="https://app.powerbigov.us/groups/me/reports/0a5a3f36-eb91-4a07-b11b-5112c126fdb7/ReportSectionbe1012005e1ec22166cb" class="portal-link green-button">Distribution Automation Tracker Analytics (PBI)</a>
-        <a href="https://app.powerbigov.us/groups/me/reports/06377a6c-87b0-4f86-b3fd-7e650fe1dc05/ReportSection?ctid=b0a9b38e-5be3-4a10-8fdc-cef4306b5139" class="portal-link green-button">Distribution Automation 3ph Recloser (PBI)</a>
-        <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B745D2860-6699-4B2E-B4C9-64196347B0D0%7D&file=Reliability%20Analysis%20Tracker_Rev2.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">Rel Recom, RFI & AFV Tracker (.xlsx</a>
-        <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B010D8B9E-04EB-446A-8827-DAEED87203CE%7D&file=Feeder%20Head%20Imbalance%20%25_V2.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">SensorOn - Feeder Head Imbalance (.xlsx)</a>
-        <a href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Lists/Recloser%20Issue%20tracker/AllItems.aspx?xsdata=MDV8MDF8fDk2YjkwMGM5YzZkMjQxMjZlOGU3MDhkYjc3ZTJjYTVjfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2MzgyMzU1ODgxNDQ0NTc5NTl8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMM1JsWVcxekx6RTVPbUZhTVd0eU5rZEtWRUpFWTFOVGEwZDZYMlpmTnpKRFNXVmhibU5QTUdJM1JFazJPSEJ4T0dkVlZUUXhRSFJvY21WaFpDNTBZV04yTWk5amFHRnVibVZzY3k4eE9UcGhXakZyY2paSFNsUkNSR05UVTJ0SGVsOW1YemN5UTBsbFlXNWpUekJpTjBSSk5qaHdjVGhuVlZVME1VQjBhSEpsWVdRdWRHRmpkakl2YldWemMyRm5aWE12TVRZNE56azJNakF4TWpnME1nPT18YTViNTQ1NTFhNjMyNDM0OWU4ZTcwOGRiNzdlMmNhNWN8YzkzOTBhYTUwZjAxNGE4Njk0ZjAzNDMwMzM4NzRkODQ%3D&sdata=cnVMSGg0OEFuRTlYbW1HTEYzRW5yWXg2NVIzRXdhdnQrQndPS3A1WmlyMD0%3D" class="portal-link orange-button">Recloser Issue Tracker (SharePoint)</a>
+        <div class="old-buttons">
+            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUM1JUVEpSS0ZLQVVZWVJLQ1BIRjFLRUtGMCQlQCN0PWcu" class="portal-link">Quarterly Logs</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u" class="portal-link">SensorOn</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUNjBDMTREQU83MUE3NjFHRVVPQ0hIQlNMQiQlQCN0PWcu" class="portal-link">Commissioning In-Service</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu" class="portal-link">Legacy In-Service</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUOFo5ODgzMUlER0pUVTZDSTRGVDdITjFOUC4u" class="portal-link">Recloser Issue/RMA</a>
+            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u" class="portal-link">Vehicle Request</a>
+        </div>
+        <div class="new-buttons">
+            <!-- New Buttons -->
+            <a href="https://aeepr.sharepoint.com/:x:/r/sites/ReliabilityFieldSupport/_layouts/15/Doc.aspx?sourcedoc=%7B2A6A4833-753C-4D4A-9472-0BE07447C051%7D&file=Three%20Phase%20Recloser%20-%20Quarterly%20Log%20Data%20Check%20List.xlsx&action=default&mobileredirect=true&isSPOFile=1" class="portal-link new-button green-button">Quarterly Logs (.xlsx)</a>
+            <a href="https://aeepr.sharepoint.com/sites/DATeam/Lists/Sensors%20On/AllItems.aspx?env=WebViewList" class="portal-link new-button blue-button">SensorOn (Sharepoint)</a>
+            <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B0E92BAAC-64F1-4E09-8C92-36D2C4EC45BF%7D&file=Three%20Phase%20Recloser%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button orange-button">Commissioning (.xlsx)</a>
+            <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B29573DAD-7464-44A9-B533-C62F7790D8E0%7D&file=Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button purple-button">Legacy In-Service (.xlsx)</a>
+        </div>
     </div>
 
     <script>
         function updateLastUpdated() {
-            const fixedDate = new Date('2024-08-27T13:05'); // Set your fixed date and time here
+            const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
             const formattedDate = fixedDate.toLocaleDateString('en-US', options);
             document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
         }
-
         updateLastUpdated();
     </script>
 </body>
