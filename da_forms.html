@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,12 +22,10 @@
             box-sizing: border-box;
             background-color: #f0f0f0;
         }
-
         .header h2 {
             color: #333; 
             margin: 0; 
         }
-
         .portal-links {
             text-align: center;
             display: flex;
@@ -33,7 +33,6 @@
             align-items: center;
             margin-bottom: 20px; /* Original spacing between buttons */
         }
-
         .portal-link {
             display: block;
             text-decoration: none;
@@ -117,8 +116,3 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
             const formattedDate = fixedDate.toLocaleDateString('en-US', options);
             document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
-        }
-        updateLastUpdated();
-    </script>
-</body>
-</html>
