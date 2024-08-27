@@ -22,6 +22,11 @@
             box-sizing: border-box;
             background-color: #f0f0f0;
         }
+        .header img {
+            max-width: 50%;
+            height: auto;
+            margin-bottom: 20px;
+        }
         .header h2 {
             color: #333; 
             margin: 0; 
@@ -45,7 +50,6 @@
             width: 200px; /* Set fixed width for buttons */
             max-width: 100%; /* Set max width */
         }
-
         .new-button {
             padding: 10px;
             border-radius: 8px;
@@ -55,30 +59,24 @@
             width: 200px; /* Set fixed width for buttons */
             max-width: 100%; /* Set max width */
         }
-
         /* Define unique colors for new buttons */
         .green-button {
             background-color: #00ab41; /* Green */
         }
-
         .blue-button {
             background-color: #40C5AF; /* Blue */
         }
-
         .orange-button {
             background-color: #00ab41; /* Orange */
         }
-
         .purple-button {
             background-color: #00ab41; /* Purple */
         }
-
         @media screen and (min-width: 600px) {
             .portal-links {
                 flex-direction: row;
                 justify-content: center;
             }
-
             .portal-links .old-buttons,
             .portal-links .new-buttons {
                 margin-bottom: 0;
@@ -109,10 +107,14 @@
             <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B29573DAD-7464-44A9-B533-C62F7790D8E0%7D&file=Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button purple-button">Legacy In-Service (.xlsx)</a>
         </div>
     </div>
-
     <script>
         function updateLastUpdated() {
             const fixedDate = new Date('2024-05-14T14:08'); // Set your fixed date and time here
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
             const formattedDate = fixedDate.toLocaleDateString('en-US', options);
             document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+        updateLastUpdated();
+    </script>
+</body>
+</html>
