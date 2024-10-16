@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guideline Library</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+
+        .header-container {
+            text-align: center;
+            background-color: #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            max-width: 25%;
+            height: auto;
+        }
+
+        .portal-links {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            background-color: #f0f0f0;
+        }
+
+        .guide-link {
+            text-align: center;
+            margin: 10px;
+            text-decoration: none;
+            color: black;
+            display: block;
+            width: 100%; /* Ensure the link takes full width */
+        }
+
+        .guide-image {
+            width: 75%; /* Set width to 100% of the parent container */
+            height: auto; /* Maintain aspect ratio */
+            margin-bottom: 10px;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 45%; /* Adjust width of each column as needed */
+        }
+
+        .last-updated {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <div class="header">
+            <img src="LUMA Logo.jpg" alt="Header Image" class="header-image">
+            <h2>Reliability DA - Guideline Library</h2>
+            <p id="lastUpdated"></p>
+    </div>
+
+    <div class="portal-links">
+        <div class="column">
+            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/Reports%20and%20Recommendations/Protection%20Coordination%20Reports/Load%20data/Load%20Data%20Process%20-%20Documentation/Load%20Data%20Process%20-%20Guide.pdf?csf=1&web=1&e=b3Fogc" class="guide-link">
+                <img src="Load_Data_Process_Img.jpg" alt="Guide Image" class="guide-image">
+            </a>
+            <a href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines%2FLoad%20Data%20Process%20%2D%20Guide%20%28Large%20Project%20Team%29%5FRev3%5F04082023%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines" class="guide-link">
+                <img src="LP Team Logo.png" alt="Guide Image" class="guide-image">
+            </a>
+             <a href="" class="guide-link">
+                <img src="(S&C)_Commissioning_Img.jpg" alt="Guide Image" class="guide-image">
+            </a>
+        
+        </div>
+        <div class="column">
+            <a href="https://aeepr.sharepoint.com/sites/reliabilityfieldsupport/shared%20documents/quarterly_&_events_recloser/.qtr_&_evt_guidelines/quarterly_guide/quarterly%20logs%20-%20guide%20(s&c).pdf?web=1" class="guide-link">
+                <img src="Quarterlyt_Logs_Img.jpg" alt="Guide Image" class="guide-image">
+            </a>
+            <a href="" class="guide-link">
+                <img src="Reliability_Recomendation_Guidelines1_.PNG" alt="Guide Image" class="guide-image">
+            </a>
+            <a href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines%2FAFV%5FGuideline%5F10152024%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines" class="guide-link">
+                <img src="AFV_10152024.jpg" alt="Guide Image" class="guide-image">
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2024-10-15T14:58');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
+</body>
+</html>
