@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reliability DA - Tools</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0; /* Change the background color as needed */
+        }
+
+        .portal-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .portal-image {
+            max-width: 50%;
+            height: auto;
+        }
+
+        .portal-title {
+            margin: 0px 0; /* Adjusted margin */
+        }
+
+        .portal-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .portal-link {
+            text-decoration: none;
+            color: black;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px;
+            width: 200px; /* Set fixed width for buttons */
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .yellow-button {
+            background-color: yellow;
+            color: black;
+            font-weight: bold; /* Make the text bold */
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .last-updated {
+            margin-top: 10px; /* Adjusted margin */
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-container">
+        <img src="LUMA Logo.jpg" alt="Wave Image" class="portal-image">
+        <h1 class="portal-title">Reliability DA - Tools</h1>
+        <p class="last-updated" id="lastUpdated"></p>
+        <div class="portal-links">
+    		<a href="ip_calculator.html" class="portal-link">IP Calculator</a>
+        </div>
+    </div>
+
+    <script>
+        function updateLastUpdated() {
+            const fixedDate = new Date('2025-05-06T09:30'); // <-- update this manually
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            };
+            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
+            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
+        }
+
+        updateLastUpdated();
+    </script>
+</body>
+</html>
