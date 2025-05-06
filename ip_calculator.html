@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IP Calculator</title>
+</head>
+<body>
+  <h2>IP Configuration Calculator</h2>
+
+  <label>IP Address: <input type="text" id="ipAddress" placeholder="e.g., 192.168.1.2"></label><br><br>
+  <label>Subnet Mask: <input type="text" id="subnetMask" placeholder="e.g., 255.255.255.0"></label><br><br>
+  <button onclick="calculate()">Calculate</button>
+
+  <h3>Results</h3>
+  <p><strong>Network Address:</strong> <span id="network"></span></p>
+  <p><strong>Broadcast Address:</strong> <span id="broadcast"></span></p>
+  <p><strong>Recommended Next IP:</strong> <span id="nextIp"></span></p>
+
+  <script>
+    function isValidIP(ip) {
+      const parts = ip.trim().split(".");
+      if (parts.length !== 4) return false;
+      return parts.every(p => /^\d+$/.test(p) && p >= 0 && p <= 255);
+    }
+
+    function toOctets(ip) {
+      return ip.split('.').map(Number);
+    }
+
+    function toIP(octets) {
+      return octets.join('.');
+    }
+
+    function bitwiseAND(a, b) {
+      return a.map((val, i) => val & b[i]);
+    }
+
+    function bitwiseOR(a, b) {
+      return a.map((val, i) => val | b[i]);
+    }
+
+    function bitwiseNOT(a) {
+      return a.map(val => 255 - val);
+    }
+
+    function calculate() {
+      const ipInput = document.getElementById("ipAddress").value;
+      const maskInput = document.getElementById("subnetMask").value;
+
+      if (!isValidIP(ipInput) || !isValidIP(maskInput)) {
+        alert("Please enter valid IP address and subnet mask.");
+        return;
+      }
+
+      const ip = toOctets(ipInput);
+      const mask = toOctets(maskInput);
+
+      const network = bitwiseAND(ip, mask);
+      const broadcast = bitwiseOR(network, bitwiseNOT(mask));
+
+      let nextIP = [...network];
+      nextIP[3] += 1;
+
+      // Avoid overlap with broadcast, network, or original IP
+      if (toIP(nextIP) === toIP(broadcast)) nextIP[3] -= 1;
+      if (toIP(nextIP) === toIP(network)) nextIP[3] += 1;
+      if (toIP(nextIP) === toIP(ip)) nextIP[3] += 1;
+
+      // Output
+      document.getElementById("network").innerText = toIP(network);
+      document.getElementById("broadcast").innerText = toIP(broadcast);
+      document.getElementById("nextIp").innerText = toIP(nextIP);
+    }
+  </script>
+</body>
+</html>
