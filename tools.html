@@ -1,102 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reliability DA - Tools</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f0f0; /* Change the background color as needed */
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Tools</title>
+  <style>
+    :root{
+      /* Same design tokens as your calculator & other pages */
+      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
+      --panel:#ffffff10;             /* translucent card */
+      --ink:#ffffff;                 /* primary text */
+      --muted:#d0e6f2;               /* secondary text */
+      --accent:#6bd27d;              /* green */
+      --accent-2:#2ac3dd;            /* cyan (buttons) */
+      --warn:#ffcc66;
+      --radius:16px;
+    }
 
-        .portal-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+    }
 
-        .portal-image {
-            max-width: 50%;
-            height: auto;
-        }
+    .wrap{ width:100%; max-width:860px; }
 
-        .portal-title {
-            margin: 0px 0; /* Adjusted margin */
-        }
+    header{ text-align:center; margin-bottom:16px; }
+    h1{ margin:0 0 8px; font-size:1.9rem; }
+    p.lead{ margin:0; color:var(--muted); }
 
-        .portal-links {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+      backdrop-filter: blur(8px);
+      padding:22px;
+    }
 
-        .portal-link {
-            text-decoration: none;
-            color: black;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px;
-            width: 200px; /* Set fixed width for buttons */
-            text-align: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
+    }
+    .brand img{
+      width:min(260px,70%); height:auto; display:block;
+      border-radius:12px; border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(0,0,0,.12);
+    }
 
-        .yellow-button {
-            background-color: yellow;
-            color: black;
-            font-weight: bold; /* Make the text bold */
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px;
-            width: 200px;
-            text-align: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
+    .meta{
+      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+      color:var(--muted); font-size:.82rem;
+    }
 
-        .last-updated {
-            margin-top: 10px; /* Adjusted margin */
-        }
-    </style>
+    .links{
+      display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px;
+    }
+
+    /* Buttons (same as LinkTree) */
+    a.btn{
+      display:block; text-decoration:none; text-align:center;
+      color:#0b1020; font-weight:700;
+      background:var(--accent-2);
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
+
+    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
+  </style>
 </head>
 <body>
-    <div class="portal-container">
-        <img src="LUMA Logo.jpg" alt="Wave Image" class="portal-image">
-        <h1 class="portal-title">Reliability DA - Tools</h1>
-        <p class="last-updated" id="lastUpdated"></p>
-        <div class="portal-links">
-    		<a href="ip_calculator.html" class="portal-link">IP Calculator</a>
-        </div>
-         <div class="portal-links">
-    		<a href="ansi_overcurrent_calculator_with_graph.html" class="portal-link">ANSI Overcurrent Trip Time Calculator</a>
-        </div>
-    </div>
+  <main class="wrap">
+    <header>
+      <img src="Luma White logo (1).png" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
+      <h1>Reliability&nbsp;DA · Tools</h1>
+      <p class="lead">Quick access to interactive calculators.</p>
+    </header>
 
-    <script>
-        function updateLastUpdated() {
-            const fixedDate = new Date('2025-08-22T20:40'); // <-- update this manually
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            };
-            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
-            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
-        }
+    <section class="card">
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
 
-        updateLastUpdated();
-    </script>
+      <div class="links">
+        <a class="btn" href="ip_calculator.html">IP Calculator</a>
+        <a class="btn" href="ansi_overcurrent_calculator_with_graph.html">ANSI Overcurrent Trip Time Calculator</a>
+      </div>
+
+      <footer>
+        <span class="pill">Develope by Eiden O. Garcia Torres
+        </span>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // Manual date, same behavior as your other pages
+    (function updateLastUpdated(){
+      const fixedDate = new Date('2025-08-22T20:40'); // ← update manually when you publish
+      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                     hour:'numeric', minute:'numeric', hour12:true };
+      document.getElementById('lastUpdated').textContent =
+        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+    })();
+  </script>
 </body>
-
 </html>
