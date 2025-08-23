@@ -1,136 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guideline Library</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f0f0;
-            position: relative;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guideline Library</title>
+  <style>
+    :root{
+      /* Same design tokens as the calculator */
+      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
+      --panel:#ffffff10;             /* translucent card */
+      --ink:#ffffff;                 /* primary text */
+      --muted:#d0e6f2;               /* secondary text */
+      --accent:#6bd27d;              /* green */
+      --accent-2:#2ac3dd;            /* cyan (buttons/borders) */
+      --warn:#ffcc66;
+      --radius:16px;
+    }
 
-        .header-container {
-            text-align: center;
-            background-color: #f0f0f0;
-            margin-bottom: 20px;
-        }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      min-height:100vh;
+    }
 
-        .header img {
-            max-width: 25%;
-            height: auto;
-        }
+    .wrap{ max-width:1100px; margin:0 auto; }
 
-        .portal-links {
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            background-color: #f0f0f0;
-        }
+    header{ text-align:center; margin-bottom:16px; }
+    h1{ margin:0 0 8px; font-size:1.9rem; }
+    p.lead{ margin:0; color:var(--muted); }
 
-        .guide-link {
-            text-align: center;
-            margin: 10px;
-            text-decoration: none;
-            color: black;
-            display: block;
-            width: 100%; /* Ensure the link takes full width */
-        }
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+      backdrop-filter: blur(8px);
+      padding:18px;
+    }
 
-        .guide-image {
-            width: 75%; /* Set width to 100% of the parent container */
-            height: auto; /* Maintain aspect ratio */
-            margin-bottom: 10px;
-        }
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
+    }
+    .brand img{
+      width:min(260px,70%); height:auto; display:block;
+      border-radius:12px; border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(0,0,0,.12);
+    }
 
-        .column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 45%; /* Adjust width of each column as needed */
-        }
+    .meta{
+      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+      color:var(--muted); font-size:.82rem;
+    }
 
-        .last-updated {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-    </style>
+    /* --- Symmetrical grid --- */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);  /* 2 columns like your original */
+      gap:14px;
+      margin-top:12px;
+    }
+    @media (max-width:780px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    /* Each item is a uniform card with fixed aspect ratio thumbnail */
+    .guide{
+      display:block; text-decoration:none; color:var(--ink);
+      border:1px solid rgba(255,255,255,.28);
+      border-radius:14px; overflow:hidden;
+      background:rgba(0,0,0,.22);
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .guide:hover{ transform:translateY(-1px); filter:saturate(1.04); box-shadow:0 14px 24px rgba(0,0,0,.28); }
+
+    .thumb{
+      width:100%;
+      aspect-ratio: 4 / 3;          /* ensures perfectly symmetrical tiles */
+      overflow:hidden;
+      background:rgba(0,0,0,.25);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .thumb img{
+      width:100%; height:100%;
+      object-fit: cover;            /* fills the frame uniformly */
+      display:block;
+    }
+
+    /* Optional subtle footer label per card (kept minimal) */
+    .caption{
+      padding:10px 12px;
+      color:var(--muted);
+      font-size:.88rem;
+      border-top:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.10));
+    }
+  </style>
 </head>
 <body>
-    <div class="header-container">
-        <div class="header">
-            <img src="LUMA Logo.jpg" alt="Header Image" class="header-image">
-            <h2>Reliability DA - Guideline Library</h2>
-            <p id="lastUpdated"></p>
-    </div>
+  <main class="wrap">
+    <header>
+      <img src="LUMA Logo.jpg" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
+      <h1>Reliability&nbsp;DA · Guideline Library</h1>
+      <p class="lead">Symmetric gallery of guideline entries — styled to match the calculator.</p>
+    </header>
 
-    <div class="portal-links">
-        <div class="column">
-            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/Reports%20and%20Recommendations/Protection%20Coordination%20Reports/Load%20data/Load%20Data%20Process%20-%20Documentation/Load%20Data%20Process%20-%20Guide.pdf?csf=1&web=1&e=b3Fogc" class="guide-link">
-                <img src="Load_Data_Process_Img.jpg" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines%2FLoad%20Data%20Process%20%2D%20Guide%20%28Large%20Project%20Team%29%5FRev3%5F04082023%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines" class="guide-link">
-                <img src="LP Team Logo.png" alt="Guide Image" class="guide-image">
-            </a>
-             <a href="" class="guide-link">
-                <img src="(S&C)_Commissioning_Img.jpg" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/Reports%20and%20Recommendations/Protection%20Coordination%20Reports/Load%20data/Large%20Project%20Team/.Load%20Data%20Process%20-%20Guidelines/Load%20Data%20Process%20-%20Guide%20(Large%20Project%20Team)_Rev3_04082023.pdf?csf=1&web=1&e=ZIUe4O" class="guide-link">
-                <img src="LP Team Logo.png" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/DA/Feeders%20by%20Region/Guidelines/Guideline_DesignCriteria_cFCI_FY26_2025-08-20.pdf?csf=1&web=1&e=e3W23Y" class="guide-link">
-                <img src="Guideline_DesignCriteria_cFCI_FY26_2025-08-20.png" alt="Guide Image" class="guide-image">
-            </a>
-        
-        </div>
-        <div class="column">
-            <a href="https://aeepr.sharepoint.com/sites/reliabilityfieldsupport/shared%20documents/quarterly_&_events_recloser/.qtr_&_evt_guidelines/quarterly_guide/quarterly%20logs%20-%20guide%20(s&c).pdf?web=1" class="guide-link">
-                <img src="Quarterlyt_Logs_Img.jpg" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="" class="guide-link">
-                <img src="Reliability_Recomendation_Guidelines1_.PNG" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines%2FAFV%5FGuideline%5F10152024%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines" class="guide-link">
-                <img src="AFV_10152024.jpg" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/DA/Feeders%20by%20Region/Guidelines/Guideline_DesignCriteria_1PhRecloser_FY26_2025-08-20_Rev1.pdf?csf=1&web=1&e=0aKTXV" class="guide-link">
-                <img src="Guideline_DesignCriteria_1PhRecloser_FY26_2025-08-20_Rev1.png" alt="Guide Image" class="guide-image">
-            </a>
-            <a href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Training%20Material/CMC%20Training/Omicron%20Basics%20Gude.pdf?csf=1&web=1&e=FIjNFg" class="guide-link">
-                <img src="oMICRON.png" alt="Guide Image" class="guide-image">
-            </a>
-        </div>
-    </div>
+    <section class="card">
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
 
-    <script>
-        function updateLastUpdated() {
-            const fixedDate = new Date('2025-08-21T20:40'); // <-- update this manually
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            };
-            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
-            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
-        }
+      <!-- Symmetrical 2×N image table -->
+      <div class="grid">
+        <!-- Col 1, Row 1 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/Reports%20and%20Recommendations/Protection%20Coordination%20Reports/Load%20data/Load%20Data%20Process%20-%20Documentation/Load%20Data%20Process%20-%20Guide.pdf?csf=1&web=1&e=b3Fogc">
+          <div class="thumb">
+            <img src="Load_Data_Process_Img.jpg" alt="Load Data Process - Guide">
+          </div>
+          <div class="caption">Load Data Process – Guide</div>
+        </a>
 
-        updateLastUpdated();
-    </script>
+        <!-- Col 2, Row 1 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/sites/reliabilityfieldsupport/shared%20documents/quarterly_&_events_recloser/.qtr_&_evt_guidelines/quarterly_guide/quarterly%20logs%20-%20guide%20(s&c).pdf?web=1">
+          <div class="thumb">
+            <img src="Quarterlyt_Logs_Img.jpg" alt="Quarterly Logs – Guide (S&C)">
+          </div>
+          <div class="caption">Quarterly Logs – Guide (S&amp;C)</div>
+        </a>
+
+        <!-- Col 1, Row 2 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines%2FLoad%20Data%20Process%20%2D%20Guide%20%28Large%20Project%20Team%29%5FRev3%5F04082023%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FReports%20and%20Recommendations%2FProtection%20Coordination%20Reports%2FLoad%20data%2FLarge%20Project%20Team%2F%2ELoad%20Data%20Process%20%2D%20Guidelines">
+          <div class="thumb">
+            <img src="LP Team Logo.png" alt="Load Data Process – Large Project Team (Library)">
+          </div>
+          <div class="caption">Load Data – Large Project Team (Library)</div>
+        </a>
+
+        <!-- Col 2, Row 2 -->
+        <a class="guide" href="">
+          <div class="thumb">
+            <img src="Reliability_Recomendation_Guidelines1_.PNG" alt="Reliability Recommendation Guidelines">
+          </div>
+          <div class="caption">Reliability Recommendation Guidelines</div>
+        </a>
+
+        <!-- Col 1, Row 3 -->
+        <a class="guide" href="">
+          <div class="thumb">
+            <img src="(S&C)_Commissioning_Img.jpg" alt="S&C Commissioning">
+          </div>
+          <div class="caption">S&amp;C Commissioning</div>
+        </a>
+
+        <!-- Col 2, Row 3 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/DA/Feeders%20by%20Region/Guidelines/Guideline_DesignCriteria_1PhRecloser_FY26_2025-08-20_Rev1.pdf?csf=1&web=1&e=0aKTXV">
+          <div class="thumb">
+            <img src="Guideline_DesignCriteria_1PhRecloser_FY26_2025-08-20_Rev1.png" alt="Design Criteria – 1Ph Recloser FY26">
+          </div>
+          <div class="caption">Design Criteria – 1Ph Recloser (FY26)</div>
+        </a>
+
+        <!-- Col 1, Row 4 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/Reports%20and%20Recommendations/Protection%20Coordination%20Reports/Load%20data/Large%20Project%20Team/.Load%20Data%20Process%20-%20Guidelines/Load%20Data%20Process%20-%20Guide%20(Large%20Project%20Team)_Rev3_04082023.pdf?csf=1&web=1&e=ZIUe4O">
+          <div class="thumb">
+            <img src="LP Team Logo.png" alt="Load Data Process – Large Project Team (Direct)">
+          </div>
+          <div class="caption">Load Data – Large Project Team (Direct)</div>
+        </a>
+
+        <!-- Col 2, Row 4 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Distribution/DA/Feeders%20by%20Region/Guidelines/Guideline_DesignCriteria_cFCI_FY26_2025-08-20.pdf?csf=1&web=1&e=e3W23Y">
+          <div class="thumb">
+            <img src="Guideline_DesignCriteria_cFCI_FY26_2025-08-20.png" alt="Design Criteria – cFCI FY26">
+          </div>
+          <div class="caption">Design Criteria – cFCI (FY26)</div>
+        </a>
+
+        <!-- Col 1, Row 5 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/sites/LUMA-UT-Home/Reliability/Forms/AllItems.aspx?id=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines%2FAFV%5FGuideline%5F10152024%2Epdf&viewid=104d4157%2Db907%2D4403%2D8615%2D351d1fb34cf8&parent=%2Fsites%2FLUMA%2DUT%2DHome%2FReliability%2FDistribution%2FDA%2FFeeders%20by%20Region%2FGuidelines%2FAFV%20Guidelines">
+          <div class="thumb">
+            <img src="AFV_10152024.jpg" alt="AFV Guideline 10/15/2024">
+          </div>
+          <div class="caption">AFV Guideline (10/15/2024)</div>
+        </a>
+
+        <!-- Col 2, Row 5 -->
+        <a class="guide" href="https://aeepr.sharepoint.com/:b:/r/sites/LUMA-UT-Home/Reliability/Training%20Material/CMC%20Training/Omicron%20Basics%20Gude.pdf?csf=1&web=1&e=FIjNFg">
+          <div class="thumb">
+            <img src="oMICRON.png" alt="Omicron Basics Guide">
+          </div>
+          <div class="caption">Omicron Basics Guide</div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Manual date (same behavior as your other pages)
+    (function updateLastUpdated(){
+      const fixedDate = new Date('2025-08-21T20:40'); // ← update manually when you publish
+      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                     hour:'numeric', minute:'numeric', hour12:true };
+      document.getElementById('lastUpdated').textContent =
+        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+    })();
+  </script>
 </body>
 </html>
-
-
-
-
-
-
