@@ -1,102 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DA Trackers & Reports</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        .header {
-            text-align: center;
-            width: 100%;
-            padding: 0px;
-            box-sizing: border-box;
-            background-color: #f0f0f0;
-        }
-        .header img {
-            max-width: 50%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            color: #333;
-            margin: 0;
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Trackers & Reports</title>
+  <style>
+    :root{
+      /* Same design tokens as your calculator + LinkTree */
+      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
+      --panel:#ffffff10;             /* translucent card */
+      --ink:#ffffff;                 /* primary text */
+      --muted:#d0e6f2;               /* secondary text */
+      --accent:#6bd27d;              /* green */
+      --accent-2:#2ac3dd;            /* cyan (buttons) */
+      --warn:#ffcc66;
+      --radius:16px;
+    }
 
-        .portal-links {
-            text-align: center;
-            margin-top: 0px;
-        }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+    }
 
-        .portal-link {
-            display: block;
-            margin: 10px 0;
-            text-decoration: none;
-            color: #333;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
+    .wrap{ width:100%; max-width:900px; }
 
-        /* Define unique colors for each button */
-        .green-button {
-            background-color: #ff9933; /* Green */
-        }
+    header{ text-align:center; margin-bottom:16px; }
+    h1{ margin:0 0 8px; font-size:1.9rem; }
+    p.lead{ margin:0; color:var(--muted); }
 
-        .blue-button {
-            background-color: #00ab41; /* Blue */
-        }
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+      backdrop-filter: blur(8px);
+      padding:22px;
+    }
 
-        .orange-button {
-            background-color: #40c5af; /* Orange */
-        }
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
+    }
+    .brand img{
+      width:min(260px,70%); height:auto; display:block;
+      border-radius:12px; border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(0,0,0,.12);
+    }
 
-        .purple-button {
-            background-color: #fff; /* Purple */
-        }
-    </style>
+    .meta{
+      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+      color:var(--muted); font-size:.82rem;
+    }
+
+    /* Link groups for tidy layout */
+    .groups{
+      display:grid; grid-template-columns:1fr; gap:16px; margin-top:12px;
+    }
+    @media (min-width: 780px){
+      .groups{ grid-template-columns:1fr 1fr; }
+    }
+
+    .group{
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:14px;
+      padding:16px;
+      background:rgba(0,0,0,.18);
+    }
+    .group h3{
+      margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600;
+    }
+
+    .links{
+      display:grid; grid-template-columns:1fr; gap:10px;
+    }
+
+    /* Buttons (same as LinkTree) */
+    a.btn{
+      display:block; text-decoration:none; text-align:center;
+      color:#0b1020; font-weight:700;
+      background:var(--accent-2);
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
+
+    a.btn.secondary{
+      background:transparent; color:var(--ink); font-weight:600;
+      border:1px solid rgba(255,255,255,.35);
+    }
+
+    /* Optional category accents */
+    a.btn.green{ background:#6bd27d; color:#003514; }
+    a.btn.blue{ background:#2ac3dd; color:#08131d; }
+    a.btn.warn{ background:var(--warn); color:#3a2800; font-weight:800; }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <img src="LUMA Logo.jpg" alt="Header Image">
-        <h2>Reliability DA - Trackers & Reports</h2>
-        <p id="lastUpdated"></p>
-    </div>
-    <div class="portal-links">
-        <a href="https://cp-luma-da-tracker.azurewebsites.net" class="portal-link purple-button">Database</a>
-        <a href="https://app.powerbigov.us/groups/me/reports/0a5a3f36-eb91-4a07-b11b-5112c126fdb7/ReportSectionbe1012005e1ec22166cb" class="portal-link green-button">Distribution Automation Tracker Analytics (PBI)</a>
-        <a href="https://app.powerbigov.us/groups/me/reports/06377a6c-87b0-4f86-b3fd-7e650fe1dc05/ReportSection?ctid=b0a9b38e-5be3-4a10-8fdc-cef4306b5139" class="portal-link green-button">Distribution Automation 3ph Recloser (PBI)</a>
-        <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B6626E92C-DD74-4C08-BB9E-8BC79A2797C1%7D&file=_Reliability%20Analysis%20Tracker_Rev4.1.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">_Reliability Analysis Tracker_Rev4.1 (.xlsx)</a>
-        <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B11450177-B04B-4353-AC4E-90AA0CDF818D%7D&file=_Reliability%20Analysis%20Tracker_Rev5_FY26.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">_Reliability Analysis Tracker_Rev5_FY26 (.xlsx)</a>
-        <a href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B010D8B9E-04EB-446A-8827-DAEED87203CE%7D&file=Feeder%20Head%20Imbalance%20%25_V2.xlsx&action=default&mobileredirect=true" class="portal-link blue-button">SensorOn - Feeder Head Imbalance (.xlsx)</a>
-        <a href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Lists/Recloser%20Issue%20tracker/AllItems.aspx?xsdata=MDV8MDF8fDk2YjkwMGM5YzZkMjQxMjZlOGU3MDhkYjc3ZTJjYTVjfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2MzgyMzU1ODgxNDQ0NTc5NTl8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMM1JsWVcxekx6RTVPbUZhTVd0eU5rZEtWRUpFWTFOVGEwZDZYMlpmTnpKRFNXVmhibU5QTUdJM1JFazJPSEJ4T0dkVlZUUXhRSFJvY21WaFpDNTBZV04yTWk5amFHRnVibVZzY3k4eE9UcGhXakZyY2paSFNsUkNSR05UVTJ0SGVsOW1YemN5UTBsbFlXNWpUekJpTjBSSk5qaHdjVGhuVlZVME1VQjBhSEpsWVdRdWRHRmpkakl2YldWemMyRm5aWE12TVRZNE56azJNakF4TWpnME1nPT18YTViNTQ1NTFhNjMyNDM0OWU4ZTcwOGRiNzdlMmNhNWN8YzkzOTBhYTUwZjAxNGE4Njk0ZjAzNDMwMzM4NzRkODQ%3D&sdata=cnVMSGg0OEFuRTlYbW1HTEYzRW5yWXg2NVIzRXdhdnQrQndPS3A1WmlyMD0%3D" class="portal-link orange-button">Recloser Issue Tracker (SharePoint)</a>
-    </div>
+  <main class="wrap">
+    <header>
+      <img src="Luma White logo (1).png" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
+      <h1>Reliability&nbsp;DA · Trackers &amp; Reports</h1>
+      <p class="lead">Central access to databases, Power BI reports, and Excel/SharePoint trackers.</p>
+    </header>
 
-    <script>
-        function updateLastUpdated() {
-            const fixedDate = new Date('2025-05-12T09:21'); // <-- update this manually
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            };
-            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
-            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
-        }
-        updateLastUpdated();
-    </script>
+    <section class="card">
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
+
+      <div class="groups">
+        <!-- Database -->
+        <div class="group">
+          <h3>Database &amp; Web App</h3>
+          <div class="links">
+            <a class="btn secondary" href="https://cp-luma-da-tracker.azurewebsites.net">Database</a>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="group">
+          <h3>Analytics (Power BI)</h3>
+          <div class="links">
+            <a class="btn warn" href="https://app.powerbigov.us/groups/me/reports/0a5a3f36-eb91-4a07-b11b-5112c126fdb7/ReportSectionbe1012005e1ec22166cb">Distribution Automation Tracker Analytics (PBI)</a>
+            <a class="btn warn" href="https://app.powerbigov.us/groups/me/reports/06377a6c-87b0-4f86-b3fd-7e650fe1dc05/ReportSection?ctid=b0a9b38e-5be3-4a10-8fdc-cef4306b5139">Distribution Automation 3ph Recloser (PBI)</a>
+          </div>
+        </div>
+
+        <!-- Excel Trackers -->
+        <div class="group">
+          <h3>Trackers (.xlsx)</h3>
+          <div class="links">
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B6626E92C-DD74-4C08-BB9E-8BC79A2797C1%7D&file=_Reliability%20Analysis%20Tracker_Rev4.1.xlsx&action=default&mobileredirect=true">_Reliability Analysis Tracker_Rev4.1 (.xlsx)</a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B11450177-B04B-4353-AC4E-90AA0CDF818D%7D&file=_Reliability%20Analysis%20Tracker_Rev5_FY26.xlsx&action=default&mobileredirect=true">_Reliability Analysis Tracker_Rev5_FY26 (.xlsx)</a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B010D8B9E-04EB-446A-8827-DAEED87203CE%7D&file=Feeder%20Head%20Imbalance%20%25_V2.xlsx&action=default&mobileredirect=true">SensorOn – Feeder Head Imbalance (.xlsx)</a>
+          </div>
+        </div>
+
+        <!-- SharePoint Lists -->
+        <div class="group">
+          <h3>SharePoint Lists</h3>
+          <div class="links">
+            <a class="btn blue" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Lists/Recloser%20Issue%20tracker/AllItems.aspx?xsdata=MDV8MDF8fDk2YjkwMGM5YzZkMjQxMjZlOGU3MDhkYjc3ZTJjYTVjfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2MzgyMzU1ODgxNDQ0NTc5NTl8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMM1JsWVcxekx6RTVPbUZhTVd0eU5rZEtWRUpFWTFOVGEwZDZYMlpmTnpKRFNXVmhibU5QTUdJM1JFazJPSEJ4T0dkVlZUUXhRSFJvY21WaFpDNTBZV04yTWk5amFHRnVibVZzY3k4eE9UcGhXakZyY2paSFNsUkNSR05UVTJ0SGVsOW1YemN5UTBsbFlXNWpUekJpTjBSSk5qaHdjVGhuVlZVME1VQjBhSEpsWVdRdWRHRmpkakl2YldWemMyRm5aWE12TVRZNE56azJNakF4TWpnME1nPT18YTViNTQ1NTFhNjMyNDM0OWU4ZTcwOGRiNzdlMmNhNWN8YzkzOTBhYTUwZjAxNGE4Njk0ZjAzNDMwMzM4NzRkODQ%3D&sdata=cnVMSGg0OEFuRTlYbW1HTEYzRW5yWXg2NVIzRXdhdnQrQndPS3A1WmlyMD0%3D">Recloser Issue Tracker (SharePoint)</a>
+          </div>
+        </div>
+      </div>
+
+      <footer style="text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem;">
+        <span class="pill">Develope by Eiden O. García Torres
+        </span>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // Manual timestamp for consistency with your other pages
+    (function updateLastUpdated(){
+      const fixedDate = new Date('2025-05-12T09:21'); // ← update manually when you publish
+      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                     hour:'numeric', minute:'numeric', hour12:true };
+      document.getElementById('lastUpdated').textContent =
+        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+    })();
+  </script>
 </body>
 </html>
