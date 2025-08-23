@@ -1,124 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DA Forms</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        .header {
-            text-align: center;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            background-color: #f0f0f0;
-        }
-        .header img {
-            max-width: 50%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            color: #333; 
-            margin: 0; 
-        }
-        .portal-links {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px; /* Original spacing between buttons */
-        }
-        .portal-link {
-            display: block;
-            text-decoration: none;
-            color: #333;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px; /* Adjust spacing between buttons */
-            width: 200px; /* Set fixed width for buttons */
-            max-width: 100%; /* Set max width */
-        }
-        .new-button {
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px;
-            text-align: center;
-            width: 200px; /* Set fixed width for buttons */
-            max-width: 100%; /* Set max width */
-        }
-        /* Define unique colors for new buttons */
-        .green-button {
-            background-color: #00ab41; /* Green */
-        }
-        .blue-button {
-            background-color: #40C5AF; /* Blue */
-        }
-        .orange-button {
-            background-color: #00ab41; /* Orange */
-        }
-        .purple-button {
-            background-color: #00ab41; /* Purple */
-        }
-        @media screen and (min-width: 600px) {
-            .portal-links {
-                flex-direction: row;
-                justify-content: center;
-            }
-            .portal-links .old-buttons,
-            .portal-links .new-buttons {
-                margin-bottom: 0;
-                margin-right: 20px; /* Add space between button groups */
-            }
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Field Forms</title>
+  <style>
+    :root{
+      /* same design tokens as the calculator + LinkTree */
+      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
+      --panel:#ffffff10;             /* translucent card */
+      --ink:#ffffff;                 /* primary text */
+      --muted:#d0e6f2;               /* secondary text */
+      --accent:#6bd27d;              /* green */
+      --accent-2:#2ac3dd;            /* cyan (buttons) */
+      --warn:#ffcc66;
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+    }
+
+    .wrap{ width:100%; max-width:860px; }
+
+    header{ text-align:center; margin-bottom:16px; }
+    h1{ margin:0 0 8px; font-size:1.9rem; }
+    p.lead{ margin:0; color:var(--muted); }
+
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+      backdrop-filter: blur(8px);
+      padding:22px;
+    }
+
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
+    }
+    .brand img{
+      width:min(260px,70%); height:auto; display:block;
+      border-radius:12px; border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(0,0,0,.12);
+    }
+
+    .meta{
+      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+      color:var(--muted); font-size:.82rem;
+    }
+
+    /* groups */
+    .groups{
+      display:grid; grid-template-columns: 1fr; gap:16px; margin-top:12px;
+    }
+    @media (min-width: 720px){
+      .groups{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .group{
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:14px;
+      padding:16px;
+      background:rgba(0,0,0,.18);
+    }
+    .group h3{
+      margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600;
+    }
+
+    .links{
+      display:grid; grid-template-columns:1fr; gap:10px;
+    }
+
+    /* buttons same as LinkTree */
+    a.btn{
+      display:block; text-decoration:none; text-align:center;
+      color:#0b1020; font-weight:700;
+      background:var(--accent-2);
+      padding:12px 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
+
+    a.btn.secondary{
+      background:transparent; color:var(--ink); font-weight:600;
+      border:1px solid rgba(255,255,255,.35);
+    }
+
+    /* Optional accents to distinguish “new” set without breaking theme */
+    a.btn.green{ background:#6bd27d; color:#003514; }
+    a.btn.blue{ background:#2ac3dd; color:#08131d; }
+    a.btn.warn{ background:var(--warn); color:#3a2800; font-weight:800; }
+
+    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <img src="LUMA Logo.jpg" alt="Header Image">
-        <h2>Reliability DA - Field Forms</h2>
-        <p id="lastUpdated"></p>
-    <div class="portal-links">
-        <div class="old-buttons">
-            <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUM1JUVEpSS0ZLQVVZWVJLQ1BIRjFLRUtGMCQlQCN0PWcu" class="portal-link">3ph Rec - Quarterly Logs</a>
-            <a href="https://forms.office.com/g/HCceQpM6Zs?origin=lprLink" class="portal-link">1ph Rec - Quarterly Logs</a>
-            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u" class="portal-link">SensorOn</a>
-            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUNjBDMTREQU83MUE3NjFHRVVPQ0hIQlNMQiQlQCN0PWcu" class="portal-link">Commissioning In-Service</a>
-            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu" class="portal-link">Legacy In-Service</a>
-            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUOFo5ODgzMUlER0pUVTZDSTRGVDdITjFOUC4u" class="portal-link">Recloser Issue/RMA</a>
-            <a href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u" class="portal-link">Vehicle Request</a>
+  <main class="wrap">
+    <header>
+      <img src="LUMA Logo.jpg" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
+      <h1>Reliability&nbsp;DA · Field Forms</h1>
+      <p class="lead">Quick access to legacy Forms and new SharePoint/Excel checklists.</p>
+    </header>
+
+    <section class="card">
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
+
+      <div class="groups">
+        <!-- Old (Microsoft) Forms -->
+        <div class="group">
+          <h3>Microsoft Forms</h3>
+          <div class="links">
+            <a class="btn secondary" href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUM1JUVEpSS0ZLQVVZWVJLQ1BIRjFLRUtGMCQlQCN0PWcu">3ph Rec – Quarterly Logs</a>
+            <a class="btn secondary" href="https://forms.office.com/g/HCceQpM6Zs?origin=lprLink">1ph Rec – Quarterly Logs</a>
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u">SensorOn</a>
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUNjBDMTREQU83MUE3NjFHRVVPQ0hIQlNMQiQlQCN0PWcu">Commissioning In-Service</a>
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu">Legacy In-Service</a>
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUOFo5ODgzMUlER0pUVTZDSTRGVDdITjFOUC4u">Recloser Issue / RMA</a>
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u">Vehicle Request</a>
+          </div>
         </div>
-        <div class="new-buttons">
-            <!-- New Buttons -->
-            <a href="https://aeepr.sharepoint.com/:x:/r/sites/ReliabilityFieldSupport/_layouts/15/Doc.aspx?sourcedoc=%7B2A6A4833-753C-4D4A-9472-0BE07447C051%7D&file=Three%20Phase%20Recloser%20-%20Quarterly%20Log%20Data%20Check%20List.xlsx&action=default&mobileredirect=true&isSPOFile=1" class="portal-link new-button green-button">3ph Rec - Quarterly Logs (.xlsx)</a>
-            <a href="https://aeepr.sharepoint.com/:x:/r/sites/ReliabilityFieldSupport/Shared%20Documents/Quarterly_%26_Events_Recloser/One%20Phase%20Recloser%20-%20Quarterly%20Logs%20Data.xlsx?d=w65baee8f1d7f455a8522ae6fb5979aa5&csf=1&web=1&e=eNVlV5" class="portal-link new-button green-button">1ph Rec - Quarterly Logs (.xlsx)</a>
-            <a href="https://aeepr.sharepoint.com/sites/DATeam/Lists/Sensors%20On/AllItems.aspx?env=WebViewList" class="portal-link new-button blue-button">SensorOn (Sharepoint)</a>
-            <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B0E92BAAC-64F1-4E09-8C92-36D2C4EC45BF%7D&file=Three%20Phase%20Recloser%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button orange-button">Commissioning (.xlsx)</a>
-            <a href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B29573DAD-7464-44A9-B533-C62F7790D8E0%7D&file=Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true" class="portal-link new-button purple-button">Legacy In-Service (.xlsx)</a>
-            <a href="https://aeepr.sharepoint.com/sites/DATeam/Lists/Issue%20Form/AllItems.aspx?e=3%3Ace167e26a27a490db1b289fce069f7dc&sharingv2=true&fromShare=true&CID=6f92ea97%2D4083%2D493c%2D8d90%2D5fa7a2f2c3e6" class="portal-link new-button blue-button">Recloser Issue/RMA (Sharepoint)</a>
+
+        <!-- New SharePoint/Excel Buttons -->
+        <div class="group">
+          <h3>SharePoint &amp; Excel Sheets</h3>
+          <div class="links">
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/ReliabilityFieldSupport/_layouts/15/Doc.aspx?sourcedoc=%7B2A6A4833-753C-4D4A-9472-0BE07447C051%7D&file=Three%20Phase%20Recloser%20-%20Quarterly%20Log%20Data%20Check%20List.xlsx&action=default&mobileredirect=true&isSPOFile=1">3ph Rec – Quarterly Logs (.xlsx)</a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/ReliabilityFieldSupport/Shared%20Documents/Quarterly_%26_Events_Recloser/One%20Phase%20Recloser%20-%20Quarterly%20Logs%20Data.xlsx?d=w65baee8f1d7f455a8522ae6fb5979aa5&csf=1&web=1&e=eNVlV5">1ph Rec – Quarterly Logs (.xlsx)</a>
+            <a class="btn blue" href="https://aeepr.sharepoint.com/sites/DATeam/Lists/Sensors%20On/AllItems.aspx?env=WebViewList">SensorOn (SharePoint)</a>
+            <a class="btn warn" href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B0E92BAAC-64F1-4E09-8C92-36D2C4EC45BF%7D&file=Three%20Phase%20Recloser%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true">Commissioning (.xlsx)</a>
+            <a class="btn warn" href="https://aeepr.sharepoint.com/:x:/r/sites/Reliability889/_layouts/15/Doc.aspx?sourcedoc=%7B29573DAD-7464-44A9-B533-C62F7790D8E0%7D&file=Legacy%20-%20Three%20Phase%20Reclosers%20In-Service%20Checklist.xlsx&action=default&mobileredirect=true">Legacy In-Service (.xlsx)</a>
+            <a class="btn blue" href="https://aeepr.sharepoint.com/sites/DATeam/Lists/Issue%20Form/AllItems.aspx?e=3%3Ace167e26a27a490db1b289fce069f7dc&sharingv2=true&fromShare=true&CID=6f92ea97%2D4083%2D493c%2D8d90%2D5fa7a2f2c3e6">Recloser Issue / RMA (SharePoint)</a>
+          </div>
         </div>
-    </div>
-    <script>
-        function updateLastUpdated() {
-            const fixedDate = new Date('2024-11-15T14:31'); // Set your fixed date and time here
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
-            const formattedDate = fixedDate.toLocaleDateString('en-US', options);
-            document.getElementById('lastUpdated').textContent = 'Last Updated: ' + formattedDate;
-        }
-        updateLastUpdated();
-    </script>
+      </div>
+
+      <footer>
+        <span class="pill">Develope by Eiden O. Garcia Torres
+        </span>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // Use the fixed manual date from your snippet to match behavior across pages
+    (function updateLastUpdated(){
+      const fixedDate = new Date('2024-11-15T14:31'); // ← update manually when you publish
+      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                     hour:'numeric', minute:'numeric', hour12:true };
+      document.getElementById('lastUpdated').textContent =
+        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+    })();
+  </script>
 </body>
 </html>
 
