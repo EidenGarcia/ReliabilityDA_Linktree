@@ -38,10 +38,35 @@
     button.secondary{background:transparent;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.3)}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.15);
           border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:.8rem}
-    .result{font-size:1.05rem;background:rgba(0,0,0,.3);border:1px dashed rgba(255,255,255,.3);
-            padding:12px;border-radius:12px;line-height:1.5}
+
+    /* Result alert styles */
+    .result{
+      font-size:1.0rem; line-height:1.5; padding:12px; border-radius:12px;
+      border:1px dashed rgba(255,255,255,.3); background:rgba(0,0,0,.3);
+      display:none;
+    }
+    .result.ok{
+      background: rgba(0, 200, 100, 0.25);
+      border: 1px solid rgba(0, 255, 120, 0.55);
+      color: #e9ffee;
+    }
+    .result.fail{
+      background: rgba(200, 0, 0, 0.25);
+      border: 1px solid rgba(255, 80, 80, 0.6);
+      color: #ffe9e9;
+    }
+    .result .headline{
+      display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:6px;
+    }
+    .result .badge{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:999px; font-weight:800; font-size:.85rem;
+      background: rgba(255,255,255,.2); color:#fff;
+    }
+
     fieldset{border:none; margin:0 0 14px; padding:0;}
     legend{color:var(--muted); font-size:.95rem; margin-bottom:6px;}
+
     .graph-wrap{position:relative}
     .legend{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.35);
       border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 10px;font-size:.82rem;line-height:1.6}
@@ -129,7 +154,7 @@
       </div>
 
       <div id="messages" style="margin-top:12px;"></div>
-      <div class="result" id="result" style="margin-top:12px; display:none;"></div>
+      <div class="result" id="result" style="margin-top:12px;"></div>
     </section>
 
     <!-- JSON config -->
@@ -183,10 +208,20 @@
     const canvas = document.getElementById('ocCanvas');
     const ctx = canvas.getContext('2d');
 
-    function showMessage(html){ msgBox.innerHTML=`<div style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);">${html}</div>`; }
+    function showMessage(html){
+      msgBox.innerHTML=`<div style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);">${html}</div>`;
+    }
     function clearMessage(){ msgBox.innerHTML=''; }
-    function setResult(html){ resultBox.style.display='block'; resultBox.innerHTML=html; }
-    function clearResult(){ resultBox.style.display='none'; resultBox.innerHTML=''; }
+
+    /* Unified result helper */
+    function setResultBox(html, ok){
+      resultBox.style.display='block';
+      resultBox.className = "result " + (ok ? "ok" : "fail");
+      resultBox.innerHTML = ok
+        ? `<div class="headline"><span class="badge">✓</span>OK</div>${html}`
+        : `<div class="headline"><span class="badge">✗</span>Not valid</div>${html}`;
+    }
+    function clearResult(){ resultBox.style.display='none'; resultBox.innerHTML=''; resultBox.className='result'; }
 
     function populateCurvesSelect(){
       curveEl.innerHTML='';
@@ -404,25 +439,31 @@
     function handleCalculate(){
       clearMessage(); clearResult();
       const I=parseFloat(IEl.value), Ip=parseFloat(IpEl.value), n=parseFloat(nEl.value), f=parseFloat(freqEl.value);
-      if(!isFinite(I)||I<0) return showMessage('Invalid I');
-      if(!isFinite(Ip)||Ip<=0) return showMessage('Invalid Ip');
-      if(!isFinite(n)) return showMessage('Invalid n');
-      if(!isFinite(f)||f<=0) return showMessage('Invalid freq');
+
+      if(!isFinite(I)||I<0) return setResultBox("Please enter a valid fault current (A).", false);
+      if(!isFinite(Ip)||Ip<=0) return setResultBox("Please enter a valid pickup current (A) > 0.", false);
+      if(!isFinite(n)) return setResultBox("Please enter a valid time dial.", false);
+      if(!isFinite(f)||f<=0) return setResultBox("Please enter a valid frequency (Hz) > 0.", false);
 
       let baseTime = computeEI_Excel(I, Ip, n);
-      if(baseTime===Infinity){ setResult('<b>No trip</b> – Fault ≤ pickup'); redrawGraph(); return; }
+      if(baseTime===Infinity){
+        setResultBox("No trip – Fault ≤ pickup (I must be greater than Ip).", false);
+        redrawGraph();
+        return;
+      }
 
       let extraSeconds=0;
       const raw=(extraEl.value||'').trim();
       if(raw){
         try{ extraSeconds = extraToSeconds(f, parseFractionOrFloat(raw), extraUnitEl.value); }
-        catch{ return showMessage('Invalid extra delay'); }
+        catch{ return setResultBox("Invalid extra delay value or unit.", false); }
       }
       const total = baseTime + extraSeconds;
 
-      setResult(`<div class="pill" style="background:rgba(255,255,255,.2);border:none">
-        Base: <b>${baseTime.toFixed(6)} s</b> · Total: <b>${total.toFixed(6)} s</b>
-      </div>`);
+      setResultBox(
+        `Base: <b>${baseTime.toFixed(6)} s</b><br>Total: <b>${total.toFixed(6)} s</b>`,
+        true
+      );
       redrawGraph();
     }
 
