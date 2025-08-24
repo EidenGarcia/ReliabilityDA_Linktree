@@ -1,98 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ANSI Overcurrent Trip Time Calculator</title>
   <style>
     :root{
       --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
       --panel:#ffffff10; --ink:#ffffff; --muted:#d0e6f2;
-      --accent:#6bd27d; --accent-2:#2ac3dd; --danger:#ff6b6b;
-      --ok:#87fba4; --warn:#ffcc66; --radius:16px;
+      --accent:#6bd27d; --accent-2:#2ac3dd; --radius:16px;
     }
     *{box-sizing:border-box}
-    body{margin:0;padding:24px;background:var(--bg);color:var(--ink);
-         font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;min-height:100vh;}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+      min-height:100vh;
+    }
     .container{max-width:1100px;margin:0 auto;display:grid;gap:20px;
                grid-template-columns:1fr 1fr;align-items:start;}
-    h1{font-size:1.8rem;margin:0 0 12px}
-    p.lead{color:var(--muted);margin-top:0}
-    .card{background:var(--panel);backdrop-filter:blur(8px);
-          border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);
-          box-shadow:0 10px 30px rgba(0,0,0,.3);padding:18px;}
+    @media (max-width:980px){.container{grid-template-columns:1fr}}
+    h1{margin:0 0 8px}
+    .card{background:var(--panel); backdrop-filter:blur(8px);
+          border:1px solid rgba(255,255,255,.2); border-radius:16px;
+          box-shadow:0 10px 30px rgba(0,0,0,.3); padding:18px;}
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     label{font-size:.9rem;color:var(--muted);display:block;margin:10px 0 6px}
-    input,select,textarea{width:100%;background:rgba(255,255,255,.1);color:var(--ink);
-      border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 12px;
-      outline:none;transition:border .2s ease, box-shadow .2s ease;}
+    input,select,textarea{
+      width:100%; background:rgba(255,255,255,.1); color:var(--ink);
+      border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px;
+      outline:none; transition:border .2s ease, box-shadow .2s ease;
+    }
     input:focus,select:focus,textarea:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(42,195,221,.3)}
-    textarea{resize:vertical;min-height:180px;font-family:ui-monospace,Menlo,Consolas,monospace}
-    .row{display:flex;gap:10px;align-items:center}
-    button{background:var(--accent-2);color:#0b1020;font-weight:700;border:none;padding:12px 16px;border-radius:12px;cursor:pointer;font-size:.95rem;box-shadow:0 10px 18px rgba(0,0,0,.2)}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    button{background:var(--accent-2); color:#0b1020; font-weight:700; border:none; padding:12px 16px;
+           border-radius:12px; cursor:pointer; font-size:.95rem; box-shadow:0 10px 18px rgba(0,0,0,.2)}
     button.secondary{background:transparent;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.3)}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:.8rem}
-    .result{font-size:1.05rem;background:rgba(0,0,0,.3);border:1px dashed rgba(255,255,255,.3);padding:12px;border-radius:12px;line-height:1.5}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace;color:#e0faff}
-    .badge-ok{color:#003514;background:#87fba4;padding:2px 8px;border-radius:999px;font-weight:700;font-size:.78rem}
-    .badge-warn{color:#3a2800;background:#ffcc66;padding:2px 8px;border-radius:999px;font-weight:700;font-size:.78rem}
-    @media (max-width:980px){.container{grid-template-columns:1fr}}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.15);
+          border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:.8rem}
+    .result{font-size:1.05rem;background:rgba(0,0,0,.3);border:1px dashed rgba(255,255,255,.3);
+            padding:12px;border-radius:12px;line-height:1.5}
+    fieldset{border:none; margin:0 0 14px; padding:0;}
+    legend{color:var(--muted); font-size:.95rem; margin-bottom:6px;}
     .graph-wrap{position:relative}
     .legend{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 10px;font-size:.82rem}
+      border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 10px;font-size:.82rem;line-height:1.6}
     .legend .swatch{width:12px;height:12px;display:inline-block;border-radius:3px;margin-right:6px;background:var(--accent-2)}
     .label-chip{
       position:absolute; transform:translate(-50%, -50%);
-      background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.35);
-      color:#fff; font-size:12px; padding:3px 6px; border-radius:8px;
-      pointer-events:none; white-space:nowrap;
+      background:rgba(0,0,0,.78); border:1px solid rgba(255,255,255,.35);
+      color:#fff; font-size:12px; padding:5px 9px; border-radius:10px;
+      pointer-events:none; white-space:nowrap; z-index:5;
+      box-shadow:0 4px 10px rgba(0,0,0,.45); letter-spacing:.2px;
+      font-family:ui-monospace, Menlo, Consolas, monospace;
     }
   </style>
 </head>
 <body>
   <header style="max-width:1100px;margin:0 auto 16px auto;">
     <h1>ANSI Overcurrent Trip Time Calculator</h1>
-    <p class="lead">Develope by Eiden O. Garcia Torres</p>
+    <p style="margin:0;color:var(--muted)">Developed by Eiden O. Garcia Torres</p>
   </header>
 
   <div class="container">
-    <!-- Inputs -->
+    <!-- Inputs (organized) -->
     <section class="card">
-      <h2 style="margin:6px 0 4px 0;font-size:1.1rem;">Inputs</h2>
-      <div class="grid-3">
-        <div>
-          <label for="I">Fault current I (A)</label>
-          <input id="I" type="number" min="0" step="any" value="1712" />
-        </div>
-        <div>
-          <label for="Ip">Pickup current Ip (A)</label>
-          <input id="Ip" type="number" min="0" step="any" value="300" />
-        </div>
-        <div>
-          <label for="n">Time dial</label>
-          <input id="n" type="number" step="any" value="1" />
-        </div>
-      </div>
+      <h2 style="margin:6px 0 12px 0;font-size:1.2rem;">Inputs</h2>
 
-      <div class="grid-2" style="margin-top:8px;">
-        <div>
-          <label for="curve">Curve</label>
-          <select id="curve"></select>
-        </div>
-        <div>
-          <label for="freq">System frequency (Hz)</label>
-          <input id="freq" type="number" step="any" value="60" />
-        </div>
-      </div>
-
-      <div class="grid-2" style="margin-top:8px;">
-        <div class="row" style="gap:8px; width:100%;">
-          <div style="flex:1;">
-            <label for="extra">Extra delay value</label>
-            <input id="extra" type="text" placeholder="e.g. 2, 2/60, 0.0333" />
+      <fieldset>
+        <legend>Fault Parameters</legend>
+        <div class="grid-3">
+          <div>
+            <label for="I">Fault current I (A)</label>
+            <input id="I" type="number" min="0" step="any" value="1712"/>
           </div>
-          <div style="width:160px;">
+          <div>
+            <label for="Ip">Pickup current Ip (A)</label>
+            <input id="Ip" type="number" min="0" step="any" value="300"/>
+          </div>
+          <div>
+            <label for="n">Time dial</label>
+            <input id="n" type="number" step="any" value="1"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>System Settings</legend>
+        <div class="grid-2">
+          <div>
+            <label for="curve">Curve</label>
+            <select id="curve"></select>
+          </div>
+          <div>
+            <label for="freq">System frequency (Hz)</label>
+            <input id="freq" type="number" step="any" value="60"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Delay Settings</legend>
+        <div class="grid-2">
+          <div>
+            <label for="extra">Extra delay value</label>
+            <input id="extra" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
+          </div>
+          <div>
             <label for="extraUnit">Extra delay unit</label>
             <select id="extraUnit">
               <option value="cycles">cycles</option>
@@ -101,12 +115,17 @@
             </select>
           </div>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="row" style="margin-top:14px;">
+      <div class="row" style="margin-top:6px;">
         <button id="calcBtn">Calculate</button>
         <button class="secondary" id="resetBtn">Reset</button>
-        <span class="pill">ANSI Curve: <span class="mono">(((9.96644/(M^2-1)+0.0388889)*1)-0.01389-(3.55944/(M^2-1)))*n</span></span>
+        <span class="pill" style="flex:1;min-width:260px;text-align:center">
+          ANSI EI Formula:
+          <span style="display:block;margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace;color:#e0faff">
+            (((9.96644/(M^2-1)+0.0388889)*1)-0.01389-(3.55944/(M^2-1)))*n
+          </span>
+        </span>
       </div>
 
       <div id="messages" style="margin-top:12px;"></div>
@@ -120,7 +139,7 @@
         <span class="pill">Edit & apply ▼</span>
       </div>
       <label for="jsonArea">ANSI curve constants as JSON (name → {A,B,C,P}). EI uses Excel formula regardless of A,B,C,P.</label>
-      <textarea id="jsonArea" spellcheck="false"></textarea>
+      <textarea id="jsonArea" spellcheck="false" style="min-height:180px;"></textarea>
       <div class="row" style="margin-top:10px;">
         <button id="applyJsonBtn">Apply JSON</button>
         <button class="secondary" id="downloadBtn">Download JSON</button>
@@ -128,13 +147,12 @@
     </section>
 
     <!-- Graph -->
-    <section class="card graph-wrap" style="grid-column: 1 / -1;">
+    <section class="card graph-wrap" style="grid-column:1 / -1;">
       <h2 style="margin:6px 0 14px 0;font-size:1.1rem;">Log–Log Curve (Operating Time vs Current)</h2>
       <canvas id="ocCanvas" width="1000" height="520" style="width:100%;height:auto;border-radius:12px;background:rgba(0,0,0,.25);"></canvas>
-      <div class="legend"><span class="swatch"></span>EI curve &nbsp; <span class="pill">I=1–10,000 A, t=0.05–1000 s</span></div>
-      <!-- dynamic data labels -->
-      <div id="labelI" class="label-chip" style="display:none;"></div>
-      <div id="labelT" class="label-chip" style="display:none;"></div>
+      <div class="legend"><span class="swatch"></span> Base & Total (same color) · <span class="pill">Shaded area = extra delay</span></div>
+      <!-- single label box like "(I, t)" for TOTAL only -->
+      <div id="labelBox" class="label-chip" style="display:none;"></div>
     </section>
   </div>
 
@@ -161,18 +179,15 @@
           applyJsonBtn=document.getElementById('applyJsonBtn'),
           downloadBtn=document.getElementById('downloadBtn');
 
-    const labelI = document.getElementById('labelI');
-    const labelT = document.getElementById('labelT');
+    const labelBox = document.getElementById('labelBox');
     const canvas = document.getElementById('ocCanvas');
     const ctx = canvas.getContext('2d');
 
-    /**************  MESSAGES / RESULT  **************/
     function showMessage(html){ msgBox.innerHTML=`<div style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);">${html}</div>`; }
     function clearMessage(){ msgBox.innerHTML=''; }
     function setResult(html){ resultBox.style.display='block'; resultBox.innerHTML=html; }
     function clearResult(){ resultBox.style.display='none'; resultBox.innerHTML=''; }
 
-    /**************  CURVES SELECT  **************/
     function populateCurvesSelect(){
       curveEl.innerHTML='';
       Object.keys(CURVES).forEach(name=>{
@@ -184,7 +199,6 @@
     }
     function loadDefaultJSON(){ jsonArea.value=JSON.stringify(CURVES,null,2); populateCurvesSelect(); }
 
-    /**************  HELPERS  **************/
     function parseFractionOrFloat(text){
       const t=String(text).trim();
       if(!t) throw new Error('Empty');
@@ -200,59 +214,42 @@
 
     function computeEI_Excel(I,Ip,n){
       if(Ip<=0) throw new Error('Ip>0');
-      const M = I/Ip;                 // CA20
+      const M = I/Ip;
       const denom = M*M - 1;
-      if(denom<=0) return Infinity;   // at/under pickup
+      if(denom<=0) return Infinity;
       return (((9.96644/denom)+0.0388889) - 0.01389 - (3.55944/denom)) * n;
     }
 
-    function totalTimeSeconds(I,Ip,n,freq,extraRaw,unit){
-      let base = computeEI_Excel(I,Ip,n);
-      if(base===Infinity) return Infinity;
-      let extra=0;
-      if(extraRaw && String(extraRaw).trim()){
-        const val=parseFractionOrFloat(extraRaw);
-        extra = (unit==='cycles') ? (val/freq) : (unit==='ms' ? val/1000 : val);
-      }
-      return base + extra;
+    function extraToSeconds(freq, val, unit){
+      if(!val && val!==0) return 0;
+      return unit==='cycles' ? val/freq : (unit==='ms' ? val/1000 : val);
     }
 
-    /**************  GRAPH (fixed axes) **************/
-    const X_MIN=1, X_MAX=10000;     // Current (A)
-    const Y_MIN=0.05, Y_MAX=1000;   // Time (s)
+    /**************  GRAPH SCALES **************/
+    const X_MIN=1, X_MAX=10000;      // A
+    const Y_MIN=0.05, Y_MAX=1000;    // s
     const PAD_L=70, PAD_R=24, PAD_T=18, PAD_B=48;
 
     const log10 = (v)=>Math.log(v)/Math.LN10;
     const xLogSpan = log10(X_MAX)-log10(X_MIN);
     const yLogSpan = log10(Y_MAX)-log10(Y_MIN);
-
-    function sx(I){
-      const w = canvas.width - PAD_L - PAD_R;
-      return PAD_L + ((log10(I)-log10(X_MIN))/xLogSpan) * w;
-    }
-    function sy(t){
-      const h = canvas.height - PAD_T - PAD_B;
-      return PAD_T + ((log10(Y_MAX)-log10(t))/yLogSpan) * h;
-    }
+    const sx = I => PAD_L + ((log10(I)-log10(X_MIN))/xLogSpan) * (canvas.width-PAD_L-PAD_R);
+    const sy = t => PAD_T + ((log10(Y_MAX)-log10(t))/yLogSpan) * (canvas.height-PAD_T-PAD_B);
 
     function drawGrid(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       ctx.fillStyle='rgba(0,0,0,.20)';
       ctx.fillRect(PAD_L,PAD_T,canvas.width-PAD_L-PAD_R,canvas.height-PAD_T-PAD_B);
 
-      ctx.save();
-      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
-
+      ctx.save(); ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
       const xDec=[1,10,100,1000,10000], yDec=[0.1,1,10,100,1000];
 
       xDec.forEach(d=>{
         const x=sx(d);
         ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
         ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='12px ui-sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='top';
-        ctx.fillText(String(d), x, canvas.height-PAD_B+6);
+        ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(String(d), x, canvas.height-PAD_B+6);
       });
-
       yDec.forEach(d=>{
         const y=sy(Math.min(Math.max(d,Y_MIN),Y_MAX));
         ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
@@ -284,88 +281,92 @@
       ctx.textAlign='center'; ctx.textBaseline='top';
       ctx.fillText('Current (A, log scale)', (PAD_L+canvas.width-PAD_R)/2, canvas.height-22);
 
-      ctx.save();
-      ctx.translate(18,(PAD_T+canvas.height-PAD_B)/2);
-      ctx.rotate(-Math.PI/2);
-      ctx.textAlign='center'; ctx.textBaseline='bottom';
-      ctx.fillText('Operating Time (s, log scale)', 0, 0);
-      ctx.restore();
-
+      ctx.save(); ctx.translate(18,(PAD_T+canvas.height-PAD_B)/2);
+      ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText('Operating Time (s, log scale)', 0, 0); ctx.restore();
       ctx.restore();
     }
 
-    function plotCurve(Ip, n){
-      const pts=[];
-      const N=600;
-      const logXmin=log10(Math.max(X_MIN, Ip*1.001));
-      const logXmax=log10(X_MAX);
+    /**************  CURVE GENERATION **************/
+    const CURVE_COLOR = 'rgba(42,195,221,1)'; // cyan
 
+    function buildCurvePoints(Ip, n, extraSeconds){
+      const N=700;
+      const logXmin = log10(Math.max(X_MIN, Ip*1.001));
+      const logXmax = log10(X_MAX);
+      const pts = [];
+      const data = [];
       for(let i=0;i<N;i++){
-        const I=Math.pow(10, logXmin + (logXmax-logXmin)*i/(N-1));
-        let t=computeEI_Excel(I,Ip,n);
+        const I = Math.pow(10, logXmin + (logXmax-logXmin)*i/(N-1));
+        let t = computeEI_Excel(I, Ip, n);
         if(!isFinite(t) || t<=0) continue;
-        t=Math.max(Y_MIN, Math.min(Y_MAX, t));
+        if(extraSeconds) t += extraSeconds;
+        t = Math.max(Y_MIN, Math.min(Y_MAX, t));
         pts.push([sx(I), sy(t)]);
+        data.push({I, t});
       }
+      return {pts, data};
+    }
+
+    function strokeCurve(pts){
       if(pts.length<2) return;
-
       ctx.save();
-      ctx.strokeStyle='rgba(42,195,221,1)';
-      ctx.lineWidth=2;
-      ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
+      ctx.strokeStyle=CURVE_COLOR; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
       for(const [x,y] of pts.slice(1)) ctx.lineTo(x,y);
-      ctx.stroke();
-      ctx.restore();
+      ctx.stroke(); ctx.restore();
     }
 
-    function placeHtmlLabel(div, x, y, text){
-      div.style.left = x + 'px';
-      div.style.top  = y + 'px';
-      div.textContent = text;
-      div.style.display = 'block';
-    }
-
-    function hideLabels(){
-      labelI.style.display='none';
-      labelT.style.display='none';
-    }
-
-    function drawIntersections(I, t){
-      // clamp
-      const Ic = Math.min(Math.max(I, X_MIN), X_MAX);
-      const tc = (t===Infinity)? null : Math.min(Math.max(t, Y_MIN), Y_MAX);
-
-      // clear previous labels
-      hideLabels();
-
+    function fillBetween(baseData, totalData){
+      if(baseData.length<2 || totalData.length<2) return;
+      const n = Math.min(baseData.length, totalData.length);
       ctx.save();
-      ctx.strokeStyle='rgba(255,255,255,.55)';
-      ctx.setLineDash([6,6]); ctx.lineWidth=1.5;
-
-      const x = sx(Ic);
-      ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height-PAD_B); ctx.stroke();
-
-      if(tc!==null){
-        const y = sy(tc);
-        ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width-PAD_R, y); ctx.stroke();
-
-        // dot
-        ctx.setLineDash([]);
-        ctx.fillStyle='rgba(255,255,255,.95)';
-        ctx.beginPath(); ctx.arc(x,y,4,0,2*Math.PI); ctx.fill();
-
-        // HTML labels (follow the canvas point)
-        // Offset a bit so they don't overlap with the dot/lines
-        placeHtmlLabel(labelI, x+22, y-14, `I = ${Ic.toFixed(1)} A`);
-        placeHtmlLabel(labelT, x+22, y+14, `t = ${tc.toFixed(3)} s`);
-      }else{
-        // only current label if no trip time
-        placeHtmlLabel(labelI, x+22, PAD_T+14, `I = ${Ic.toFixed(1)} A`);
+      ctx.fillStyle='rgba(42,195,221,.18)'; // soft cyan haze
+      ctx.beginPath();
+      for(let i=0;i<n;i++){
+        const x = sx(totalData[i].I), y = sy(totalData[i].t);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
       }
+      for(let i=n-1;i>=0;i--){
+        const x = sx(baseData[i].I), y = sy(baseData[i].t);
+        ctx.lineTo(x,y);
+      }
+      ctx.closePath(); ctx.fill();
       ctx.restore();
     }
 
+    /**************  LABEL/GUIDES (TOTAL ONLY) **************/
+    function setLabelBox(x, y, I, t){
+      const pad=8;
+      const left=Math.max(PAD_L+pad, Math.min(x+22, canvas.width-PAD_R-pad));
+      const top =Math.max(PAD_T+pad, Math.min(y-18, canvas.height-PAD_B-pad));
+      labelBox.style.left = left+'px';
+      labelBox.style.top  = top +'px';
+      labelBox.textContent = `(${I.toFixed(1)} A, ${t.toFixed(3)} s)`;
+      labelBox.style.display='block';
+    }
+    function hideLabel(){ labelBox.style.display='none'; }
+
+    function drawIntersectionsForTotal(I, tTotal){
+      if(!isFinite(tTotal)) return;
+      const x = sx(I), y = sy(Math.min(Math.max(tTotal,Y_MIN),Y_MAX));
+
+      // dashed guides ONLY for total
+      ctx.save();
+      ctx.setLineDash([6,6]); ctx.lineWidth=1.6; ctx.strokeStyle='rgba(255,255,255,.65)';
+      ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height-PAD_B); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width-PAD_R, y); ctx.stroke();
+
+      // dot
+      ctx.setLineDash([]);
+      ctx.fillStyle='white';
+      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+
+      setLabelBox(x, y, I, tTotal);
+    }
+
+    /**************  REDRAW **************/
     function redrawGraph(){
       const I = parseFloat(IEl.value),
             Ip = parseFloat(IpEl.value),
@@ -376,44 +377,52 @@
 
       drawGrid();
 
-      if(isFinite(Ip) && Ip>0 && isFinite(n)) plotCurve(Ip, n);
+      if(!(isFinite(Ip)&&Ip>0&&isFinite(n)&&isFinite(f)&&f>0)){ hideLabel(); return; }
 
-      if(isFinite(I) && I>0 && isFinite(Ip) && Ip>0 && isFinite(n) && isFinite(f) && f>0){
-        let t = totalTimeSeconds(I, Ip, n, f, extraRaw, unit);
-        drawIntersections(I, t);
-      }else{
-        hideLabels();
+      let extraSec = 0;
+      if(extraRaw){
+        try{ extraSec = extraToSeconds(f, parseFractionOrFloat(extraRaw), unit); }
+        catch{ extraSec = 0; }
+      }
+
+      const base = buildCurvePoints(Ip, n, 0);
+      const total = buildCurvePoints(Ip, n, extraSec);
+
+      fillBetween(base.data, total.data);
+      strokeCurve(base.pts);
+      strokeCurve(total.pts);
+
+      hideLabel();
+      if(isFinite(I)&&I>0){
+        const baseT = computeEI_Excel(I, Ip, n);
+        const totalT = (baseT===Infinity)? Infinity : baseT + extraSec;
+        if(isFinite(totalT)) drawIntersectionsForTotal(I, totalT);
       }
     }
 
-    /**************  UI ACTIONS  **************/
+    /**************  BUTTONS **************/
     function handleCalculate(){
       clearMessage(); clearResult();
-      let I=parseFloat(IEl.value),
-          Ip=parseFloat(IpEl.value),
-          n=parseFloat(nEl.value),
-          freq=parseFloat(freqEl.value);
-
+      const I=parseFloat(IEl.value), Ip=parseFloat(IpEl.value), n=parseFloat(nEl.value), f=parseFloat(freqEl.value);
       if(!isFinite(I)||I<0) return showMessage('Invalid I');
       if(!isFinite(Ip)||Ip<=0) return showMessage('Invalid Ip');
       if(!isFinite(n)) return showMessage('Invalid n');
-      if(!isFinite(freq)||freq<=0) return showMessage('Invalid freq');
+      if(!isFinite(f)||f<=0) return showMessage('Invalid freq');
 
-      let extraSeconds=0, baseTime=0;
-      try{ baseTime=computeEI_Excel(I,Ip,n);}catch(e){ return showMessage(e.message); }
-      if(baseTime===Infinity){ setResult(`<div>No trip – Fault ≤ pickup</div>`); redrawGraph(); return; }
+      let baseTime = computeEI_Excel(I, Ip, n);
+      if(baseTime===Infinity){ setResult('<b>No trip</b> – Fault ≤ pickup'); redrawGraph(); return; }
 
-      const extraRaw=(extraEl.value||'').trim(), unit=extraUnitEl.value;
-      if(extraRaw){
-        try{
-          const val=parseFractionOrFloat(extraRaw);
-          if(unit==='cycles') extraSeconds=val/freq;
-          else if(unit==='ms') extraSeconds=val/1000;
-          else extraSeconds=val;
-        }catch(e){ return showMessage('Invalid extra delay'); }
+      let extraSeconds=0;
+      const raw=(extraEl.value||'').trim();
+      if(raw){
+        try{ extraSeconds = extraToSeconds(f, parseFractionOrFloat(raw), extraUnitEl.value); }
+        catch{ return showMessage('Invalid extra delay'); }
       }
-      const total=baseTime+extraSeconds;
-      setResult(`<div class="badge-ok">OK</div><div>Base: ${baseTime.toFixed(6)} s<br>Total: ${total.toFixed(6)} s</div>`);
+      const total = baseTime + extraSeconds;
+
+      setResult(`<div class="pill" style="background:rgba(255,255,255,.2);border:none">
+        Base: <b>${baseTime.toFixed(6)} s</b> · Total: <b>${total.toFixed(6)} s</b>
+      </div>`);
       redrawGraph();
     }
 
@@ -422,15 +431,10 @@
       extraEl.value=''; extraUnitEl.value='cycles';
       clearMessage(); clearResult(); redrawGraph();
     }
-
     function handleApplyJSON(){
-      try{
-        const obj=JSON.parse(jsonArea.value);
-        CURVES=obj; populateCurvesSelect();
-        showMessage('Updated JSON');
-      }catch(e){ showMessage('JSON error'); }
+      try{ CURVES=JSON.parse(jsonArea.value); populateCurvesSelect(); showMessage('Updated JSON'); }
+      catch{ showMessage('JSON error'); }
     }
-
     function handleDownloadJSON(){
       const blob=new Blob([jsonArea.value],{type:'application/json'});
       const url=URL.createObjectURL(blob);
@@ -438,14 +442,14 @@
       URL.revokeObjectURL(url);
     }
 
-    /**************  INIT  **************/
+    /**************  INIT **************/
     function init(){
       loadDefaultJSON();
       calcBtn.addEventListener('click',handleCalculate);
       resetBtn.addEventListener('click',handleReset);
       applyJsonBtn.addEventListener('click',handleApplyJSON);
       downloadBtn.addEventListener('click',handleDownloadJSON);
-      redrawGraph(); // first draw
+      redrawGraph();
     }
     init();
   </script>
