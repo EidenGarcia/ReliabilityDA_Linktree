@@ -6,13 +6,12 @@
   <title>Reliability DA · Trackers & Reports</title>
   <style>
     :root{
-      /* Same design tokens as your calculator + LinkTree */
       --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10;             /* translucent card */
-      --ink:#ffffff;                 /* primary text */
-      --muted:#d0e6f2;               /* secondary text */
-      --accent:#6bd27d;              /* green */
-      --accent-2:#2ac3dd;            /* cyan (buttons) */
+      --panel:#ffffff10;
+      --ink:#ffffff;
+      --muted:#d0e6f2;
+      --accent:#6bd27d;
+      --accent-2:#2ac3dd;
       --warn:#ffcc66;
       --radius:16px;
     }
@@ -21,10 +20,10 @@
     body{
       margin:0; padding:24px; background:var(--bg); color:var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
     }
 
-    .wrap{ width:100%; max-width:900px; }
+    .wrap{ max-width:900px; margin:0 auto; }
 
     header{ text-align:center; margin-bottom:16px; }
     h1{ margin:0 0 8px; font-size:1.9rem; }
@@ -39,6 +38,7 @@
       padding:22px;
     }
 
+    /* Logo inside the card */
     .brand{
       display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
     }
@@ -50,7 +50,7 @@
     }
 
     .meta{
-      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+      display:flex; justify-content:center; gap:10px; margin:8px 0 16px 0; flex-wrap:wrap;
     }
     .pill{
       display:inline-block; padding:6px 10px; border-radius:999px;
@@ -58,9 +58,9 @@
       color:var(--muted); font-size:.82rem;
     }
 
-    /* Link groups for tidy layout */
+    /* Groups */
     .groups{
-      display:grid; grid-template-columns:1fr; gap:16px; margin-top:12px;
+      display:grid; grid-template-columns:1fr; gap:16px;
     }
     @media (min-width: 780px){
       .groups{ grid-template-columns:1fr 1fr; }
@@ -80,7 +80,7 @@
       display:grid; grid-template-columns:1fr; gap:10px;
     }
 
-    /* Buttons (same as LinkTree) */
+    /* Buttons */
     a.btn{
       display:block; text-decoration:none; text-align:center;
       color:#0b1020; font-weight:700;
@@ -97,21 +97,26 @@
       border:1px solid rgba(255,255,255,.35);
     }
 
-    /* Optional category accents */
     a.btn.green{ background:#6bd27d; color:#003514; }
     a.btn.blue{ background:#2ac3dd; color:#08131d; }
     a.btn.warn{ background:var(--warn); color:#3a2800; font-weight:800; }
+
+    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
   </style>
 </head>
 <body>
   <main class="wrap">
     <header>
-      <img src="Luma White logo (1).png" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
       <h1>Reliability&nbsp;DA · Trackers &amp; Reports</h1>
       <p class="lead">Central access to databases, Power BI reports, and Excel/SharePoint trackers.</p>
     </header>
 
     <section class="card">
+      <!-- Logo above last updated -->
+      <div class="brand">
+        <img src="Luma White logo (1).png" alt="LUMA Logo">
+      </div>
+
       <div class="meta">
         <span class="pill" id="lastUpdated">Last Updated: —</span>
       </div>
@@ -153,17 +158,15 @@
         </div>
       </div>
 
-      <footer style="text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem;">
-        <span class="pill">Develope by Eiden O. García Torres
-        </span>
+      <footer>
+        <span class="pill">Develope by Eiden O. García Torres</span>
       </footer>
     </section>
   </main>
 
   <script>
-    // Manual timestamp for consistency with your other pages
     (function updateLastUpdated(){
-      const fixedDate = new Date('2025-05-12T09:21'); // ← update manually when you publish
+      const fixedDate = new Date('2025-05-12T09:21'); // ← update manually
       const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
                      hour:'numeric', minute:'numeric', hour12:true };
       document.getElementById('lastUpdated').textContent =
