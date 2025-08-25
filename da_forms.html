@@ -21,10 +21,10 @@
     body{
       margin:0; padding:24px; background:var(--bg); color:var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
     }
 
-    .wrap{ width:100%; max-width:860px; }
+    .wrap{ width:100%; max-width:860px; margin:0 auto; }
 
     header{ text-align:center; margin-bottom:16px; }
     h1{ margin:0 0 8px; font-size:1.9rem; }
@@ -39,6 +39,7 @@
       padding:22px;
     }
 
+    /* Logo moved INSIDE the card (above Last Updated) */
     .brand{
       display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
     }
@@ -50,7 +51,7 @@
     }
 
     .meta{
-      display:flex; justify-content:center; gap:10px; margin:8px 0 2px 0; flex-wrap:wrap;
+      display:flex; justify-content:center; gap:10px; margin:8px 0 16px 0; flex-wrap:wrap;
     }
     .pill{
       display:inline-block; padding:6px 10px; border-radius:999px;
@@ -108,12 +109,16 @@
 <body>
   <main class="wrap">
     <header>
-      <img src="Luma White logo (1).png" alt="LUMA Logo" style="width:min(240px,55%);height:auto;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.25);background:rgba(0,0,0,.12);">
       <h1>Reliability&nbsp;DA · Field Forms</h1>
       <p class="lead">Quick access to legacy Forms and new SharePoint/Excel checklists.</p>
     </header>
 
     <section class="card">
+      <!-- LUMA logo inside the card, above Last Updated -->
+      <div class="brand">
+        <img src="Luma White logo (1).png" alt="LUMA Logo">
+      </div>
+
       <div class="meta">
         <span class="pill" id="lastUpdated">Last Updated: —</span>
       </div>
@@ -148,14 +153,13 @@
       </div>
 
       <footer>
-        <span class="pill">Develope by Eiden O. Garcia Torres
-        </span>
+        <span class="pill">Develope by Eiden O. Garcia Torres</span>
       </footer>
     </section>
   </main>
 
   <script>
-    // Use the fixed manual date from your snippet to match behavior across pages
+    // Same fixed manual date behavior as your other pages
     (function updateLastUpdated(){
       const fixedDate = new Date('2024-11-15T14:31'); // ← update manually when you publish
       const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
@@ -166,4 +170,3 @@
   </script>
 </body>
 </html>
-
