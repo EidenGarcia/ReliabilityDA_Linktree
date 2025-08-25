@@ -1,144 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reliability DA · Tools</title>
+  <title>Reliability DA · LinkTree</title>
   <style>
     :root{
-      /* Same tokens as your LinkTree */
+      /* Same palette & tokens used in your calculator */
       --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10;
-      --ink:#ffffff;
-      --muted:#d0e6f2;
-      --accent:#6bd27d;
-      --accent-2:#2ac3dd;
-      --radius:20px;
+      --panel:#ffffff10;             /* translucent card */
+      --ink:#ffffff;                 /* primary text */
+      --muted:#d0e6f2;               /* secondary text */
+      --accent:#6bd27d;              /* green */
+      --accent-2:#2ac3dd;            /* cyan (buttons) */
+      --danger:#ff6b6b;
+      --ok:#87fba4;
+      --warn:#ffcc66;
+      --radius:16px;
     }
 
     *{box-sizing:border-box}
     body{
-      margin:0; padding:32px; background:var(--bg); color:var(--ink);
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh;
-      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
     }
 
-    /* Page header (outside panel) */
-    .page-header{
-      text-align:center; margin-bottom:16px;
+    .wrap{
+      width:100%; max-width:860px;
     }
-    .page-header h1{
-      margin:0 0 6px; font-size:2rem; font-weight:800; letter-spacing:.2px;
-    }
-    .page-header .sub{ margin:0; color:var(--muted); }
 
-    /* Glass panel like LinkTree */
-    .panel{
-      width:min(920px, 94vw);
+    header{ text-align:center; margin-bottom:16px; }
+    h1{ margin:0 0 8px; font-size:1.9rem; }
+    p.lead{ margin:0; color:var(--muted); }
+
+    .card{
       background:var(--panel);
-      backdrop-filter: blur(10px);
-      border:1px solid rgba(255,255,255,.28);
-      border-radius: var(--radius);
-      box-shadow: 0 16px 36px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
-      padding:26px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+      backdrop-filter: blur(8px);
+      padding:22px;
     }
 
-    /* Logo “card” same vibe */
-    .logo-card{
-      width:min(340px, 80%);
-      margin:0 auto 12px;
-      padding:18px 20px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.28);
-      background:rgba(0,0,0,.15);
-      box-shadow:0 10px 24px rgba(0,0,0,.28);
-      display:flex; align-items:center; justify-content:center;
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:16px;
     }
-    .logo-card img{
-      max-width:100%; height:auto; display:block;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    .brand img{
+      width:min(260px,70%); height:auto; display:block;
+      border-radius:12px; border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(0,0,0,.12);
     }
 
     .meta{
-      display:flex; justify-content:center; margin:8px 0 14px; flex-wrap:wrap;
+      display:flex; justify-content:center; gap:10px; margin:12px 0 4px 0; flex-wrap:wrap;
     }
     .pill{
-      display:inline-block; padding:8px 14px; border-radius:999px;
-      background:rgba(255,255,255,.15);
-      border:1px solid rgba(255,255,255,.25);
-      color:var(--muted); font-size:.9rem;
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+      color:var(--muted); font-size:.82rem;
     }
 
-    /* Link list – match LinkTree spacing */
     .links{
-      display:grid; grid-template-columns:1fr; gap:14px;
-      margin:14px 0 18px;
+      display:grid; grid-template-columns:1fr; gap:12px; margin-top:10px;
     }
 
-    /* Buttons to match LinkTree */
-.btn {
-  display:block; text-decoration:none; text-align:center;
-  font-weight:700; color:#fff;
-  padding:14px 16px; border-radius:14px;
+    a.btn{
+      text-decoration:none; color:#0b1020; font-weight:700;
+      background:var(--accent-2);
+      padding:14px 16px; text-align:center; border-radius:12px;
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:0 10px 18px rgba(0,0,0,.22);
+      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
 
-  /* match your screenshot */
-  background: transparent; 
-  border: 1px solid rgba(255,255,255,.6);
+    /* Neutral/secondary button styling to match calculator "secondary" */
+    a.btn.secondary{
+      background:transparent; color:var(--ink); font-weight:600;
+      border:1px solid rgba(255,255,255,.35);
+    }
 
-  /* subtle glow/shadow like the LinkTree example */
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  transition: transform .08s ease, box-shadow .18s ease, filter .18s ease;
-}
-.btn:hover { 
-  transform: translateY(-1px); 
-  filter: brightness(1.1); 
-  box-shadow: 0 8px 20px rgba(0,0,0,.25);
-}
+    /* Special yellow callout button (kept from your original intent, but styled to match) */
+    a.btn.warn{
+      background:var(--warn); color:#3a2800; font-weight:800;
+      border-color:rgba(0,0,0,.15);
+    }
 
-    /* Footer pill in panel */
-    .panel-footer{ display:flex; justify-content:center; }
-    .by{ color:var(--muted); }
+    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
 
-    @media (max-width:520px){
-      body{ padding:22px; }
-      .page-header h1{ font-size:1.7rem; }
-      .pill{ font-size:.85rem; }
+    @media (max-width:640px){
+      body{ padding:18px; }
+      .card{ padding:16px; }
+      h1{ font-size:1.6rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Match LinkTree header -->
-  <div class="page-header">
-    <h1>Reliability DA · Tools</h1>
-    <p class="sub">Quick access to interactive calculators.</p>
-  </div>
+  <main class="wrap">
+    <header>
+      <h1>Reliability&nbsp;DA · Tools</h1>
+      <p class="lead">Quick access to interactive calculators.
+      </p>
+    </header>
 
-  <!-- Glass panel -->
-  <section class="panel">
-    <div class="logo-card">
-      <!-- Use the same logo image you used on LinkTree -->
-      <img src="Luma White logo (1).png" alt="LUMA Logo">
-    </div>
+    <section class="card">
+      <div class="brand">
+        <!-- Use your local file or hosted logo; filename kept from your snippet -->
+        <img src="Luma White logo (1).png" alt="LUMA Logo">
+      </div>
 
-    <div class="meta">
-      <span class="pill" id="lastUpdated">Last Updated: —</span>
-    </div>
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
 
-    <div class="links">
-      <a class="btn" href="ip_calculator.html">IP Calculator</a>
-      <a class="btn" href="ansi_overcurrent_calculator_with_graph.html">ANSI Overcurrent Trip Time Calculator</a>
-    </div>
+      <div class="links">
+        <!-- Buttons kept in your original order; labels unchanged -->
+        <a class="btn secondary" href="ip_calculator.html">IP Calculator</a>
+        <a class="btn secondary" href="ansi_overcurrent_calculator_with_graph.html">ANSI Overcurrent Trip Time Calculator</a>
+      </div>
 
-    <div class="panel-footer">
-      <span class="pill by">Developed by Eiden O. Garcia Torres</span>
-    </div>
-  </section>
+      <footer>
+        <span class="pill">Develope by Eiden O. Garcia Torres
+        </span>
+      </footer>
+    </section>
+  </main>
 
   <script>
-    // Same manual "Last Updated" behavior as your LinkTree
+    // Keep your “fixed manual date” behavior, but formatted like the calculator’s UI
     (function updateLastUpdated(){
-      const fixedDate = new Date('2025-08-22T20:40'); // ← update manually on publish
+      const fixedDate = new Date('2025-08-21T20:40'); // ← update manually when you publish
       const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
                      hour:'numeric', minute:'numeric', hour12:true };
       document.getElementById('lastUpdated').textContent =
@@ -147,4 +140,6 @@
   </script>
 </body>
 </html>
+
+
 
