@@ -1,173 +1,254 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reliability DA · Field Forms</title>
-  <style>
-    :root{
-      /* same design tokens as the calculator + LinkTree */
-      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10;             /* translucent card */
-      --ink:#ffffff;                 /* primary text */
-      --muted:#d0e6f2;               /* secondary text */
-      --accent:#6bd27d;              /* green */
-      --accent-2:#2ac3dd;            /* cyan (buttons) */
-      --warn:#ffcc66;
-      --radius:16px;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reliability DA · Field Forms</title>
 
-    *{box-sizing:border-box}
-    body{
-      margin:0; padding:24px; background:var(--bg); color:var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh;
-    }
+<style>
+:root{
+  --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
+  --panel:#ffffff10;
+  --ink:#ffffff;
+  --muted:#d0e6f2;
+  --accent:#6bd27d;
+  --accent-2:#2ac3dd;
+  --warn:#ffcc66;
+  --radius:16px;
+}
 
-    .wrap{ width:100%; max-width:860px; margin:0 auto; }
+*{box-sizing:border-box}
 
-    header{ text-align:center; margin-bottom:16px; }
-    h1{ margin:0 0 8px; font-size:1.9rem; }
-    p.lead{ margin:0; color:var(--muted); }
+body{
+  margin:0;
+  padding:24px;
+  background:var(--bg);
+  color:var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  min-height:100vh;
+}
 
-    .card{
-      background:var(--panel);
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:var(--radius);
-      box-shadow:0 10px 30px rgba(0,0,0,.3);
-      backdrop-filter: blur(8px);
-      padding:22px;
-    }
+.wrap{
+  width:100%;
+  max-width:520px;
+  margin:0 auto;
+}
 
-    /* Logo moved INSIDE the card (above Last Updated) */
-    .brand{
-      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px;
-    }
-    .brand img{
-      width:min(260px,70%); height:auto; display:block;
-      border-radius:12px; border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-      background:rgba(0,0,0,.12);
-    }
+header{
+  text-align:center;
+  margin-bottom:16px;
+}
 
-    .meta{
-      display:flex; justify-content:center; gap:10px; margin:8px 0 16px 0; flex-wrap:wrap;
-    }
-    .pill{
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
-      color:var(--muted); font-size:.82rem;
-    }
+h1{
+  margin:0 0 8px;
+  font-size:1.9rem;
+}
 
-    /* groups */
-    .groups{
-      display:grid; grid-template-columns: 1fr; gap:16px; margin-top:12px;
-    }
-    @media (min-width: 720px){
-      .groups{ grid-template-columns: 1fr 1fr; }
-    }
+p.lead{
+  margin:0;
+  color:var(--muted);
+}
 
-    .group{
-      border:1px solid rgba(255,255,255,.22);
-      border-radius:14px;
-      padding:16px;
-      background:rgba(0,0,0,.18);
-    }
-    .group h3{
-      margin:0 0 10px 0; font-size:1rem; color:var(--muted); font-weight:600;
-    }
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:var(--radius);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  backdrop-filter: blur(8px);
+  padding:22px;
+}
 
-    .links{
-      display:grid; grid-template-columns:1fr; gap:10px;
-    }
+.brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
 
-    /* buttons same as LinkTree */
-    a.btn{
-      display:block; text-decoration:none; text-align:center;
-      color:#0b1020; font-weight:700;
-      background:var(--accent-2);
-      padding:12px 14px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.28);
-      box-shadow:0 10px 18px rgba(0,0,0,.22);
-      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
-    }
-    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
+.brand img{
+  width:min(260px,70%);
+  height:auto;
+  display:block;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 18px rgba(0,0,0,.25);
+  background:rgba(0,0,0,.12);
+}
 
-    a.btn.secondary{
-      background:transparent; color:var(--ink); font-weight:600;
-      border:1px solid rgba(255,255,255,.35);
-    }
+.meta{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:8px 0 16px 0;
+  flex-wrap:wrap;
+}
 
-    /* Optional accents to distinguish “new” set without breaking theme */
-    a.btn.green{ background:#6bd27d; color:#003514; }
-    a.btn.blue{ background:#2ac3dd; color:#08131d; }
-    a.btn.warn{ background:var(--warn); color:#3a2800; font-weight:800; }
+.pill{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.2);
+  color:var(--muted);
+  font-size:.82rem;
+}
 
-    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
-  </style>
+/* ALWAYS ONE COLUMN */
+.groups{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+  margin-top:12px;
+}
+
+.group{
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:14px;
+  padding:16px;
+  background:rgba(0,0,0,.18);
+}
+
+.group h3{
+  margin:0 0 10px 0;
+  font-size:1rem;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.links{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+a.btn{
+  display:block;
+  text-decoration:none;
+  text-align:center;
+  color:#0b1020;
+  font-weight:700;
+  background:var(--accent-2);
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 10px 18px rgba(0,0,0,.22);
+  transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+a.btn:hover{
+  transform:translateY(-1px);
+  filter:saturate(1.05);
+  box-shadow:0 14px 24px rgba(0,0,0,.28);
+}
+
+a.btn.secondary{
+  background:transparent;
+  color:var(--ink);
+  font-weight:600;
+  border:1px solid rgba(255,255,255,.35);
+}
+
+footer{
+  text-align:center;
+  margin-top:14px;
+  color:var(--muted);
+  font-size:.85rem;
+}
+</style>
+
 </head>
+
 <body>
-  <main class="wrap">
-    <header>
-      <h1>Reliability&nbsp;DA · Field Forms</h1>
-      <p class="lead">Quick access to legacy Forms and new SharePoint/Excel checklists.</p>
-    </header>
 
-    <section class="card">
-      <!-- LUMA logo inside the card, above Last Updated -->
-      <div class="brand">
-        <img src="Luma White logo (1).png" alt="LUMA Logo">
-      </div>
+<main class="wrap">
 
-      <div class="meta">
-        <span class="pill" id="lastUpdated">Last Updated: —</span>
-      </div>
+<header>
+<h1>Reliability DA · Field Forms</h1>
+<p class="lead">Quick access to legacy Forms and new SharePoint/Excel checklists.</p>
+</header>
 
-      <div class="groups">
-        <!-- Old (Microsoft) Forms -->
-        <div class="group">
-          <h3>Microsoft Forms</h3>
-          <div class="links">
-            <a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">3-Ph Recloser – Commissioning</a>
-            <a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">Versa-Tech XC – Commissioning</a>
-            <a class="btn secondary" href="https://forms.office.com/g/ukNm5MgsUC">3-Ph Recloser – Quarterly Logs</a>
-            <a class="btn secondary" href="https://forms.office.com/g/hG09322044">1-Ph Recloser – Quarterly Logs</a>
-            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu">Legacy In-Service</a>
-            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u">SensorOn</a>
-            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u">Vehicle Request</a>
-            <a class="btn secondary" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/_layouts/15/listforms.aspx?cid=NWY4ZjE1NWYtODgyMi00M2FmLWI0ZTQtMThmYjgyYTkxYjBh&nav=ZjFhODNjNzEtODM3ZC00ODc5LThhZDUtOWRjYWE4OWU2ZGM4&xsdata=MDV8MDJ8fGMwZjU5OWIxYzA0YjRiOTQ5MjNjMDhkZTY0YmYzMjAzfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2MzkwNTg5Njk0NzM4MTUxMDB8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKRFFTSTZJbFJsWVcxelgwRlVVRk5sY25acFkyVmZVMUJQVEU5R0lpd2lWaUk2SWpBdU1DNHdNREF3SWl3aVVDSTZJbGRwYmpNeUlpd2lRVTRpT2lKUGRHaGxjaUlzSWxkVUlqb3hNWDA9fDF8TDJOb1lYUnpMekU1T2pNMU9URmlNemhtTFRJeE5HWXRORFV6WmkwNVpEazBMV0psWW1Vek5tUXhNRGszTWw5bE5qZGlNbUZrT1MweE5HSXhMVFJsTXpRdE9ERmxNUzFtWmpjNE5HTTBaVEV6TTJGQWRXNXhMbWRpYkM1emNHRmpaWE12YldWemMyRm5aWE12TVRjM01ETXdNREUwTlRneU1RPT18ODA1ZDFmY2U1MGU4NDhmMjkyM2MwOGRlNjRiZjMyMDN8ZWEwYWQxODZkMWNlNGQ1Njg4NThmYjBlNjhlNDFiYjA%3D&sdata=OU5HL01naUVmWFBtaXFLczZyR2lRc0xGODZpWVI2VjM0bE11NVJRMTkwYz0%3D&ovuser=b0a9b38e-5be3-4a10-8fdc-cef4306b5139%2CEiden.GarciaTorres%40Lumapr.com&OR=Teams-HL&CT=1770300226230&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNjAxMDQwMDkyNSIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D">Recloser Investigation</a>
-          </div>
-        </div>
-      </div>
+<section class="card">
 
-      <footer>
-        <span class="pill">Develope by Eiden O. Garcia Torres</span>
-      </footer>
-    </section>
-  </main>
+<div class="brand">
+<img src="Luma White logo (1).png" alt="LUMA Logo">
+</div>
 
-  <script>
-    // Same fixed manual date behavior as your other pages
-    (function updateLastUpdated(){
-      const fixedDate = new Date('2026-02-05T19:04'); // ← update manually when you publish
-      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
-                     hour:'numeric', minute:'numeric', hour12:true };
-      document.getElementById('lastUpdated').textContent =
-        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
-    })();
-  </script>
+<div class="meta">
+<span class="pill" id="lastUpdated">Last Updated: —</span>
+</div>
+
+<div class="groups">
+
+<div class="group">
+<h3>Microsoft Forms</h3>
+
+<div class="links">
+
+<a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
+3-Ph Recloser – Commissioning
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
+Versa-Tech XC – Commissioning
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/g/ukNm5MgsUC">
+3-Ph Recloser – Quarterly Logs
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/g/hG09322044">
+1-Ph Recloser – Quarterly Logs
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu">
+Legacy In-Service
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u">
+SensorOn
+</a>
+
+<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u">
+Vehicle Request
+</a>
+
+<a class="btn secondary" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/...">
+Recloser Investigation
+</a>
+
+</div>
+</div>
+
+</div>
+
+<footer>
+<span class="pill">Developed by Eiden O. Garcia Torres</span>
+</footer>
+
+</section>
+</main>
+
+<script>
+(function updateLastUpdated(){
+  const fixedDate = new Date('2026-03-04T19:04');
+
+  const opts = {
+    weekday:'long',
+    year:'numeric',
+    month:'long',
+    day:'numeric',
+    hour:'numeric',
+    minute:'numeric',
+    hour12:true
+  };
+
+  document.getElementById('lastUpdated').textContent =
+    'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+
+})();
+</script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
