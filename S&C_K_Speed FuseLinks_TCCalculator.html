@@ -3,527 +3,1046 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>S&C “K” Speed Fuse Links · TCC Calculator (Upstream/Downstream TCI)</title>
+<title>S&C "K" Speed Fuse Links · TCC Calculator</title>
+<link rel="stylesheet" href="styles.css">
 <style>
-  :root{
-    --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-    --panel:#ffffff10; --ink:#ffffff; --muted:#d0e6f2;
-    --accent:#6bd27d; --accent-2:#2ac3dd;
-  }
-  *{box-sizing:border-box}
-  body{ margin:0; padding:24px; background:var(--bg); color:var(--ink);
-        font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial; min-height:100vh;}
-  .container{max-width:1100px;margin:0 auto;display:grid;gap:20px;grid-template-columns:1fr 1fr;align-items:start;}
-  @media (max-width:980px){.container{grid-template-columns:1fr}}
-  h1{margin:0 0 8px}
-  .card{background:var(--panel); backdrop-filter:blur(8px);
-        border:1px solid rgba(255,255,255,.2); border-radius:16px;
-        box-shadow:0 10px 30px rgba(0,0,0,.3); padding:18px;}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  label{font-size:.9rem;color:var(--muted);display:block;margin:10px 0 6px}
-  input,select,textarea{width:100%; background:rgba(255,255,255,.1); color:var(--ink);
-    border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px; outline:none;
-    transition:border .2s ease, box-shadow .2s ease;}
-  input::placeholder{color:#cfe7f2aa}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(42,195,221,.3)}
-  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
-  button{background:var(--accent-2); color:#0b1020; font-weight:700; border:none; padding:12px 16px;
-         border-radius:12px; cursor:pointer; font-size:.95rem; box-shadow:0 10px 18px rgba(0,0,0,.2)}
-  button.secondary{background:transparent;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.3)}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.15);
-        border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:.8rem}
-  .hint{display:inline-block;margin:2px 0 10px;color:var(--muted);font-size:.85rem}
-
-  .result{font-size:1rem; line-height:1.5; padding:12px; border-radius:12px;
-          border:1px dashed rgba(255,255,255,.3); background:rgba(0,0,0,.3); display:none;}
-  .result.ok{background: rgba(0,200,100,.25); border:1px solid rgba(0,255,120,.55); color:#e9ffee;}
-  .result.fail{background: rgba(200,0,0,.25); border:1px solid rgba(255,80,80,.6); color:#ffe9e9;}
-  .result .headline{display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:6px;}
-  .result .badge{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
-                 border-radius:999px; font-weight:800; font-size:.85rem; background: rgba(255,255,255,.2); color:#fff;}
-  fieldset{border:none; margin:0 0 14px; padding:0;}
-  legend{color:var(--muted); font-size:.95rem; margin-bottom:6px;}
-
-  /* ===== Graph area ===== */
-  .graph-wrap{position:relative; padding:12px; border-radius:16px; background:var(--panel);
-              border:1px solid rgba(255,255,255,.2); box-shadow:0 10px 30px rgba(0,0,0,.3);}
-  .legend-bar{
-    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
-    margin:4px 0 10px 0;
-  }
-  .legend-left{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
-  .legend-right{display:flex; gap:10px; margin-left:auto; align-items:center; flex-wrap:wrap;}
-  .legend-chip{display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
-    background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.25); font-size:.82rem;}
-  .legend-chip .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
-  .tci-chip{padding:8px 12px; border-radius:999px; background:rgba(0,0,0,.55);
-    border:1px solid rgba(255,255,255,.35); color:#fff; font-size:.88rem; box-shadow:0 6px 16px rgba(0,0,0,.35); white-space:nowrap;}
-  canvas{width:100%; height:auto; border-radius:12px; background:rgba(0,0,0,.25);}
-
-  /* point label */
-  .label-chip{
-    position:absolute; transform:translate(-50%, -50%); background:rgba(0,0,0,.78);
-    border:1px solid rgba(255,255,255,.35); color:#fff; font-size:12px; padding:5px 9px; border-radius:10px;
-    pointer-events:none; white-space:nowrap; z-index:5; box-shadow:0 4px 10px rgba(0,0,0,.45);
-    font-family:ui-monospace, Menlo, Consolas, monospace;
+  /* ── Layout: left col = both input panels, right col = graph ── */
+  .calc-container {
+    width: 100%;
+    max-width: 1400px;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 440px 1fr;
+    align-items: stretch;
   }
 
-  /* tiny bottom toggle inside cards */
-  .bottom-toggle{
-    display:flex; justify-content:flex-end; align-items:center; gap:8px;
-    margin-top:10px; color:var(--muted); font-size:.85rem;
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
   }
-  .switch{ position:relative; display:inline-block; width:38px; height:22px;}
-  .switch input{opacity:0;width:0;height:0}
-  .slider{ position:absolute; cursor:pointer; inset:0; background:#93a9c5; transition:.2s; border-radius:999px; }
-  .slider:before{ content:""; position:absolute; height:16px;width:16px; left:3px; top:3px; background:white; transition:.2s; border-radius:50%;}
-  input:checked + .slider{ background:#2ac3dd;}
-  input:checked + .slider:before{ transform:translateX(16px); }
 
-  select { background: var(--panel); color: var(--ink); }
-  select option { background:#1b2a65; color:var(--ink); }
+  .graph-card {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* JSON card spans full width below */
+  .json-card {
+    grid-column: 1 / -1;
+  }
+
+  /* Mobile: single column, graph at bottom */
+  @media (max-width: 960px) {
+    .calc-container {
+      grid-template-columns: 1fr;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .graph-card { order: 99; }
+    .json-card  { order: 100; }
+  }
+
+  /* ── Cards ── */
+  .calc-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+    padding: 22px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .calc-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .set-hint {
+    font-size: 0.76rem;
+    color: var(--muted-2);
+    display: block;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  /* Set 1 = cyan accent, Set 2 = green accent */
+  .set1-accent { border-top: 2px solid var(--cyan); }
+  .set2-accent { border-top: 2px solid var(--green); }
+
+  fieldset { border: none; margin: 0 0 14px; padding: 0; }
+  legend {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    opacity: 0.85;
+  }
+  .set2-accent legend { color: var(--green); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 480px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: block;
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    color: var(--ink);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  input::placeholder { color: rgba(141,180,204,0.5); }
+  input[readonly] {
+    background: rgba(255,255,255,0.03);
+    color: var(--muted-2);
+    cursor: default;
+  }
+  input:focus:not([readonly]), select:focus, textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(42,195,221,0.2);
+    background: rgba(255,255,255,0.1);
+  }
+  input.error { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); }
+  select option { background: #0f1a3e; color: #fff; }
+
+  .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+
+  .calc-btn {
+    background: linear-gradient(135deg, var(--cyan), #1fa8c0);
+    color: #041820;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.88rem;
+    box-shadow: 0 4px 16px rgba(42,195,221,0.25);
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+  }
+  .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(42,195,221,0.35); filter: brightness(1.05); }
+  .calc-btn.green-btn {
+    background: linear-gradient(135deg, var(--green), #3aa84f);
+    color: #012210;
+    box-shadow: 0 4px 16px rgba(107,210,125,0.25);
+  }
+  .calc-btn.green-btn:hover { box-shadow: 0 8px 24px rgba(107,210,125,0.35); }
+  .calc-btn.secondary {
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    border: 1px solid var(--glass-border);
+    box-shadow: none;
+  }
+  .calc-btn.secondary:hover { background: rgba(255,255,255,0.1); color: var(--ink); }
+
+  .formula-pill {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 0.73rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+  .formula-pill code {
+    display: block;
+    margin-top: 3px;
+    font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+    color: #a0e8f4;
+    font-size: 0.7rem;
+  }
+
+  /* result */
+  .result-box {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    animation: fadeUp 0.2s ease both;
+  }
+  .result-box.ok  { background: rgba(107,210,125,0.12); border: 1px solid rgba(107,210,125,0.35); color: #c8f5d0; }
+  .result-box.fail{ background: rgba(255,107,107,0.10); border: 1px solid rgba(255,107,107,0.35); color: #ffd0d0; }
+  .result-box .rhead {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.78rem; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .rhead .badge {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+  }
+
+  .msg-box { margin-top: 8px; font-size: 0.84rem; color: var(--muted); }
+  .msg-box .msg {
+    padding: 7px 11px; border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);
+  }
+
+  /* Toggle switch */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 8px; margin-top: 10px;
+    font-size: 0.8rem; color: var(--muted-2);
+  }
+  .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: rgba(255,255,255,0.15); transition: 0.2s; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .slider::before {
+    content: ""; position: absolute;
+    height: 14px; width: 14px; left: 2px; top: 2px;
+    background: white; transition: 0.2s; border-radius: 50%;
+  }
+  input:checked + .slider { background: var(--cyan); border-color: var(--cyan); }
+  input:checked + .slider::before { transform: translateX(16px); }
+
+  /* Graph */
+  .graph-legend {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px;
+    background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+    font-size: 0.78rem; color: var(--muted);
+    transition: opacity 0.2s;
+  }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  .tci-chip {
+    margin-left: auto;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--ink); font-size: 0.82rem;
+    display: none;
+    font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+    white-space: nowrap;
+  }
+
+  canvas {
+    width: 100%; height: auto;
+    border-radius: var(--radius);
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--glass-border);
+    display: block;
+  }
+  .canvas-wrap { position: relative; flex: 1; }
+  .label-chip {
+    position: absolute;
+    background: rgba(10,26,48,0.92);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; font-size: 11px; padding: 5px 9px;
+    border-radius: 8px; pointer-events: none; white-space: nowrap;
+    z-index: 5; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+    display: none;
+  }
+
+  textarea {
+    min-height: 160px; resize: vertical;
+    font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+    font-size: 0.8rem; line-height: 1.5;
+  }
+
+  /* ── Disclaimer Modal ── */
+  #disclaimerOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: rgba(5,12,30,0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    animation: fadeIn 0.3s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalUp {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  #disclaimerBox {
+    background: linear-gradient(160deg, rgba(15,26,62,0.98) 0%, rgba(8,18,40,0.98) 100%);
+    border: 1px solid rgba(255,200,80,0.35);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    padding: 36px 36px 30px;
+    max-width: 560px; width: 100%;
+    animation: modalUp 0.35s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+  }
+  .disc-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(255,200,60,0.18), rgba(255,130,30,0.12));
+    border: 1px solid rgba(255,200,60,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 18px;
+  }
+  #disclaimerBox h2 {
+    font-family: 'Syne', sans-serif; font-size: 1.2rem;
+    font-weight: 800; color: #fff; margin: 0 0 6px; letter-spacing: -0.02em;
+  }
+  .disc-subtitle {
+    font-size: 0.78rem; color: rgba(255,200,80,0.75);
+    font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px;
+  }
+  .disc-body { font-size: 0.88rem; color: rgba(200,220,240,0.85); line-height: 1.7; margin-bottom: 24px; }
+  .disc-body strong { color: #fff; font-weight: 600; }
+  .disc-warning-line {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.22);
+    border-radius: 10px; padding: 12px 14px; margin-top: 14px;
+    font-size: 0.84rem; color: rgba(255,210,210,0.9); line-height: 1.55;
+  }
+  .warn-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .disc-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 0 0 22px; }
+  .disc-checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; cursor: pointer; user-select: none;
+  }
+  .disc-checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--cyan); cursor: pointer; flex-shrink: 0;
+  }
+  .disc-checkbox-row span { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+  #acceptBtn {
+    width: 100%; padding: 14px; border-radius: 12px; border: none; cursor: not-allowed;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em;
+    background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3);
+    border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease;
+  }
+  #acceptBtn.ready {
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--cyan), #1fa8c0);
+    color: #041820; border-color: transparent;
+    box-shadow: 0 4px 20px rgba(42,195,221,0.3);
+  }
+  #acceptBtn.ready:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(42,195,221,0.4); filter: brightness(1.05); }
+  #mainContent { filter: blur(3px); pointer-events: none; user-select: none; transition: filter 0.3s ease; }
 </style>
 </head>
 <body>
-<header style="max-width:1100px;margin:0 auto 16px auto;">
-  <h1>S&C “K” Speed Fuse Links · TCC Calculator</h1>
-  <p style="margin:0;color:var(--muted)">Developed by Eiden O. Garcia Torres</p>
-</header>
 
-<div class="container">
-  <!-- Inputs · Set 1 (UPSTREAM) -->
-  <section class="card" id="panel1">
-    <h2 style="margin:6px 0 6px 0;font-size:1.2rem;">Inputs · Set 1 — Upstream</h2>
-    <span class="hint">Example: Recloser / Relay (upstream device)</span>
-
-    <fieldset>
-      <legend>Fault Parameters</legend>
-      <div class="grid-3">
-        <div><label for="I1">Fault current I (A)</label><input id="I1" type="number" min="0" step="any" placeholder="e.g. 1712"/></div>
-        <div><label for="Ip1">Pickup current Ip (A)</label><input id="Ip1" type="number" step="any" placeholder="auto from curve" readonly/></div>
-        <div><label for="n1">Time dial</label><input id="n1" type="number" step="any" placeholder="e.g. 1"/></div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>System Settings</legend>
-      <div class="grid-2">
-        <div>
-          <label for="curve1">Curve</label>
-          <select id="curve1">
-            <option value="">Select curve…</option>
-          </select>
-        </div>
-        <div><label for="freq1">System frequency (Hz)</label><input id="freq1" type="number" step="any" value="60"/></div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>Delay Settings</legend>
-      <div class="grid-2">
-        <div><label for="extra1">Extra delay value</label><input id="extra1" type="text" placeholder="e.g. 2, 2/60, 0.0333"/></div>
-        <div><label for="extraUnit1">Extra delay unit</label>
-          <select id="extraUnit1">
-            <option value="cycles">cycles</option><option value="s">seconds</option><option value="ms">milliseconds</option>
-          </select>
-        </div>
-      </div>
-    </fieldset>
-
-    <div class="row" style="margin-top:6px;">
-      <button id="calcBtn1">Calculate</button>
-      <button class="secondary" id="resetBtn1">Reset</button>
-      <span class="pill" style="flex:1;min-width:260px;text-align:center">
-        TripSaver II Formula:
-        <span style="display:block;margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace;color:#e0faff">
-          T = ( A / ( (I/Ip)^p − C ) + B ) · TM + TS
+<!-- ── Disclaimer Modal ── -->
+<div id="disclaimerOverlay">
+  <div id="disclaimerBox">
+    <div class="disc-icon">⚠️</div>
+    <div class="disc-subtitle">Important Notice — Read Before Use</div>
+    <h2>Estimation Tool Disclaimer</h2>
+    <div class="disc-body">
+      <p>This tool is an <strong>estimation calculator</strong> for the operating time of
+      S&amp;C "K" Speed Fuse Links using TripSaver II TCC curves. It applies the selected
+      fuse curve constants to approximate the expected melting/clearing time based on the
+      fault current and parameters you provide.</p>
+      <div class="disc-warning-line">
+        <span class="warn-icon">🚫</span>
+        <span>
+          <strong>This calculator must NOT be used as the basis for any final engineering
+          determination, protection coordination study, fuse sizing decision, or equipment
+          design.</strong> Results are approximate and intended solely as a preliminary
+          reference to estimate operating time. Always verify results using certified
+          relay-coordination software and consult a qualified protection engineer before
+          making any operational or design decision.
         </span>
-      </span>
-    </div>
-
-    <div class="bottom-toggle">
-      <span>Show curve on plot</span>
-      <label class="switch"><input type="checkbox" id="show1" checked><span class="slider"></span></label>
-    </div>
-
-    <div id="messages1" style="margin-top:12px;"></div>
-    <div class="result" id="result1" style="margin-top:12px;"></div>
-  </section>
-
-  <!-- Inputs · Set 2 (DOWNSTREAM) -->
-  <section class="card" id="panel2">
-    <h2 style="margin:6px 0 6px 0;font-size:1.2rem;">Inputs · Set 2 — Downstream</h2>
-    <span class="hint">Example: Fuse (downstream device)</span>
-
-    <fieldset>
-      <legend>Fault Parameters</legend>
-      <div class="grid-3">
-        <div><label for="I2">Fault current I (A)</label><input id="I2" type="number" min="0" step="any" placeholder="e.g. 1712"/></div>
-        <div><label for="Ip2">Pickup current Ip (A)</label><input id="Ip2" type="number" step="any" placeholder="auto from curve" readonly/></div>
-        <div><label for="n2">Time dial</label><input id="n2" type="number" step="any" placeholder="e.g. 1"/></div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>System Settings</legend>
-      <div class="grid-2">
-        <div>
-          <label for="curve2">Curve</label>
-          <select id="curve2">
-            <option value="">Select curve…</option>
-          </select>
-        </div>
-        <div><label for="freq2">System frequency (Hz)</label><input id="freq2" type="number" step="any" value="60"/></div>
-      </div>
-    </fieldset>
-    <fieldset>
-      <legend>Delay Settings</legend>
-      <div class="grid-2">
-        <div><label for="extra2">Extra delay value</label><input id="extra2" type="text" placeholder="e.g. 2, 2/60, 0.0333"/></div>
-        <div><label for="extraUnit2">Extra delay unit</label>
-          <select id="extraUnit2">
-            <option value="cycles">cycles</option><option value="s">seconds</option><option value="ms">milliseconds</option>
-          </select>
-        </div>
-      </div>
-    </fieldset>
-
-    <div class="row" style="margin-top:6px;">
-      <button id="calcBtn2">Calculate</button>
-      <button class="secondary" id="resetBtn2">Reset</button>
-      <span class="pill" style="flex:1;min-width:260px;text-align:center">
-        TripSaver II Formula:
-        <span style="display:block;margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace;color:#e0faff">
-          T = ( A / ( (I/Ip)^p − C ) + B ) · TM + TS
-        </span>
-      </span>
-    </div>
-
-    <div class="bottom-toggle">
-      <span>Show curve on plot</span>
-      <label class="switch"><input type="checkbox" id="show2" checked><span class="slider"></span></label>
-    </div>
-
-    <div id="messages2" style="margin-top:12px;"></div>
-    <div class="result" id="result2" style="margin-top:12px;"></div>
-  </section>
-
-  <!-- Graph card -->
-  <section class="graph-wrap" style="grid-column:1 / -1;">
-    <h2 style="margin:6px 0 10px 0;font-size:1.1rem;">Log–Log Curve (Operating Time vs Current)</h2>
-
-    <!-- Legend + TCI -->
-    <div class="legend-bar" id="legendBar">
-      <div class="legend-left">
-        <span class="pill">Shaded area = extra delay</span>
-        <span class="pill">TCI = t<sub>upstream</sub> − t<sub>downstream</sub> @ same I</span>
-      </div>
-      <div class="legend-right">
-        <span id="chip1" class="legend-chip"><span class="sw" style="background:rgba(42,195,221,1)"></span> Upstream · Set 1</span>
-        <span id="chip2" class="legend-chip"><span class="sw" style="background:rgba(107,210,125,1)"></span> Downstream · Set 2</span>
-        <span id="tciChip" class="tci-chip" style="display:none;">Δt (TCI): —</span>
       </div>
     </div>
-
-    <div style="position:relative">
-      <canvas id="ocCanvas" width="1000" height="520"></canvas>
-      <div id="labelBox1" class="label-chip" style="display:none;"></div>
-      <div id="labelBox2" class="label-chip" style="display:none;"></div>
-    </div>
-  </section>
-
-  <!-- JSON config -->
-  <section class="card" style="grid-column:1 / -1;">
-    <div class="row" style="justify-content:space-between; align-items:center;">
-      <h2 style="margin:6px 0 4px 0;font-size:1.1rem;">Curve Constants (JSON)</h2>
-      <span class="pill">Edit & apply ▼</span>
-    </div>
-    <label for="jsonArea">TripSaver II K-speed fuse link parameters (name → {pickup,A,B,C,P}).</label>
-    <textarea id="jsonArea" spellcheck="false" style="min-height:180px;"></textarea>
-    <div class="row" style="margin-top:10px;">
-      <button id="applyJsonBtn">Apply JSON</button>
-      <button class="secondary" id="downloadBtn">Download JSON</button>
-    </div>
-  </section>
+    <div class="disc-divider"></div>
+    <label class="disc-checkbox-row" for="discCheck">
+      <input type="checkbox" id="discCheck"/>
+      <span>I understand that this tool provides estimates only and must not be used for
+      final engineering determinations, fuse sizing, or protection coordination decisions.</span>
+    </label>
+    <button id="acceptBtn" disabled>Check the box above to continue</button>
+  </div>
 </div>
 
+<!-- ── Main Content ── -->
+<div id="mainContent">
+<div class="page-wrapper" style="align-items:flex-start;">
+  <div style="width:100%;max-width:1400px;">
+
+    <a class="back-link" href="tools.html">← Back to Tools</a>
+
+    <header class="site-header">
+      <h1>S&amp;C "K" Speed Fuse Links · TCC</h1>
+      <p class="lead">Upstream / Downstream coordination calculator with TCI — TripSaver II curves.</p>
+    </header>
+
+    <div class="calc-container">
+
+      <!-- ── LEFT COL: Set 1 + Set 2 ── -->
+      <div class="left-col">
+
+        <!-- Set 1 — Upstream -->
+        <div class="calc-card set1-accent" style="animation-delay:0.05s">
+          <h2>Set 1 — Upstream</h2>
+          <span class="set-hint">Example: Recloser / Relay (upstream device)</span>
+
+          <fieldset>
+            <legend>Fault Parameters</legend>
+            <div class="grid-3">
+              <div>
+                <label for="I1">Fault current I (A)</label>
+                <input id="I1" type="number" min="0.001" step="any" placeholder="e.g. 1712"/>
+              </div>
+              <div>
+                <label for="Ip1">Pickup Ip (A)</label>
+                <input id="Ip1" type="number" step="any" placeholder="auto from curve" readonly/>
+              </div>
+              <div>
+                <label for="n1">Time mult. TM</label>
+                <input id="n1" type="number" min="0.01" step="any" placeholder="e.g. 1"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>System Settings</legend>
+            <div class="grid-2">
+              <div>
+                <label for="curve1">Fuse curve</label>
+                <select id="curve1"><option value="">Select curve…</option></select>
+              </div>
+              <div>
+                <label for="freq1">Frequency (Hz)</label>
+                <input id="freq1" type="number" min="1" step="any" value="60"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Extra Delay (optional)</legend>
+            <div class="grid-2">
+              <div>
+                <label for="extra1">Delay value</label>
+                <input id="extra1" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
+              </div>
+              <div>
+                <label for="extraUnit1">Unit</label>
+                <select id="extraUnit1">
+                  <option value="cycles">cycles</option>
+                  <option value="s">seconds</option>
+                  <option value="ms">milliseconds</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="btn-row">
+            <button class="calc-btn" id="calcBtn1">Calculate</button>
+            <button class="calc-btn secondary" id="resetBtn1">Reset</button>
+          </div>
+
+          <div class="formula-pill">
+            TripSaver II Formula:
+            <code>T = ( A / ( (I/Ip)^P − C ) + B ) · TM + TS</code>
+          </div>
+
+          <div class="toggle-row">
+            <span>Show on plot</span>
+            <label class="switch"><input type="checkbox" id="show1" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="msg-box" id="messages1"></div>
+          <div class="result-box" id="result1"></div>
+        </div>
+
+        <!-- Set 2 — Downstream -->
+        <div class="calc-card set2-accent" style="animation-delay:0.1s">
+          <h2>Set 2 — Downstream</h2>
+          <span class="set-hint">Example: Fuse (downstream device)</span>
+
+          <fieldset>
+            <legend>Fault Parameters</legend>
+            <div class="grid-3">
+              <div>
+                <label for="I2">Fault current I (A)</label>
+                <input id="I2" type="number" min="0.001" step="any" placeholder="e.g. 1712"/>
+              </div>
+              <div>
+                <label for="Ip2">Pickup Ip (A)</label>
+                <input id="Ip2" type="number" step="any" placeholder="auto from curve" readonly/>
+              </div>
+              <div>
+                <label for="n2">Time mult. TM</label>
+                <input id="n2" type="number" min="0.01" step="any" placeholder="e.g. 1"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>System Settings</legend>
+            <div class="grid-2">
+              <div>
+                <label for="curve2">Fuse curve</label>
+                <select id="curve2"><option value="">Select curve…</option></select>
+              </div>
+              <div>
+                <label for="freq2">Frequency (Hz)</label>
+                <input id="freq2" type="number" min="1" step="any" value="60"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Extra Delay (optional)</legend>
+            <div class="grid-2">
+              <div>
+                <label for="extra2">Delay value</label>
+                <input id="extra2" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
+              </div>
+              <div>
+                <label for="extraUnit2">Unit</label>
+                <select id="extraUnit2">
+                  <option value="cycles">cycles</option>
+                  <option value="s">seconds</option>
+                  <option value="ms">milliseconds</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="btn-row">
+            <button class="calc-btn green-btn" id="calcBtn2">Calculate</button>
+            <button class="calc-btn secondary" id="resetBtn2">Reset</button>
+          </div>
+
+          <div class="formula-pill">
+            TripSaver II Formula:
+            <code>T = ( A / ( (I/Ip)^P − C ) + B ) · TM + TS</code>
+          </div>
+
+          <div class="toggle-row">
+            <span>Show on plot</span>
+            <label class="switch"><input type="checkbox" id="show2" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="msg-box" id="messages2"></div>
+          <div class="result-box" id="result2"></div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- ── RIGHT: Graph ── -->
+      <div class="calc-card graph-card" style="animation-delay:0.15s">
+        <h2>TCC Log–Log Curve · Operating Time vs. Current</h2>
+
+        <div class="graph-legend">
+          <span class="legend-item" id="chip1">
+            <span class="legend-swatch" style="background:rgba(42,195,221,1)"></span>
+            Upstream · Set 1
+          </span>
+          <span class="legend-item" id="chip2">
+            <span class="legend-swatch" style="background:rgba(107,210,125,1)"></span>
+            Downstream · Set 2
+          </span>
+          <span class="legend-item" style="font-size:0.72rem;color:var(--muted-2);">Shaded = extra delay</span>
+          <span id="tciChip" class="tci-chip">Δt (TCI): —</span>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="ocCanvas" width="1060" height="720"></canvas>
+          <div id="labelBox1" class="label-chip"></div>
+          <div id="labelBox2" class="label-chip"></div>
+        </div>
+      </div>
+
+      <!-- ── JSON card (full width) ── -->
+      <div class="calc-card json-card" style="animation-delay:0.2s">
+        <h2>Curve Constants (JSON)</h2>
+        <p style="font-size:0.8rem;color:var(--muted);margin:0 0 12px;">
+          TripSaver II K-speed fuse link parameters — <code style="color:#a0e8f4">name → {pickup, A, B, C, P}</code>.
+          Edit and click Apply to update both curve dropdowns.
+        </p>
+        <textarea id="jsonArea" spellcheck="false"></textarea>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="calc-btn" id="applyJsonBtn">Apply JSON</button>
+          <button class="calc-btn secondary" id="downloadBtn">Download JSON</button>
+        </div>
+        <div class="msg-box" id="jsonMsg"></div>
+      </div>
+
+    </div><!-- /calc-container -->
+
+    <div style="text-align:center;margin-top:18px;">
+      <span style="color:var(--muted-2);font-size:0.78rem;">Developed by Eiden O. Garcia Torres</span>
+    </div>
+
+  </div>
+</div>
+</div><!-- /#mainContent -->
+
 <script>
-/* ---------- Data ---------- */
+/* ── Curve data ── */
 const DEFAULT_CURVES = {
-  "Fuse-6K":   { pickup:13.0,   A:3.37282,  B:0, C:1, P:2 },
-  "Fuse-8K":   { pickup:16.0,   A:4.34162,  B:0, C:1, P:2 },
-  "Fuse-10K":  { pickup:21.0,   A:4.26300,  B:0, C:1, P:2 },
-  "Fuse-12K":  { pickup:28.4,   A:3.83300,  B:0, C:1, P:2 },
-  "Fuse-15K":  { pickup:34.0,   A:4.63226,  B:0, C:1, P:2 },
-  "Fuse-20K":  { pickup:44.0,   A:4.55960,  B:0, C:1, P:2 },
-  "Fuse-25K":  { pickup:54.0,   A:4.92290,  B:0, C:1, P:2 },
-  "Fuse-30K":  { pickup:69.5,   A:4.63230,  B:0, C:1, P:2 },
-  "Fuse-40K":  { pickup:85.0,   A:5.35886,  B:0, C:1, P:2 },
-  "Fuse-50K":  { pickup:108.0,  A:5.60106,  B:0, C:1, P:2 },
-  "Fuse-65K":  { pickup:143.0,  A:4.63230,  B:0, C:1, P:2 },
-  "Fuse-80K":  { pickup:180.0,  A:5.21350,  B:0, C:1, P:2 },
-  "Fuse-100K": { pickup:219.5,  A:5.35890,  B:0, C:1, P:2 },
-  "Fuse-140K": { pickup:309.0,  A:7.033346, B:0, C:1, P:2 },
-  "Fuse-200K": { pickup:479.787,A:7.540324, B:0, C:1, P:2 }
+  "Fuse-6K":   { pickup: 13.0,    A: 3.37282,  B: 0, C: 1, P: 2 },
+  "Fuse-8K":   { pickup: 16.0,    A: 4.34162,  B: 0, C: 1, P: 2 },
+  "Fuse-10K":  { pickup: 21.0,    A: 4.26300,  B: 0, C: 1, P: 2 },
+  "Fuse-12K":  { pickup: 28.4,    A: 3.83300,  B: 0, C: 1, P: 2 },
+  "Fuse-15K":  { pickup: 34.0,    A: 4.63226,  B: 0, C: 1, P: 2 },
+  "Fuse-20K":  { pickup: 44.0,    A: 4.55960,  B: 0, C: 1, P: 2 },
+  "Fuse-25K":  { pickup: 54.0,    A: 4.92290,  B: 0, C: 1, P: 2 },
+  "Fuse-30K":  { pickup: 69.5,    A: 4.63230,  B: 0, C: 1, P: 2 },
+  "Fuse-40K":  { pickup: 85.0,    A: 5.35886,  B: 0, C: 1, P: 2 },
+  "Fuse-50K":  { pickup: 108.0,   A: 5.60106,  B: 0, C: 1, P: 2 },
+  "Fuse-65K":  { pickup: 143.0,   A: 4.63230,  B: 0, C: 1, P: 2 },
+  "Fuse-80K":  { pickup: 180.0,   A: 5.21350,  B: 0, C: 1, P: 2 },
+  "Fuse-100K": { pickup: 219.5,   A: 5.35890,  B: 0, C: 1, P: 2 },
+  "Fuse-140K": { pickup: 309.0,   A: 7.033346, B: 0, C: 1, P: 2 },
+  "Fuse-200K": { pickup: 479.787, A: 7.540324, B: 0, C: 1, P: 2 }
 };
 let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
 
-/* ---------- Handles ---------- */
-function handles(i){ return {
-  I:el(`I${i}`), Ip:el(`Ip${i}`), n:el(`n${i}`), curve:el(`curve${i}`),
-  freq:el(`freq${i}`), extra:el(`extra${i}`), extraUnit:el(`extraUnit${i}`),
-  calcBtn:el(`calcBtn${i}`), resetBtn:el(`resetBtn${i}`),
-  msg:el(`messages${i}`), result:el(`result${i}`), labelBox:el(`labelBox${i}`),
-  show:el(`show${i}`)
-};}
-function el(id){return document.getElementById(id)}
-const h1=handles(1), h2=handles(2);
-const jsonArea=el('jsonArea'), applyJsonBtn=el('applyJsonBtn'), downloadBtn=el('downloadBtn');
-const canvas=el('ocCanvas'), ctx=canvas.getContext('2d');
-const tciChip=el('tciChip'), chip1=el('chip1'), chip2=el('chip2');
+/* ── DOM helpers ── */
+const el = id => document.getElementById(id);
 
-/* ---------- UI helpers ---------- */
-function showMessage(e, html){ e.innerHTML=`<div style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);">${html}</div>`;}
-function clearMessage(e){ e.innerHTML=''; }
-function setResultBox(e, html, ok){ e.style.display='block'; e.className="result "+(ok?"ok":"fail");
-  e.innerHTML= ok?`<div class="headline"><span class="badge">✓</span>OK</div>${html}`:`<div class="headline"><span class="badge">✗</span>Not valid</div>${html}`;}
-function clearResult(e){ e.style.display='none'; e.innerHTML=''; e.className='result'; }
-function populateCurvesSelect(sel){
+function handles(i) {
+  return {
+    I: el(`I${i}`), Ip: el(`Ip${i}`), n: el(`n${i}`),
+    curve: el(`curve${i}`), freq: el(`freq${i}`),
+    extra: el(`extra${i}`), extraUnit: el(`extraUnit${i}`),
+    calcBtn: el(`calcBtn${i}`), resetBtn: el(`resetBtn${i}`),
+    msg: el(`messages${i}`), result: el(`result${i}`),
+    labelBox: el(`labelBox${i}`), show: el(`show${i}`)
+  };
+}
+const h1 = handles(1), h2 = handles(2);
+const jsonArea = el('jsonArea'), applyJsonBtn = el('applyJsonBtn'),
+      downloadBtn = el('downloadBtn'), jsonMsg = el('jsonMsg');
+const canvas = el('ocCanvas'), ctx = canvas.getContext('2d');
+const tciChip = el('tciChip'), chip1 = el('chip1'), chip2 = el('chip2');
+
+/* ── UI helpers ── */
+function showMessage(box, html) { box.innerHTML = `<div class="msg">${html}</div>`; }
+function clearMessage(box)      { box.innerHTML = ''; }
+
+function setResultBox(box, html, ok) {
+  box.style.display = 'block';
+  box.className = 'result-box ' + (ok ? 'ok' : 'fail');
+  box.innerHTML = (ok
+    ? `<div class="rhead"><span class="badge">✓</span> OK</div>`
+    : `<div class="rhead"><span class="badge">✗</span> Invalid</div>`) + html;
+}
+function clearResult(box) { box.style.display = 'none'; box.innerHTML = ''; box.className = 'result-box'; }
+
+function markError(el)    { el.classList.add('error'); }
+function clearError(el)   { el.classList.remove('error'); }
+
+function populateCurvesSelect(sel) {
   sel.innerHTML = `<option value="">Select curve…</option>`;
-  Object.keys(CURVES).forEach(n=>{ const o=document.createElement('option'); o.value=n;o.textContent=n; sel.appendChild(o);});
-}
-function syncPickupFromCurve(sel, ip){
-  const p=CURVES[sel.value];
-  if(p){ ip.value=p.pickup; ip.placeholder='auto from curve'; }
-  else { ip.value=''; ip.placeholder='auto from curve'; }
-  ip.readOnly=true;
+  Object.keys(CURVES).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    sel.appendChild(opt);
+  });
 }
 
-/* ---------- Math ---------- */
-function parseFractionOrFloat(t){ t=String(t).trim(); if(!t) throw 0;
-  if(t.includes('/')){ const [a,b]=t.split('/',2).map(s=>parseFloat(s.trim())); if(!isFinite(a)||!isFinite(b)||b===0) throw 0; return a/b; }
-  const v=parseFloat(t); if(!isFinite(v)) throw 0; return v;
+function syncPickupFromCurve(sel, ipEl) {
+  const p = CURVES[sel.value];
+  ipEl.value       = p ? p.pickup : '';
+  ipEl.placeholder = p ? 'auto from curve' : 'auto from curve';
+  ipEl.readOnly    = true;
 }
-function computeTS2(I,Ip,A,B,C,P,TM,TS){ if(Ip<=0) throw 0; const M=I/Ip, d=Math.pow(M,P)-C;
-  if(d<=0) return Infinity; return ((A/d)+B)*TM+TS; }
-function extraToSeconds(f,val,u){ if(!val && val!==0) return 0; return u==='cycles'? val/f : (u==='ms'? val/1000 : val); }
 
-/* ---------- Scales ---------- */
-const X_MIN=1, X_MAX=10000, Y_MIN=0.05, Y_MAX=1000;
-const PAD_L=70, PAD_R=24, PAD_T=36, PAD_B=70;
-const log10=v=>Math.log(v)/Math.LN10;
-const xLogSpan=log10(X_MAX)-log10(X_MIN), yLogSpan=log10(Y_MAX)-log10(Y_MIN);
-const sx=I=>PAD_L+((log10(I)-log10(X_MIN))/xLogSpan)*(canvas.width-PAD_L-PAD_R);
-const sy=t=>PAD_T+((log10(Y_MAX)-log10(t))/yLogSpan)*(canvas.height-PAD_T-PAD_B);
+/* ── Math ── */
+// FIX 3: throw proper Error objects instead of primitives
+function parseFractionOrFloat(t) {
+  t = String(t).trim();
+  if (!t) throw new Error('Empty value');
+  if (t.includes('/')) {
+    const [a, b] = t.split('/', 2).map(s => parseFloat(s.trim()));
+    if (!isFinite(a) || !isFinite(b) || b === 0) throw new Error('Invalid fraction');
+    return a / b;
+  }
+  const v = parseFloat(t);
+  if (!isFinite(v)) throw new Error('Invalid number');
+  return v;
+}
 
-function drawGrid(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='rgba(0,0,0,.20)';
-  ctx.fillRect(PAD_L,PAD_T,canvas.width-PAD_L-PAD_R,canvas.height-PAD_T-PAD_B);
+function computeTS2(I, Ip, A, B, C, P, TM, TS) {
+  if (Ip <= 0) throw new Error('Ip must be > 0');
+  // FIX 2: TM > 0 guard
+  if (TM <= 0) throw new Error('Time multiplier TM must be > 0');
+  const M = I / Ip;
+  const d = Math.pow(M, P) - C;
+  if (d <= 0) return Infinity;
+  return ((A / d) + B) * TM + TS;
+}
 
-  ctx.save(); ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
-  const xDec=[1,10,100,1000,10000], yDec=[0.1,1,10,100,1000];
+function extraToSeconds(freq, val, unit) {
+  if (!val && val !== 0) return 0;
+  if (unit === 'cycles') return val / freq;
+  if (unit === 'ms')     return val / 1000;
+  return val;
+}
 
-  xDec.forEach(d=>{
-    const x=sx(d);
-    ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='12px ui-sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(String(d), x, canvas.height-PAD_B+6);
+/* ── Graph scales ── */
+const X_MIN = 1, X_MAX = 10000, Y_MIN = 0.05, Y_MAX = 1000;
+const PAD_L = 72, PAD_R = 24, PAD_T = 20, PAD_B = 50;
+const log10 = v => Math.log(v) / Math.LN10;
+const xLogSpan = log10(X_MAX) - log10(X_MIN);
+const yLogSpan = log10(Y_MAX) - log10(Y_MIN);
+const sx = I => PAD_L + ((log10(I) - log10(X_MIN)) / xLogSpan) * (canvas.width - PAD_L - PAD_R);
+const sy = t => PAD_T + ((log10(Y_MAX) - log10(t))  / yLogSpan) * (canvas.height - PAD_T - PAD_B);
+
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.fillRect(PAD_L, PAD_T, canvas.width - PAD_L - PAD_R, canvas.height - PAD_T - PAD_B);
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+
+  [1, 10, 100, 1000, 10000].forEach(d => {
+    const x = sx(d);
+    ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '12px ui-sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(String(d), x, canvas.height - PAD_B + 7);
   });
 
-  yDec.forEach(d=>{
-    const y=sy(Math.min(Math.max(d,Y_MIN),Y_MAX));
-    ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.85)'; ctx.textAlign='right'; ctx.textBaseline='middle';
-    ctx.fillText(String(d), PAD_L-8, y);
+  [0.1, 1, 10, 100, 1000].forEach(d => {
+    const y = sy(Math.min(Math.max(d, Y_MIN), Y_MAX));
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(d), PAD_L - 8, y);
   });
 
-  ctx.strokeStyle='rgba(255,255,255,.12)';
-  for(let decade=0; decade<4; decade++){
-    const base=Math.pow(10,decade);
-    for(let m=2;m<10;m++){ const v=base*m; if(v>=X_MIN && v<=X_MAX){
-      const x=sx(v); ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
-    }}
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  for (let dec = 0; dec < 4; dec++) {
+    const base = Math.pow(10, dec);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= X_MIN && v <= X_MAX) {
+        ctx.beginPath(); ctx.moveTo(sx(v), PAD_T); ctx.lineTo(sx(v), canvas.height - PAD_B); ctx.stroke();
+      }
+    }
   }
-  for(let decade=-1; decade<3; decade++){
-    const base=Math.pow(10,decade);
-    for(let m=2;m<10;m++){ const v=base*m; if(v>=Y_MIN && v<=Y_MAX){
-      const y=sy(v); ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
-    }}
+  for (let dec = -1; dec < 3; dec++) {
+    const base = Math.pow(10, dec);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= Y_MIN && v <= Y_MAX) {
+        ctx.beginPath(); ctx.moveTo(PAD_L, sy(v)); ctx.lineTo(canvas.width - PAD_R, sy(v)); ctx.stroke();
+      }
+    }
   }
 
-  ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='13px ui-sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText('Current (A, log scale)', (PAD_L+canvas.width-PAD_R)/2, canvas.height-22);
-  ctx.save(); ctx.translate(18,(PAD_T+canvas.height-PAD_B)/2);
-  ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.textBaseline='bottom';
-  ctx.fillText('Operating Time (s, log scale)', 0, 0); ctx.restore();
-  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.font = '13px ui-sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('Current (A · log scale)', (PAD_L + canvas.width - PAD_R) / 2, canvas.height - 22);
+  ctx.save();
+  ctx.translate(16, (PAD_T + canvas.height - PAD_B) / 2);
+  ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Operating Time (s · log scale)', 0, 0);
+  ctx.restore(); ctx.restore();
 }
 
-/* ---------- Curves ---------- */
-const COLORS=[
-  { line:'rgba(42,195,221,1)', fill:'rgba(42,195,221,.18)', guide:'rgba(255,255,255,.65)' },  // upstream
-  { line:'rgba(107,210,125,1)', fill:'rgba(107,210,125,.20)', guide:'rgba(255,255,255,.65)' } // downstream
+/* ── Curve drawing ── */
+const COLORS = [
+  { line: 'rgba(42,195,221,1)',  fill: 'rgba(42,195,221,0.15)',  dot: 'rgba(42,195,221,0.8)'  },
+  { line: 'rgba(107,210,125,1)', fill: 'rgba(107,210,125,0.15)', dot: 'rgba(107,210,125,0.8)' }
 ];
-function buildCurvePoints(p,TM,TS){
-  const {pickup:Ip,A,B,C,P}=p, N=700, logXmin=log10(Math.max(X_MIN,Ip*1.001)), logXmax=log10(X_MAX);
-  const pts=[], data=[];
-  for(let i=0;i<N;i++){
-    const I=Math.pow(10, logXmin + (logXmax-logXmin)*i/(N-1));
-    let t=computeTS2(I,Ip,A,B,C,P,TM,TS);
-    if(!isFinite(t)||t<=0) continue;
-    t=Math.max(Y_MIN,Math.min(Y_MAX,t)); pts.push([sx(I),sy(t)]); data.push({I,t});
+
+function buildCurvePoints(p, TM, TS) {
+  const { pickup: Ip, A, B, C, P } = p;
+  const N = 700;
+  const logXmin = log10(Math.max(X_MIN, Ip * 1.001));
+  const logXmax = log10(X_MAX);
+  const pts = [], data = [];
+  for (let i = 0; i < N; i++) {
+    const I = Math.pow(10, logXmin + (logXmax - logXmin) * i / (N - 1));
+    let t;
+    try { t = computeTS2(I, Ip, A, B, C, P, TM, TS); } catch { continue; }
+    if (!isFinite(t) || t <= 0) continue;
+    t = Math.max(Y_MIN, Math.min(Y_MAX, t));
+    pts.push([sx(I), sy(t)]);
+    data.push({ I, t });
   }
-  return {pts,data};
+  return { pts, data };
 }
-function strokeCurve(pts,color){ if(pts.length<2) return; ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); for(const [x,y] of pts.slice(1)) ctx.lineTo(x,y); ctx.stroke(); ctx.restore();}
-function fillBetween(a,b,fill){ if(a.length<2||b.length<2) return; const n=Math.min(a.length,b.length);
-  ctx.save(); ctx.fillStyle=fill; ctx.beginPath();
-  for(let i=0;i<n;i++){ const x=sx(b[i].I), y=sy(b[i].t); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
-  for(let i=n-1;i>=0;i--){ const x=sx(a[i].I), y=sy(a[i].t); ctx.lineTo(x,y); }
+
+function strokeCurve(pts, color) {
+  if (pts.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (const [x, y] of pts.slice(1)) ctx.lineTo(x, y);
+  ctx.stroke(); ctx.restore();
+}
+
+function fillBetween(baseData, totalData, fill) {
+  if (baseData.length < 2 || totalData.length < 2) return;
+  const n = Math.min(baseData.length, totalData.length);
+  ctx.save(); ctx.fillStyle = fill;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = sx(totalData[i].I), y = sy(totalData[i].t);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for (let i = n - 1; i >= 0; i--) ctx.lineTo(sx(baseData[i].I), sy(baseData[i].t));
   ctx.closePath(); ctx.fill(); ctx.restore();
 }
 
-/* ---------- Labels / Guides ---------- */
-function setLabelBox(lb,x,y,I,t){ const pad=8;
-  const left=Math.max(PAD_L+pad, Math.min(x+22, canvas.width-24-pad));
-  const top =Math.max(PAD_T+pad, Math.min(y-18, canvas.height-PAD_B-pad));
-  lb.style.left=left+'px'; lb.style.top=top+'px'; lb.textContent=`(${I.toFixed(1)} A, ${t.toFixed(3)} s)`; lb.style.display='block';
+// FIX 1: label box uses CSS scale ratio
+function setLabelBox(lb, canvasX, canvasY, I, t) {
+  const rect   = canvas.getBoundingClientRect();
+  const scaleX = rect.width  / canvas.width;
+  const scaleY = rect.height / canvas.height;
+  const cssX   = canvasX * scaleX;
+  const cssY   = canvasY * scaleY;
+  const pad = 8, chipW = 160;
+  lb.style.left    = Math.min(cssX + 14, rect.width - chipW - pad) + 'px';
+  lb.style.top     = Math.max(pad, cssY - 22) + 'px';
+  lb.textContent   = `${I.toFixed(1)} A  ·  ${t.toFixed(4)} s`;
+  lb.style.display = 'block';
 }
-function hideLabel(lb){ lb.style.display='none'; }
-function drawIntersections(I,t,guide,lb){
-  if(!isFinite(t)) return;
-  const x=sx(I), y=sy(Math.min(Math.max(t,Y_MIN),Y_MAX));
-  ctx.save(); ctx.setLineDash([6,6]); ctx.lineWidth=1.6; ctx.strokeStyle=guide;
-  ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-24,y); ctx.stroke();
-  ctx.setLineDash([]); ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); ctx.restore();
-  setLabelBox(lb,x,y,I,t);
+function hideLabel(lb) { lb.style.display = 'none'; }
+
+function drawOperatingPoint(I, t, dotColor, lb) {
+  if (!isFinite(t) || t <= 0) return;
+  const x = sx(I), y = sy(Math.min(Math.max(t, Y_MIN), Y_MAX));
+  ctx.save();
+  ctx.setLineDash([6, 5]); ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = dotColor; ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  setLabelBox(lb, x, y, I, t);
 }
 
-/* ---------- Redraw + TCI ---------- */
-function paramsOf(sel){ return CURVES[sel.value]; }
+/* ── Redraw per set ── */
+function redrawForSet(h, idx) {
+  if (!h.show.checked) { hideLabel(h.labelBox); return { hidden: true }; }
 
-function redrawForSet(h, idx){
-  // hidden => ensure label is gone
-  if(!h.show.checked){ hideLabel(h.labelBox); return {hidden:true}; }
+  const TM = parseFloat(h.n.value);
+  const f  = parseFloat(h.freq.value || '60');
+  const p  = CURVES[h.curve.value];
 
-  const TM=parseFloat(h.n.value), f=parseFloat(h.freq.value||'60');
-  const p=paramsOf(h.curve);
+  if (!p || !isFinite(TM) || TM <= 0) { hideLabel(h.labelBox); return null; }
 
-  // insufficient inputs => also hide label
-  if(!p || !isFinite(TM)){ hideLabel(h.labelBox); return null; }
+  const raw  = (h.extra.value || '').trim(), unit = h.extraUnit.value;
+  let TS = 0;
+  if (raw) {
+    try { TS = extraToSeconds(f, parseFractionOrFloat(raw), unit); } catch { TS = 0; }
+  }
 
-  const raw=(h.extra.value||'').trim(), unit=h.extraUnit.value;
-  let TS=0; if(raw){ try{ TS=extraToSeconds(f, parseFractionOrFloat(raw), unit); }catch{ TS=0; } }
+  const base  = buildCurvePoints(p, TM, 0);
+  const total = buildCurvePoints(p, TM, TS);
+  if (TS > 0) fillBetween(base.data, total.data, COLORS[idx].fill);
+  strokeCurve(base.pts, COLORS[idx].line);
+  if (TS > 0) strokeCurve(total.pts, COLORS[idx].line);
 
-  const base=buildCurvePoints(p,TM,0), total=buildCurvePoints(p,TM,TS);
-  fillBetween(base.data,total.data,COLORS[idx].fill);
-  strokeCurve(base.pts,COLORS[idx].line);
-  strokeCurve(total.pts,COLORS[idx].line);
-
-  // default: no label unless valid I provided
   hideLabel(h.labelBox);
 
-  let baseT=Infinity,totalT=Infinity;
-  const I=parseFloat(h.I.value);
-  if(isFinite(I)&&I>0){
-    const {pickup:Ip,A,B,C,P}=p;
-    baseT=computeTS2(I,Ip,A,B,C,P,TM,0);
-    totalT=(baseT===Infinity)?Infinity:baseT+TS;
-    if(isFinite(totalT)) drawIntersections(I,totalT,COLORS[idx].guide,h.labelBox);
+  const I = parseFloat(h.I.value);
+  let baseT = Infinity, totalT = Infinity;
+  if (isFinite(I) && I > 0) {
+    const { pickup: Ip, A, B, C, P } = p;
+    try {
+      baseT  = computeTS2(I, Ip, A, B, C, P, TM, 0);
+      totalT = isFinite(baseT) ? baseT + TS : Infinity;
+      if (isFinite(totalT)) drawOperatingPoint(I, totalT, COLORS[idx].dot, h.labelBox);
+    } catch { /* skip */ }
   }
   return { baseT, totalT, f };
 }
 
-function formatTCI(ds,f_up,f_down){
-  const a=Math.abs(ds), s=ds>=0?'+':'−', sec=`${s}${a.toFixed(6)} s`;
-  if(!isFinite(f_up)||!isFinite(f_down)) return sec;
-  return Math.abs(f_up-f_down)<1e-9
-    ? `${sec} · ${(a*f_up).toFixed(2)} cycles @ ${f_up} Hz`
-    : `${sec} · ${(a*f_up).toFixed(2)} cyc @ ${f_up} Hz | ${(a*f_down).toFixed(2)} cyc @ ${f_down} Hz`;
-}
-
-function updateTCI(rUp,rDown){
-  if(!rUp || !rDown || rUp.hidden || rDown.hidden || !isFinite(rUp.totalT) || !isFinite(rDown.totalT)){
-    tciChip.style.display='none'; tciChip.textContent='Δt (TCI): —'; return;
+function updateTCI(rUp, rDn) {
+  if (!rUp || !rDn || rUp.hidden || rDn.hidden || !isFinite(rUp.totalT) || !isFinite(rDn.totalT)) {
+    tciChip.style.display = 'none'; return;
   }
-  // Δt (TCI) = t_upstream − t_downstream
-  const delta = rUp.totalT - rDown.totalT;
-  tciChip.textContent = `Δt (TCI): ${formatTCI(delta, rUp.f, rDown.f)}`;
-  tciChip.style.display='inline-block';
+  const delta = rUp.totalT - rDn.totalT;
+  const sign  = delta >= 0 ? '+' : '−';
+  const abs   = Math.abs(delta);
+  let text = `Δt (TCI): ${sign}${abs.toFixed(6)} s`;
+  if (isFinite(rUp.f) && Math.abs(rUp.f - rDn.f) < 1e-9) {
+    text += `  ·  ${(abs * rUp.f).toFixed(2)} cycles @ ${rUp.f} Hz`;
+  }
+  tciChip.textContent   = text;
+  tciChip.style.display = 'inline-block';
 }
 
-function drawAll(){
+function drawAll() {
   drawGrid();
-
-  // make sure old labels never linger
-  hideLabel(h1.labelBox);
-  hideLabel(h2.labelBox);
-
-  chip1.style.opacity = h1.show.checked ? '1' : '.35';
-  chip2.style.opacity = h2.show.checked ? '1' : '.35';
-
-  const rUp = redrawForSet(h1,0);
-  const rDn = redrawForSet(h2,1);
+  hideLabel(h1.labelBox); hideLabel(h2.labelBox);
+  chip1.style.opacity = h1.show.checked ? '1' : '0.35';
+  chip2.style.opacity = h2.show.checked ? '1' : '0.35';
+  const rUp = redrawForSet(h1, 0);
+  const rDn = redrawForSet(h2, 1);
   updateTCI(rUp, rDn);
 }
 
-/* ---------- Actions ---------- */
-function handleCalculate(h){
+/* ── Calculate ── */
+function handleCalculate(h, idx) {
   clearMessage(h.msg); clearResult(h.result);
-  const I=parseFloat(h.I.value), TM=parseFloat(h.n.value), f=parseFloat(h.freq.value||'60'), p=paramsOf(h.curve);
-  if(!isFinite(I)||I<=0) return setResultBox(h.result,"Please enter a valid fault current (A).",false);
-  if(!p) return setResultBox(h.result,"Select a fuse curve.",false);
-  if(!isFinite(TM)) return setResultBox(h.result,"Please enter a valid time dial (TM).",false);
-  if(!isFinite(f)||f<=0) return setResultBox(h.result,"Please enter a valid frequency (Hz) > 0.",false);
+  clearError(h.I); clearError(h.n); clearError(h.freq);
 
-  let TS=0; const raw=(h.extra.value||'').trim(); if(raw){ try{ TS=extraToSeconds(f, parseFractionOrFloat(raw), h.extraUnit.value); }
-  catch{ return setResultBox(h.result,"Invalid extra delay value or unit.",false); } }
+  const I  = parseFloat(h.I.value);
+  const TM = parseFloat(h.n.value);
+  const f  = parseFloat(h.freq.value || '60');
+  const p  = CURVES[h.curve.value];
 
-  const {pickup:Ip,A,B,C,P}=p; let baseTime=computeTS2(I,Ip,A,B,C,P,TM,0);
-  if(baseTime===Infinity){ setResultBox(h.result,"No trip – Fault ≤ pickup (I must exceed curve pickup).",false); drawAll(); return; }
-  const total=baseTime+TS;
-  setResultBox(h.result,`Base: <b>${baseTime.toFixed(6)} s</b><br>Total: <b>${total.toFixed(6)} s</b>`,true);
+  let valid = true;
+  if (!isFinite(I) || I <= 0)   { markError(h.I);    valid = false; }
+  if (!isFinite(TM) || TM <= 0) { markError(h.n);    valid = false; }
+  if (!isFinite(f) || f <= 0)   { markError(h.freq); valid = false; }
+  if (!p) { setResultBox(h.result, 'Please select a fuse curve.', false); return; }
+  if (!valid) { setResultBox(h.result, 'Please fix the highlighted fields — all values must be positive numbers.', false); return; }
+
+  let TS = 0;
+  const raw = (h.extra.value || '').trim();
+  if (raw) {
+    try { TS = extraToSeconds(f, parseFractionOrFloat(raw), h.extraUnit.value); }
+    catch (e) { setResultBox(h.result, 'Invalid extra delay: ' + e.message, false); return; }
+  }
+
+  const { pickup: Ip, A, B, C, P } = p;
+  let baseTime;
+  try { baseTime = computeTS2(I, Ip, A, B, C, P, TM, 0); }
+  catch (e) { setResultBox(h.result, e.message, false); return; }
+
+  if (!isFinite(baseTime)) {
+    setResultBox(h.result, 'No trip — fault current must exceed fuse pickup (I > Ip = ' + Ip + ' A).', false);
+    drawAll(); return;
+  }
+
+  const total = baseTime + TS;
+  const M     = (I / Ip).toFixed(3);
+
+  setResultBox(h.result,
+    `<b>M = I / Ip = ${M}</b> &nbsp;(Ip = ${Ip} A)<br>
+     Base melt time: <b>${baseTime.toFixed(6)} s</b>&nbsp;(<b>${(baseTime * f).toFixed(2)} cycles</b>)<br>
+     Extra delay: <b>${TS.toFixed(6)} s</b><br>
+     Total: <b style="font-size:1.05rem;">${total.toFixed(6)} s</b>&nbsp;(<b>${(total * f).toFixed(2)} cycles</b>)`,
+    true
+  );
   drawAll();
 }
-function handleReset(h){
-  h.I.value=''; h.n.value=''; h.extra.value=''; h.extraUnit.value='cycles';
-  h.curve.value=''; syncPickupFromCurve(h.curve,h.Ip);
-  hideLabel(h.labelBox);                 // ensure popover is gone
+
+function handleReset(h) {
+  h.I.value = ''; h.n.value = ''; h.extra.value = ''; h.extraUnit.value = 'cycles';
+  h.curve.value = ''; syncPickupFromCurve(h.curve, h.Ip);
+  clearError(h.I); clearError(h.n); clearError(h.freq);
   clearMessage(h.msg); clearResult(h.result);
+  hideLabel(h.labelBox);
   drawAll();
 }
 
-/* ---------- JSON ---------- */
-function loadDefaultJSON(){ jsonArea.value=JSON.stringify(CURVES,null,2);
-  [h1.curve,h2.curve].forEach(populateCurvesSelect);
-  syncPickupFromCurve(h1.curve,h1.Ip); syncPickupFromCurve(h2.curve,h2.Ip);
+/* ── JSON ── */
+function loadDefaultJSON() {
+  jsonArea.value = JSON.stringify(CURVES, null, 2);
+  [h1.curve, h2.curve].forEach(populateCurvesSelect);
+  syncPickupFromCurve(h1.curve, h1.Ip);
+  syncPickupFromCurve(h2.curve, h2.Ip);
 }
-function applyJSON(){ try{ CURVES=JSON.parse(jsonArea.value);
-  [h1.curve,h2.curve].forEach(populateCurvesSelect);
-  syncPickupFromCurve(h1.curve,h1.Ip); syncPickupFromCurve(h2.curve,h2.Ip);
-  showMessage(h1.msg,'Updated JSON'); clearMessage(h2.msg); drawAll();
-}catch{ showMessage(h1.msg,'JSON error'); } }
-function downloadJSON(){ const b=new Blob([jsonArea.value],{type:'application/json'});
-  const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='tripsaver_fuse_curves.json'; a.click(); URL.revokeObjectURL(u); }
 
-/* ---------- Init ---------- */
-function initSet(h){
-  populateCurvesSelect(h.curve); syncPickupFromCurve(h.curve,h.Ip);
-  h.calcBtn.addEventListener('click',()=>handleCalculate(h));
-  h.resetBtn.addEventListener('click',()=>handleReset(h));
-  h.curve.addEventListener('change',()=>{ syncPickupFromCurve(h.curve,h.Ip); drawAll(); });
+function applyJSON() {
+  try {
+    CURVES = JSON.parse(jsonArea.value);
+    [h1.curve, h2.curve].forEach(populateCurvesSelect);
+    syncPickupFromCurve(h1.curve, h1.Ip);
+    syncPickupFromCurve(h2.curve, h2.Ip);
+    showMessage(jsonMsg, '✅ Curves updated successfully.');
+    drawAll();
+  } catch (e) {
+    showMessage(jsonMsg, '❌ JSON error: ' + e.message);
+  }
+}
+
+function downloadJSON() {
+  const blob = new Blob([jsonArea.value], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'sc_k_fuse_curves.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── Init ── */
+function initSet(h, idx) {
+  populateCurvesSelect(h.curve);
+  syncPickupFromCurve(h.curve, h.Ip);
+  h.calcBtn.addEventListener('click',  () => handleCalculate(h, idx));
+  h.resetBtn.addEventListener('click', () => handleReset(h));
+  h.curve.addEventListener('change',   () => { syncPickupFromCurve(h.curve, h.Ip); drawAll(); });
   h.show.addEventListener('change', drawAll);
-  ['I','n','freq','extra','extraUnit'].forEach(k=> h[k].addEventListener('input', drawAll));
+  ['I', 'n', 'freq', 'extra'].forEach(k => h[k].addEventListener('input', drawAll));
+  h.extraUnit.addEventListener('change', drawAll);
 }
-(function init(){
-  initSet(h1); initSet(h2);
-  loadDefaultJSON();
-  applyJsonBtn.addEventListener('click',applyJSON);
-  downloadBtn.addEventListener('click',downloadJSON);
-  drawAll();
-  window.addEventListener('resize', drawAll);
+
+initSet(h1, 0); initSet(h2, 1);
+loadDefaultJSON();
+applyJsonBtn.addEventListener('click', applyJSON);
+downloadBtn.addEventListener('click',  downloadJSON);
+window.addEventListener('resize', drawAll);
+drawAll();
+
+/* ── Disclaimer modal ── */
+(function () {
+  const overlay     = el('disclaimerOverlay');
+  const acceptBtn   = el('acceptBtn');
+  const discCheck   = el('discCheck');
+  const mainContent = el('mainContent');
+
+  discCheck.addEventListener('change', function () {
+    if (this.checked) {
+      acceptBtn.disabled = false;
+      acceptBtn.classList.add('ready');
+      acceptBtn.textContent = 'I Accept — Continue to Calculator';
+    } else {
+      acceptBtn.disabled = true;
+      acceptBtn.classList.remove('ready');
+      acceptBtn.textContent = 'Check the box above to continue';
+    }
+  });
+
+  acceptBtn.addEventListener('click', function () {
+    if (acceptBtn.disabled) return;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity    = '0';
+    mainContent.style.filter      = 'none';
+    mainContent.style.pointerEvents = 'auto';
+    mainContent.style.userSelect    = 'auto';
+    setTimeout(() => { overlay.remove(); drawAll(); }, 320);
+  });
 })();
 </script>
 </body>
