@@ -4,109 +4,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reliability DA · LinkTree</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root{
-      /* Same palette & tokens used in your calculator */
-      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10;             /* translucent card */
-      --ink:#ffffff;                 /* primary text */
-      --muted:#d0e6f2;               /* secondary text */
-      --accent:#6bd27d;              /* green */
-      --accent-2:#2ac3dd;            /* cyan (buttons) */
-      --danger:#ff6b6b;
-      --ok:#87fba4;
-      --warn:#ffcc66;
-      --radius:16px;
+    .home-links { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    a.btn.nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      justify-content: flex-start;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 500;
     }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0; padding:24px; background:var(--bg); color:var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
+    a.btn.nav-btn .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.08);
     }
 
-    .wrap{
-      width:100%; max-width:860px;
+    a.btn.nav-btn::after { display: none; }
+
+    a.btn.nav-btn .btn-arrow {
+      margin-left: auto;
+      color: var(--muted-2);
+      font-size: 0.85rem;
+      transition: transform 0.18s ease, color 0.18s ease;
     }
 
-    header{ text-align:center; margin-bottom:16px; }
-    h1{ margin:0 0 8px; font-size:1.9rem; }
-    p.lead{ margin:0; color:var(--muted); }
-
-    .card{
-      background:var(--panel);
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:var(--radius);
-      box-shadow:0 10px 30px rgba(0,0,0,.3);
-      backdrop-filter: blur(8px);
-      padding:22px;
+    a.btn.nav-btn:hover .btn-arrow {
+      transform: translateX(3px);
+      color: var(--ink);
     }
 
-    .brand{
-      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:16px;
-    }
-    .brand img{
-      width:min(260px,70%); height:auto; display:block;
-      border-radius:12px; border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-      background:rgba(0,0,0,.12);
+    /* Safety button override */
+    a.btn.safety {
+      background: linear-gradient(135deg, rgba(255,200,80,0.14), rgba(255,140,40,0.08));
+      color: #ffe599;
+      border: 1px solid rgba(255,200,80,0.3);
+      font-weight: 600;
     }
 
-    .meta{
-      display:flex; justify-content:center; gap:10px; margin:12px 0 4px 0; flex-wrap:wrap;
-    }
-    .pill{
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
-      color:var(--muted); font-size:.82rem;
+    a.btn.safety:hover {
+      background: linear-gradient(135deg, rgba(255,200,80,0.22), rgba(255,140,40,0.14));
+      border-color: rgba(255,200,80,0.5);
+      box-shadow: 0 4px 20px rgba(255,200,80,0.18);
     }
 
-    .links{
-      display:grid; grid-template-columns:1fr; gap:12px; margin-top:10px;
+    a.btn.safety .btn-icon {
+      background: rgba(255,200,80,0.15);
     }
 
-    a.btn{
-      text-decoration:none; color:#0b1020; font-weight:700;
-      background:var(--accent-2);
-      padding:14px 16px; text-align:center; border-radius:12px;
-      border:1px solid rgba(255,255,255,.28);
-      box-shadow:0 10px 18px rgba(0,0,0,.22);
-      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
-    }
-    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
-
-    /* Neutral/secondary button styling to match calculator "secondary" */
-    a.btn.secondary{
-      background:transparent; color:var(--ink); font-weight:600;
-      border:1px solid rgba(255,255,255,.35);
-    }
-
-    /* Special yellow callout button (kept from your original intent, but styled to match) */
-    a.btn.warn{
-      background:var(--warn); color:#3a2800; font-weight:800;
-      border-color:rgba(0,0,0,.15);
-    }
-
-    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
-
-    @media (max-width:640px){
-      body{ padding:18px; }
-      .card{ padding:16px; }
-      h1{ font-size:1.6rem; }
+    /* Accent stripe on card */
+    .card {
+      border-top: 2px solid transparent;
+      border-image: linear-gradient(90deg, var(--green), var(--cyan)) 1;
+      border-radius: var(--radius-lg);
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <header>
-      <h1>Reliability&nbsp;DA · LinkTree</h1>
+<div class="page-wrapper">
+  <div class="wrap-narrow">
+
+    <header class="site-header">
+      <h1>Reliability DA</h1>
       <p class="lead">Quick access to guides, forms, trackers, and tools.</p>
     </header>
 
-    <section class="card">
+    <div class="card">
       <div class="brand">
-        <!-- Use your local file or hosted logo; filename kept from your snippet -->
         <img src="Luma White logo (1).png" alt="LUMA Logo">
       </div>
 
@@ -114,37 +90,56 @@
         <span class="pill" id="lastUpdated">Last Updated: —</span>
       </div>
 
-      <div class="links">
-        <!-- Buttons kept in your original order; labels unchanged -->
-        <a class="btn secondary" href="guides5.html">Guideline Library</a>
-        <a class="btn secondary" href="da_forms.html">Microsoft Forms</a>
-        <a class="btn secondary" href="da_trackers.html">Trackers &amp; Reports</a>
-        <a class="btn secondary" href="tools.html">Tools</a>
-        <a class="btn warn" href="https://aeepr.sharepoint.com/:f:/r/sites/LUMA-UT-Home/Reliability/General/SAFETY%20ALERT%20RECORD%20TRAININGS?csf=1&web=1&e=BQBjpQ&xsdata=MDV8MDJ8fDBkNGQ2ZTAwMGY1ZTQ1MDBjYzdlMDhkY2VlMTAwZmYzfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2Mzg2NDY5OTk5MzQyOTEwNzB8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMMk5vWVhSekx6RTVPalV4T1RVMFpXRTRMV1UxTVRrdE5HVmxZUzFpWVRKaExUTmtOREUyWWpFNVkyWXpaVjlsTmpkaU1tRmtPUzB4TkdJeExUUmxNelF0T0RGbE1TMW1aamM0TkdNMFpURXpNMkZBZFc1eExtZGliQzV6Y0dGalpYTXZiV1Z6YzJGblpYTXZNVGN5T1RFd016RTVNemd6TXc9PXxkMmZhM2I0Mjk2NTU0ZGU4Y2M3ZTA4ZGNlZTEwMGZmM3wzMWUwNmIxZjgyZjQ0MGRkOTY2YjFhYzMzNDlkOTdhZQ%3D%3D&sdata=MEo1T0JaUHJWSU5UWGdXdlNhc0R2bFhEU21sSFhJcHFCcTZXMitYdlZZVT0%3D&ovuser=b0a9b38e-5be3-4a10-8fdc-cef4306b5139%2CEiden.GarciaTorres%40Lumapr.com&OR=Teams-HL&CT=1729106118656&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNDA5MDEwMTQyMyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D">
-          SAFETY ALERT RECORD TRAININGS
+      <div class="divider"></div>
+
+      <nav class="home-links">
+        <a class="btn secondary nav-btn" href="guides5.html">
+          <span class="btn-icon">📋</span>
+          <span>Guideline Library</span>
+          <span class="btn-arrow">→</span>
         </a>
+
+        <a class="btn secondary nav-btn" href="da_forms.html">
+          <span class="btn-icon">📝</span>
+          <span>Microsoft Forms</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn secondary nav-btn" href="da_trackers.html">
+          <span class="btn-icon">📊</span>
+          <span>Trackers &amp; Reports</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn secondary nav-btn" href="tools.html">
+          <span class="btn-icon">🔧</span>
+          <span>Tools</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn safety nav-btn" href="https://aeepr.sharepoint.com/:f:/r/sites/LUMA-UT-Home/Reliability/General/SAFETY%20ALERT%20RECORD%20TRAININGS?csf=1&web=1&e=BQBjpQ&xsdata=MDV8MDJ8fDBkNGQ2ZTAwMGY1ZTQ1MDBjYzdlMDhkY2VlMTAwZmYzfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2Mzg2NDY5OTk5MzQyOTEwNzB8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMMk5vWVhSekx6RTVPalV4T1RVMFpXRTRMV1UxTVRrdE5HVmxZUzFpWVRKaExUTmtOREUyWWpFNVkyWXpaVjlsTmpkaU1tRmtPUzB4TkdJeExUUmxNelF0T0RGbE1TMW1aamM0TkdNMFpURXpNMkZBZFc1eExtZGliQzV6Y0dGalpYTXZiV1Z6YzJGblpYTXZNVGN5T1RFd016RTVNemd6TXc9PXxkMmZhM2I0Mjk2NTU0ZGU4Y2M3ZTA4ZGNlZTEwMGZmM3wzMWUwNmIxZjgyZjQ0MGRkOTY2YjFhYzMzNDlkOTdhZQ%3D%3D&sdata=MEo1T0JaUHJWSU5UWGdXdlNhc0R2bFhEU21sSFhJcHFCcTZXMitYdlZZVT0%3D&ovuser=b0a9b38e-5be3-4a10-8fdc-cef4306b5139%2CEiden.GarciaTorres%40Lumapr.com&OR=Teams-HL&CT=1729106118656&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNDA5MDEwMTQyMyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D">
+          <span class="btn-icon">⚠️</span>
+          <span>Safety Alert Record Trainings</span>
+          <span class="btn-arrow">→</span>
+        </a>
+      </nav>
+
+      <div class="card-footer">
+        <span class="footer-credit">Developed by Eiden O. Garcia Torres</span>
       </div>
+    </div>
 
-      <footer>
-        <span class="pill">Develope by Eiden O. Garcia Torres
-        </span>
-      </footer>
-    </section>
-  </main>
+  </div>
+</div>
 
-  <script>
-    // Keep your “fixed manual date” behavior, but formatted like the calculator’s UI
-    (function updateLastUpdated(){
-      const fixedDate = new Date('2025-08-21T20:40'); // ← update manually when you publish
-      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
-                     hour:'numeric', minute:'numeric', hour12:true };
-      document.getElementById('lastUpdated').textContent =
-        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
-    })();
-  </script>
+<script>
+  (function(){
+    const fixedDate = new Date('2025-08-21T20:40');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
+</script>
 </body>
 </html>
-
-
-
-
