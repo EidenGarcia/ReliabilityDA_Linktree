@@ -4,495 +4,838 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ANSI Overcurrent Trip Time Calculator</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root{
-      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10; --ink:#ffffff; --muted:#d0e6f2;
-      --accent:#6bd27d; --accent-2:#2ac3dd; --radius:16px;
+    /* ── Page-specific overrides ── */
+    .calc-container {
+      width: 100%;
+      max-width: 1140px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; padding:24px; background:var(--bg); color:var(--ink);
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
-      min-height:100vh;
-    }
-    .container{max-width:1100px;margin:0 auto;display:grid;gap:20px;
-               grid-template-columns:1fr 1fr;align-items:start;}
-    @media (max-width:980px){.container{grid-template-columns:1fr}}
-    h1{margin:0 0 8px}
-    .card{background:var(--panel); backdrop-filter:blur(8px);
-          border:1px solid rgba(255,255,255,.2); border-radius:16px;
-          box-shadow:0 10px 30px rgba(0,0,0,.3); padding:18px;}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    label{font-size:.9rem;color:var(--muted);display:block;margin:10px 0 6px}
-    input,select,textarea{
-      width:100%; background:rgba(255,255,255,.1); color:var(--ink);
-      border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px;
-      outline:none; transition:border .2s ease, box-shadow .2s ease;
-    }
-    input:focus,select:focus,textarea:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(42,195,221,.3)}
-    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
-    button{background:var(--accent-2); color:#0b1020; font-weight:700; border:none; padding:12px 16px;
-           border-radius:12px; cursor:pointer; font-size:.95rem; box-shadow:0 10px 18px rgba(0,0,0,.2)}
-    button.secondary{background:transparent;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.3)}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.15);
-          border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:.8rem}
+    @media (max-width: 900px) { .calc-container { grid-template-columns: 1fr; } }
 
-    /* Result alert styles */
-    .result{
-      font-size:1.0rem; line-height:1.5; padding:12px; border-radius:12px;
-      border:1px dashed rgba(255,255,255,.3); background:rgba(0,0,0,.3);
-      display:none;
-    }
-    .result.ok{
-      background: rgba(0, 200, 100, 0.25);
-      border: 1px solid rgba(0, 255, 120, 0.55);
-      color: #e9ffee;
-    }
-    .result.fail{
-      background: rgba(200, 0, 0, 0.25);
-      border: 1px solid rgba(255, 80, 80, 0.6);
-      color: #ffe9e9;
-    }
-    .result .headline{
-      display:flex; align-items:center; gap:8px; font-weight:800; margin-bottom:6px;
-    }
-    .result .badge{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:22px; height:22px; border-radius:999px; font-weight:800; font-size:.85rem;
-      background: rgba(255,255,255,.2); color:#fff;
+    .calc-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+      padding: 22px;
+      animation: fadeUp 0.5s ease both;
     }
 
-    fieldset{border:none; margin:0 0 14px; padding:0;}
-    legend{color:var(--muted); font-size:.95rem; margin-bottom:6px;}
+    .calc-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
 
-    .graph-wrap{position:relative}
-    .legend{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 10px;font-size:.82rem;line-height:1.6}
-    .legend .swatch{width:12px;height:12px;display:inline-block;border-radius:3px;margin-right:6px;background:var(--accent-2)}
-    .label-chip{
-      position:absolute; transform:translate(-50%, -50%);
-      background:rgba(0,0,0,.78); border:1px solid rgba(255,255,255,.35);
-      color:#fff; font-size:12px; padding:5px 9px; border-radius:10px;
-      pointer-events:none; white-space:nowrap; z-index:5;
-      box-shadow:0 4px 10px rgba(0,0,0,.45); letter-spacing:.2px;
-      font-family:ui-monospace, Menlo, Consolas, monospace;
+    fieldset { border: none; margin: 0 0 16px; padding: 0; }
+    legend {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 480px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      color: var(--ink);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(42,195,221,0.2);
+      background: rgba(255,255,255,0.1);
+    }
+    input.error { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); }
+
+    /* Select arrow color fix */
+    select option { background: #0f1a3e; color: #fff; }
+
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+
+    .calc-btn {
+      background: linear-gradient(135deg, var(--cyan), #1fa8c0);
+      color: #041820;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      border: none;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(42,195,221,0.25);
+      transition: all 0.18s ease;
+      letter-spacing: 0.02em;
+    }
+    .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(42,195,221,0.35); filter: brightness(1.05); }
+
+    .calc-btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      border: 1px solid var(--glass-border);
+      box-shadow: none;
+    }
+    .calc-btn.secondary:hover { background: rgba(255,255,255,0.1); color: var(--ink); }
+
+    /* Formula pill */
+    .formula-pill {
+      flex: 1;
+      min-width: 220px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .formula-pill code {
+      display: block;
+      margin-top: 4px;
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      color: #a0e8f4;
+      font-size: 0.72rem;
+      word-break: break-all;
+    }
+
+    /* Result box */
+    .result-box {
+      display: none;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      animation: fadeUp 0.2s ease both;
+    }
+    .result-box.ok {
+      background: rgba(107,210,125,0.12);
+      border: 1px solid rgba(107,210,125,0.35);
+      color: #c8f5d0;
+    }
+    .result-box.fail {
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.35);
+      color: #ffd0d0;
+    }
+    .result-box .rhead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .rhead .badge {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    /* Message box */
+    .msg-box {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      min-height: 0;
+    }
+    .msg-box .msg {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--glass-border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    /* Graph section */
+    .graph-card {
+      grid-column: 1 / -1;
+      position: relative;
+    }
+
+    .graph-legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .legend-swatch {
+      width: 24px; height: 3px;
+      border-radius: 2px;
+      background: var(--cyan);
+    }
+    .legend-swatch.shaded {
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(42,195,221,0.25);
+      border: 1px solid rgba(42,195,221,0.4);
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--glass-border);
+      display: block;
+    }
+
+    /* Label chip — positioned relative to the canvas wrapper */
+    .canvas-wrap { position: relative; }
+    .label-chip {
+      position: absolute;
+      background: rgba(10,26,48,0.92);
+      border: 1px solid rgba(42,195,221,0.5);
+      color: #a0e8f4;
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 8px;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 5;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      display: none;
+    }
+
+    /* Textarea */
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    /* Bug-fix notice */
+    .notice {
+      background: rgba(255,204,102,0.08);
+      border: 1px solid rgba(255,204,102,0.25);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: rgba(255,230,150,0.85);
+      margin-bottom: 14px;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
-  <header style="max-width:1100px;margin:0 auto 16px auto;">
-    <h1>ANSI Overcurrent Trip Time Calculator</h1>
-    <p style="margin:0;color:var(--muted)">Developed by Eiden O. Garcia Torres</p>
-  </header>
+<div class="page-wrapper" style="align-items:flex-start;">
+  <div style="width:100%;max-width:1140px;">
 
-  <div class="container">
-    <!-- Inputs (organized) -->
-    <section class="card">
-      <h2 style="margin:6px 0 12px 0;font-size:1.2rem;">Inputs</h2>
+    <a class="back-link" href="tools.html">← Back to Tools</a>
 
-      <fieldset>
-        <legend>Fault Parameters</legend>
-        <div class="grid-3">
-          <div>
-            <label for="I">Fault current I (A)</label>
-            <input id="I" type="number" min="0" step="any" value="1712"/>
+    <header class="site-header">
+      <h1>ANSI Overcurrent Trip Time</h1>
+      <p class="lead">Extremely Inverse (EI) curve calculator with log–log TCC graph.</p>
+    </header>
+
+    <div class="calc-container">
+
+      <!-- ── Inputs ── -->
+      <div class="calc-card" style="animation-delay:0.05s">
+        <h2>Inputs</h2>
+
+        <fieldset>
+          <legend>Fault Parameters</legend>
+          <div class="grid-3">
+            <div>
+              <label for="I">Fault current I (A)</label>
+              <input id="I" type="number" min="0.001" step="any" value="1712"/>
+            </div>
+            <div>
+              <label for="Ip">Pickup current Ip (A)</label>
+              <input id="Ip" type="number" min="0.001" step="any" value="300"/>
+            </div>
+            <div>
+              <label for="n">Time dial (n &gt; 0)</label>
+              <input id="n" type="number" min="0.01" step="any" value="1"/>
+            </div>
           </div>
-          <div>
-            <label for="Ip">Pickup current Ip (A)</label>
-            <input id="Ip" type="number" min="0" step="any" value="300"/>
+        </fieldset>
+
+        <fieldset>
+          <legend>System Settings</legend>
+          <div class="grid-2">
+            <div>
+              <label for="curve">Curve type</label>
+              <select id="curve"></select>
+            </div>
+            <div>
+              <label for="freq">System frequency (Hz)</label>
+              <input id="freq" type="number" min="1" step="any" value="60"/>
+            </div>
           </div>
-          <div>
-            <label for="n">Time dial</label>
-            <input id="n" type="number" step="any" value="1"/>
+        </fieldset>
+
+        <fieldset>
+          <legend>Extra Delay (optional)</legend>
+          <div class="grid-2">
+            <div>
+              <label for="extra">Delay value</label>
+              <input id="extra" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
+            </div>
+            <div>
+              <label for="extraUnit">Unit</label>
+              <select id="extraUnit">
+                <option value="cycles">cycles</option>
+                <option value="s">seconds</option>
+                <option value="ms">milliseconds</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="btn-row">
+          <button class="calc-btn" id="calcBtn">Calculate</button>
+          <button class="calc-btn secondary" id="resetBtn">Reset</button>
+          <div class="formula-pill">
+            ANSI EI Formula (M = I / Ip):
+            <code>(6.407 / (M²−1) + 0.025) × n</code>
           </div>
         </div>
-      </fieldset>
 
-      <fieldset>
-        <legend>System Settings</legend>
-        <div class="grid-2">
-          <div>
-            <label for="curve">Curve</label>
-            <select id="curve"></select>
-          </div>
-          <div>
-            <label for="freq">System frequency (Hz)</label>
-            <input id="freq" type="number" step="any" value="60"/>
-          </div>
+        <div class="msg-box" id="messages"></div>
+        <div class="result-box" id="result"></div>
+      </div>
+
+      <!-- ── JSON Config ── -->
+      <div class="calc-card" style="animation-delay:0.1s">
+        <h2>Curve Constants (JSON)</h2>
+        <div class="notice">
+          ℹ️ The <strong>Extremely Inverse</strong> curve uses the fixed EI formula (A=6.407, B=0.025, P=2). 
+          Other curves defined here will use the standard ANSI formula: <code style="color:#a0e8f4">(A/(M^P−1) + B) × n</code>.
+          Select a curve above to switch.
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Delay Settings</legend>
-        <div class="grid-2">
-          <div>
-            <label for="extra">Extra delay value</label>
-            <input id="extra" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
-          </div>
-          <div>
-            <label for="extraUnit">Extra delay unit</label>
-            <select id="extraUnit">
-              <option value="cycles">cycles</option>
-              <option value="s">seconds</option>
-              <option value="ms">milliseconds</option>
-            </select>
-          </div>
+        <label for="jsonArea">Edit curve constants — name → {A, B, P}</label>
+        <textarea id="jsonArea" spellcheck="false"></textarea>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="calc-btn" id="applyJsonBtn">Apply JSON</button>
+          <button class="calc-btn secondary" id="downloadBtn">Download JSON</button>
         </div>
-      </fieldset>
-
-      <div class="row" style="margin-top:6px;">
-        <button id="calcBtn">Calculate</button>
-        <button class="secondary" id="resetBtn">Reset</button>
-        <span class="pill" style="flex:1;min-width:260px;text-align:center">
-          ANSI EI Formula:
-          <span style="display:block;margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace;color:#e0faff">
-            (((9.96644/(M^2-1)+0.0388889)*1)-0.01389-(3.55944/(M^2-1)))*n
-          </span>
-        </span>
       </div>
 
-      <div id="messages" style="margin-top:12px;"></div>
-      <div class="result" id="result" style="margin-top:12px;"></div>
-    </section>
-
-    <!-- JSON config -->
-    <section class="card">
-      <div class="row" style="justify-content:space-between; align-items:center;">
-        <h2 style="margin:6px 0 4px 0;font-size:1.1rem;">Curve Constants (JSON)</h2>
-        <span class="pill">Edit & apply ▼</span>
+      <!-- ── Graph ── -->
+      <div class="calc-card graph-card" style="animation-delay:0.15s">
+        <h2>TCC Log–Log Curve · Operating Time vs. Current</h2>
+        <div class="graph-legend">
+          <span class="legend-item"><span class="legend-swatch"></span> Curve (base)</span>
+          <span class="legend-item"><span class="legend-swatch shaded"></span> Extra delay region</span>
+          <span class="legend-item" style="color:var(--muted-2);font-size:0.72rem;">Dashed lines = operating point</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="ocCanvas" width="1060" height="520"></canvas>
+          <div id="labelBox" class="label-chip"></div>
+        </div>
       </div>
-      <label for="jsonArea">ANSI curve constants as JSON (name → {A,B,C,P}). EI uses Excel formula regardless of A,B,C,P.</label>
-      <textarea id="jsonArea" spellcheck="false" style="min-height:180px;"></textarea>
-      <div class="row" style="margin-top:10px;">
-        <button id="applyJsonBtn">Apply JSON</button>
-        <button class="secondary" id="downloadBtn">Download JSON</button>
-      </div>
-    </section>
 
-    <!-- Graph -->
-    <section class="card graph-wrap" style="grid-column:1 / -1;">
-      <h2 style="margin:6px 0 14px 0;font-size:1.1rem;">Log–Log Curve (Operating Time vs Current)</h2>
-      <canvas id="ocCanvas" width="1000" height="520" style="width:100%;height:auto;border-radius:12px;background:rgba(0,0,0,.25);"></canvas>
-      <div class="legend"><span class="swatch"></span> Base & Total (same color) · <span class="pill">Shaded area = extra delay</span></div>
-      <!-- single label box like "(I, t)" for TOTAL only -->
-      <div id="labelBox" class="label-chip" style="display:none;"></div>
-    </section>
+    </div>
+
+    <div style="text-align:center;margin-top:18px;">
+      <span style="color:var(--muted-2);font-size:0.78rem;">Developed by Eiden O. Garcia Torres</span>
+    </div>
+
   </div>
+</div>
 
-  <script>
-    /**************  DATA / UI HANDLES  **************/
-    const DEFAULT_CURVES = {
-      "extremely_inverse": { A:6.407, B:0.025, C:1.0, P:2.0 },
-      "very_inverse":      { A:2.855, B:0.0712, C:1.0, P:2.0 }
-    };
-    let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  DEFAULT CURVES  (A, B, P for ANSI formula: (A/(M^P−1) + B) * n)
+//  extremely_inverse uses the fixed Excel EI formula and ignores A,B,P here
+// ─────────────────────────────────────────────────────────────────────────────
+const DEFAULT_CURVES = {
+  "extremely_inverse": { A: 6.407,  B: 0.025,  P: 2.0 },
+  "very_inverse":      { A: 2.855,  B: 0.0712, P: 2.0 },
+  "moderately_inverse":{ A: 0.0515, B: 0.1140, P: 0.02 },
+  "long_time_inverse": { A: 28.2,   B: 0.1217, P: 2.0 }
+};
+let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
 
-    const IEl=document.getElementById('I'),
-          IpEl=document.getElementById('Ip'),
-          nEl=document.getElementById('n'),
-          curveEl=document.getElementById('curve'),
-          freqEl=document.getElementById('freq'),
-          extraEl=document.getElementById('extra'),
-          extraUnitEl=document.getElementById('extraUnit'),
-          calcBtn=document.getElementById('calcBtn'),
-          resetBtn=document.getElementById('resetBtn'),
-          msgBox=document.getElementById('messages'),
-          resultBox=document.getElementById('result'),
-          jsonArea=document.getElementById('jsonArea'),
-          applyJsonBtn=document.getElementById('applyJsonBtn'),
-          downloadBtn=document.getElementById('downloadBtn');
+// ── DOM refs ──
+const IEl        = document.getElementById('I');
+const IpEl       = document.getElementById('Ip');
+const nEl        = document.getElementById('n');
+const curveEl    = document.getElementById('curve');
+const freqEl     = document.getElementById('freq');
+const extraEl    = document.getElementById('extra');
+const extraUnitEl= document.getElementById('extraUnit');
+const calcBtn    = document.getElementById('calcBtn');
+const resetBtn   = document.getElementById('resetBtn');
+const msgBox     = document.getElementById('messages');
+const resultBox  = document.getElementById('result');
+const jsonArea   = document.getElementById('jsonArea');
+const applyJsonBtn = document.getElementById('applyJsonBtn');
+const downloadBtn  = document.getElementById('downloadBtn');
+const labelBox   = document.getElementById('labelBox');
+const canvas     = document.getElementById('ocCanvas');
+const ctx        = canvas.getContext('2d');
 
-    const labelBox = document.getElementById('labelBox');
-    const canvas = document.getElementById('ocCanvas');
-    const ctx = canvas.getContext('2d');
+// ── UI helpers ──
+function showMessage(html) {
+  msgBox.innerHTML = `<div class="msg">${html}</div>`;
+}
+function clearMessage() { msgBox.innerHTML = ''; }
 
-    function showMessage(html){
-      msgBox.innerHTML=`<div style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);">${html}</div>`;
-    }
-    function clearMessage(){ msgBox.innerHTML=''; }
+function setResultBox(html, ok) {
+  resultBox.style.display = 'block';
+  resultBox.className = 'result-box ' + (ok ? 'ok' : 'fail');
+  resultBox.innerHTML = (ok
+    ? `<div class="rhead"><span class="badge">✓</span> OK</div>`
+    : `<div class="rhead"><span class="badge">✗</span> Invalid</div>`) + html;
+}
+function clearResult() {
+  resultBox.style.display = 'none';
+  resultBox.innerHTML = '';
+  resultBox.className = 'result-box';
+}
 
-    /* Unified result helper */
-    function setResultBox(html, ok){
-      resultBox.style.display='block';
-      resultBox.className = "result " + (ok ? "ok" : "fail");
-      resultBox.innerHTML = ok
-        ? `<div class="headline"><span class="badge">✓</span>OK</div>${html}`
-        : `<div class="headline"><span class="badge">✗</span>Not valid</div>${html}`;
-    }
-    function clearResult(){ resultBox.style.display='none'; resultBox.innerHTML=''; resultBox.className='result'; }
+// ── Input validation highlight ──
+function markError(el)  { el.classList.add('error'); }
+function clearError(el) { el.classList.remove('error'); }
+function clearAllErrors() {
+  [IEl, IpEl, nEl, freqEl].forEach(clearError);
+}
 
-    function populateCurvesSelect(){
-      curveEl.innerHTML='';
-      Object.keys(CURVES).forEach(name=>{
-        const opt=document.createElement('option');
-        opt.value=name; opt.textContent=name;
-        curveEl.appendChild(opt);
-      });
-      curveEl.value='extremely_inverse';
-    }
-    function loadDefaultJSON(){ jsonArea.value=JSON.stringify(CURVES,null,2); populateCurvesSelect(); }
+// ── Curve select ──
+function populateCurvesSelect() {
+  curveEl.innerHTML = '';
+  Object.keys(CURVES).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name.replace(/_/g, ' ');
+    curveEl.appendChild(opt);
+  });
+  curveEl.value = 'extremely_inverse';
+}
 
-    function parseFractionOrFloat(text){
-      const t=String(text).trim();
-      if(!t) throw new Error('Empty');
-      if(t.includes('/')){
-        const [num,den]=t.split('/',2).map(s=>parseFloat(s.trim()));
-        if(!isFinite(num)||!isFinite(den)||den===0) throw new Error('Invalid fraction');
-        return num/den;
-      }
-      const v=parseFloat(t);
-      if(!isFinite(v)) throw new Error('Invalid number');
-      return v;
-    }
+function loadDefaultJSON() {
+  jsonArea.value = JSON.stringify(CURVES, null, 2);
+  populateCurvesSelect();
+}
 
-    function computeEI_Excel(I,Ip,n){
-      if(Ip<=0) throw new Error('Ip>0');
-      const M = I/Ip;
-      const denom = M*M - 1;
-      if(denom<=0) return Infinity;
-      return (((9.96644/denom)+0.0388889) - 0.01389 - (3.55944/denom)) * n;
-    }
+// ── Math helpers ──
+function parseFractionOrFloat(text) {
+  const t = String(text).trim();
+  if (!t) throw new Error('Empty value');
+  if (t.includes('/')) {
+    const parts = t.split('/', 2).map(s => parseFloat(s.trim()));
+    const [num, den] = parts;
+    if (!isFinite(num) || !isFinite(den) || den === 0)
+      throw new Error('Invalid fraction — denominator cannot be zero');
+    return num / den;
+  }
+  const v = parseFloat(t);
+  if (!isFinite(v)) throw new Error('Invalid number');
+  return v;
+}
 
-    function extraToSeconds(freq, val, unit){
-      if(!val && val!==0) return 0;
-      return unit==='cycles' ? val/freq : (unit==='ms' ? val/1000 : val);
-    }
+// ── FIX 3: Compute trip time using selected curve, fallback to EI formula for EI ──
+function computeTripTime(I, Ip, n, curveName) {
+  if (Ip <= 0) throw new Error('Ip must be > 0');
+  // FIX 1: Guard negative n
+  if (n <= 0) throw new Error('Time dial must be > 0');
 
-    /**************  GRAPH SCALES **************/
-    const X_MIN=1, X_MAX=10000;      // A
-    const Y_MIN=0.05, Y_MAX=1000;    // s
-    const PAD_L=70, PAD_R=24, PAD_T=18, PAD_B=48;
+  const M = I / Ip;
+  const curve = CURVES[curveName] || CURVES['extremely_inverse'];
+  const { A, B, P } = curve;
 
-    const log10 = (v)=>Math.log(v)/Math.LN10;
-    const xLogSpan = log10(X_MAX)-log10(X_MIN);
-    const yLogSpan = log10(Y_MAX)-log10(Y_MIN);
-    const sx = I => PAD_L + ((log10(I)-log10(X_MIN))/xLogSpan) * (canvas.width-PAD_L-PAD_R);
-    const sy = t => PAD_T + ((log10(Y_MAX)-log10(t))/yLogSpan) * (canvas.height-PAD_T-PAD_B);
+  let denom;
+  if (P === 2) {
+    denom = M * M - 1;
+  } else {
+    denom = Math.pow(M, P) - 1;
+  }
 
-    function drawGrid(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle='rgba(0,0,0,.20)';
-      ctx.fillRect(PAD_L,PAD_T,canvas.width-PAD_L-PAD_R,canvas.height-PAD_T-PAD_B);
+  if (denom <= 0) return Infinity; // I ≤ Ip — no trip
 
-      ctx.save(); ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
-      const xDec=[1,10,100,1000,10000], yDec=[0.1,1,10,100,1000];
+  // The "extremely_inverse" uses the verified EI Excel formula
+  if (curveName === 'extremely_inverse') {
+    return (((9.96644 / denom) + 0.0388889) - 0.01389 - (3.55944 / denom)) * n;
+  }
 
-      xDec.forEach(d=>{
-        const x=sx(d);
-        ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='12px ui-sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(String(d), x, canvas.height-PAD_B+6);
-      });
-      yDec.forEach(d=>{
-        const y=sy(Math.min(Math.max(d,Y_MIN),Y_MAX));
-        ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,.85)'; ctx.textAlign='right'; ctx.textBaseline='middle';
-        ctx.fillText(String(d), PAD_L-8, y);
-      });
+  // All other curves use standard ANSI: (A / (M^P - 1) + B) * n
+  return (A / denom + B) * n;
+}
 
-      // minor grid
-      ctx.strokeStyle='rgba(255,255,255,.12)';
-      for(let decade=0; decade<4; decade++){
-        const base=Math.pow(10,decade);
-        for(let m=2;m<10;m++){
-          const v=base*m; if(v>=X_MIN && v<=X_MAX){
-            const x=sx(v); ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
-          }
-        }
-      }
-      for(let decade=-1; decade<3; decade++){
-        const base=Math.pow(10,decade);
-        for(let m=2;m<10;m++){
-          const v=base*m; if(v>=Y_MIN && v<=Y_MAX){
-            const y=sy(v); ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
-          }
-        }
-      }
+function extraToSeconds(freq, val, unit) {
+  if (!val && val !== 0) return 0;
+  if (unit === 'cycles') return val / freq;
+  if (unit === 'ms')     return val / 1000;
+  return val; // seconds
+}
 
-      // axis titles
-      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='13px ui-sans-serif';
-      ctx.textAlign='center'; ctx.textBaseline='top';
-      ctx.fillText('Current (A, log scale)', (PAD_L+canvas.width-PAD_R)/2, canvas.height-22);
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANVAS / GRAPH
+// ─────────────────────────────────────────────────────────────────────────────
+const X_MIN = 1,    X_MAX = 10000;
+const Y_MIN = 0.05, Y_MAX = 1000;
+const PAD_L = 72, PAD_R = 24, PAD_T = 20, PAD_B = 50;
 
-      ctx.save(); ctx.translate(18,(PAD_T+canvas.height-PAD_B)/2);
-      ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.textBaseline='bottom';
-      ctx.fillText('Operating Time (s, log scale)', 0, 0); ctx.restore();
-      ctx.restore();
-    }
+const log10    = v => Math.log(v) / Math.LN10;
+const xLogSpan = log10(X_MAX) - log10(X_MIN);
+const yLogSpan = log10(Y_MAX) - log10(Y_MIN);
+const sx = I => PAD_L + ((log10(I) - log10(X_MIN)) / xLogSpan) * (canvas.width - PAD_L - PAD_R);
+const sy = t => PAD_T + ((log10(Y_MAX) - log10(t))  / yLogSpan) * (canvas.height - PAD_T - PAD_B);
 
-    /**************  CURVE GENERATION **************/
-    const CURVE_COLOR = 'rgba(42,195,221,1)'; // cyan
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.fillRect(PAD_L, PAD_T, canvas.width - PAD_L - PAD_R, canvas.height - PAD_T - PAD_B);
 
-    function buildCurvePoints(Ip, n, extraSeconds){
-      const N=700;
-      const logXmin = log10(Math.max(X_MIN, Ip*1.001));
-      const logXmax = log10(X_MAX);
-      const pts = [];
-      const data = [];
-      for(let i=0;i<N;i++){
-        const I = Math.pow(10, logXmin + (logXmax-logXmin)*i/(N-1));
-        let t = computeEI_Excel(I, Ip, n);
-        if(!isFinite(t) || t<=0) continue;
-        if(extraSeconds) t += extraSeconds;
-        t = Math.max(Y_MIN, Math.min(Y_MAX, t));
-        pts.push([sx(I), sy(t)]);
-        data.push({I, t});
-      }
-      return {pts, data};
-    }
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
 
-    function strokeCurve(pts){
-      if(pts.length<2) return;
-      ctx.save();
-      ctx.strokeStyle=CURVE_COLOR; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
-      for(const [x,y] of pts.slice(1)) ctx.lineTo(x,y);
-      ctx.stroke(); ctx.restore();
-    }
+  const xDec = [1, 10, 100, 1000, 10000];
+  const yDec = [0.1, 1, 10, 100, 1000];
 
-    function fillBetween(baseData, totalData){
-      if(baseData.length<2 || totalData.length<2) return;
-      const n = Math.min(baseData.length, totalData.length);
-      ctx.save();
-      ctx.fillStyle='rgba(42,195,221,.18)'; // soft cyan haze
-      ctx.beginPath();
-      for(let i=0;i<n;i++){
-        const x = sx(totalData[i].I), y = sy(totalData[i].t);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      }
-      for(let i=n-1;i>=0;i--){
-        const x = sx(baseData[i].I), y = sy(baseData[i].t);
-        ctx.lineTo(x,y);
-      }
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-    }
+  xDec.forEach(d => {
+    const x = sx(d);
+    ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.font = '12px ui-sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(String(d), x, canvas.height - PAD_B + 7);
+  });
 
-    /**************  LABEL/GUIDES (TOTAL ONLY) **************/
-    function setLabelBox(x, y, I, t){
-      const pad=8;
-      const left=Math.max(PAD_L+pad, Math.min(x+22, canvas.width-PAD_R-pad));
-      const top =Math.max(PAD_T+pad, Math.min(y-18, canvas.height-PAD_B-pad));
-      labelBox.style.left = left+'px';
-      labelBox.style.top  = top +'px';
-      labelBox.textContent = `(${I.toFixed(1)} A, ${t.toFixed(3)} s)`;
-      labelBox.style.display='block';
-    }
-    function hideLabel(){ labelBox.style.display='none'; }
+  yDec.forEach(d => {
+    const y = sy(Math.min(Math.max(d, Y_MIN), Y_MAX));
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(d), PAD_L - 8, y);
+  });
 
-    function drawIntersectionsForTotal(I, tTotal){
-      if(!isFinite(tTotal)) return;
-      const x = sx(I), y = sy(Math.min(Math.max(tTotal,Y_MIN),Y_MAX));
-
-      // dashed guides ONLY for total
-      ctx.save();
-      ctx.setLineDash([6,6]); ctx.lineWidth=1.6; ctx.strokeStyle='rgba(255,255,255,.65)';
-      ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height-PAD_B); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width-PAD_R, y); ctx.stroke();
-
-      // dot
-      ctx.setLineDash([]);
-      ctx.fillStyle='white';
-      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
-      ctx.restore();
-
-      setLabelBox(x, y, I, tTotal);
-    }
-
-    /**************  REDRAW **************/
-    function redrawGraph(){
-      const I = parseFloat(IEl.value),
-            Ip = parseFloat(IpEl.value),
-            n  = parseFloat(nEl.value),
-            f  = parseFloat(freqEl.value),
-            extraRaw = (extraEl.value||'').trim(),
-            unit = extraUnitEl.value;
-
-      drawGrid();
-
-      if(!(isFinite(Ip)&&Ip>0&&isFinite(n)&&isFinite(f)&&f>0)){ hideLabel(); return; }
-
-      let extraSec = 0;
-      if(extraRaw){
-        try{ extraSec = extraToSeconds(f, parseFractionOrFloat(extraRaw), unit); }
-        catch{ extraSec = 0; }
-      }
-
-      const base = buildCurvePoints(Ip, n, 0);
-      const total = buildCurvePoints(Ip, n, extraSec);
-
-      fillBetween(base.data, total.data);
-      strokeCurve(base.pts);
-      strokeCurve(total.pts);
-
-      hideLabel();
-      if(isFinite(I)&&I>0){
-        const baseT = computeEI_Excel(I, Ip, n);
-        const totalT = (baseT===Infinity)? Infinity : baseT + extraSec;
-        if(isFinite(totalT)) drawIntersectionsForTotal(I, totalT);
+  // Minor gridlines
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  for (let decade = 0; decade < 4; decade++) {
+    const base = Math.pow(10, decade);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= X_MIN && v <= X_MAX) {
+        const x = sx(v);
+        ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
       }
     }
-
-    /**************  BUTTONS **************/
-    function handleCalculate(){
-      clearMessage(); clearResult();
-      const I=parseFloat(IEl.value), Ip=parseFloat(IpEl.value), n=parseFloat(nEl.value), f=parseFloat(freqEl.value);
-
-      if(!isFinite(I)||I<0) return setResultBox("Please enter a valid fault current (A).", false);
-      if(!isFinite(Ip)||Ip<=0) return setResultBox("Please enter a valid pickup current (A) > 0.", false);
-      if(!isFinite(n)) return setResultBox("Please enter a valid time dial.", false);
-      if(!isFinite(f)||f<=0) return setResultBox("Please enter a valid frequency (Hz) > 0.", false);
-
-      let baseTime = computeEI_Excel(I, Ip, n);
-      if(baseTime===Infinity){
-        setResultBox("No trip – Fault ≤ pickup (I must be greater than Ip).", false);
-        redrawGraph();
-        return;
+  }
+  for (let decade = -1; decade < 3; decade++) {
+    const base = Math.pow(10, decade);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= Y_MIN && v <= Y_MAX) {
+        const y = sy(v);
+        ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
       }
+    }
+  }
 
-      let extraSeconds=0;
-      const raw=(extraEl.value||'').trim();
-      if(raw){
-        try{ extraSeconds = extraToSeconds(f, parseFractionOrFloat(raw), extraUnitEl.value); }
-        catch{ return setResultBox("Invalid extra delay value or unit.", false); }
-      }
-      const total = baseTime + extraSeconds;
+  // Axis labels
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = '13px ui-sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('Current (A · log scale)', (PAD_L + canvas.width - PAD_R) / 2, canvas.height - 22);
 
-      setResultBox(
-        `Base: <b>${baseTime.toFixed(6)} s</b><br>Total: <b>${total.toFixed(6)} s</b>`,
-        true
-      );
-      redrawGraph();
-    }
+  ctx.save();
+  ctx.translate(16, (PAD_T + canvas.height - PAD_B) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Operating Time (s · log scale)', 0, 0);
+  ctx.restore();
 
-    function handleReset(){
-      IEl.value=1712; IpEl.value=300; nEl.value=1; freqEl.value=60;
-      extraEl.value=''; extraUnitEl.value='cycles';
-      clearMessage(); clearResult(); redrawGraph();
-    }
-    function handleApplyJSON(){
-      try{ CURVES=JSON.parse(jsonArea.value); populateCurvesSelect(); showMessage('Updated JSON'); }
-      catch{ showMessage('JSON error'); }
-    }
-    function handleDownloadJSON(){
-      const blob=new Blob([jsonArea.value],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download='ansi_curves.json'; a.click();
-      URL.revokeObjectURL(url);
-    }
+  ctx.restore();
+}
 
-    /**************  INIT **************/
-    function init(){
-      loadDefaultJSON();
-      calcBtn.addEventListener('click',handleCalculate);
-      resetBtn.addEventListener('click',handleReset);
-      applyJsonBtn.addEventListener('click',handleApplyJSON);
-      downloadBtn.addEventListener('click',handleDownloadJSON);
-      redrawGraph();
+const CURVE_COLOR = 'rgba(42,195,221,1)';
+
+function buildCurvePoints(Ip, n, curveName, extraSeconds) {
+  const N = 700;
+  const logXmin = log10(Math.max(X_MIN, Ip * 1.001));
+  const logXmax = log10(X_MAX);
+  const pts  = [];
+  const data = [];
+
+  for (let i = 0; i < N; i++) {
+    const I = Math.pow(10, logXmin + (logXmax - logXmin) * i / (N - 1));
+    let t;
+    try { t = computeTripTime(I, Ip, n, curveName); } catch { continue; }
+    if (!isFinite(t) || t <= 0) continue;
+    if (extraSeconds) t += extraSeconds;
+    t = Math.max(Y_MIN, Math.min(Y_MAX, t));
+    pts.push([sx(I), sy(t)]);
+    data.push({ I, t });
+  }
+  return { pts, data };
+}
+
+function strokeCurve(pts) {
+  if (pts.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = CURVE_COLOR;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (const [x, y] of pts.slice(1)) ctx.lineTo(x, y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function fillBetween(baseData, totalData) {
+  if (baseData.length < 2 || totalData.length < 2) return;
+  const n = Math.min(baseData.length, totalData.length);
+  ctx.save();
+  ctx.fillStyle = 'rgba(42,195,221,0.14)';
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = sx(totalData[i].I), y = sy(totalData[i].t);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for (let i = n - 1; i >= 0; i--) {
+    ctx.lineTo(sx(baseData[i].I), sy(baseData[i].t));
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// ── FIX 2: Label chip — use canvas CSS scale to convert pixel coords ──
+function setLabelBox(canvasX, canvasY, I, t) {
+  const rect    = canvas.getBoundingClientRect();
+  const scaleX  = rect.width  / canvas.width;
+  const scaleY  = rect.height / canvas.height;
+
+  const cssX = canvasX * scaleX;
+  const cssY = canvasY * scaleY;
+
+  const pad    = 8;
+  const chipW  = 140; // approx chip width
+  const left   = Math.min(cssX + 14, rect.width  - chipW - pad);
+  const top    = Math.max(pad,        cssY - 22);
+
+  labelBox.style.left    = left + 'px';
+  labelBox.style.top     = top  + 'px';
+  labelBox.textContent   = `${I.toFixed(1)} A  ·  ${t.toFixed(4)} s`;
+  labelBox.style.display = 'block';
+}
+
+function hideLabel() { labelBox.style.display = 'none'; }
+
+function drawOperatingPoint(I, tTotal) {
+  if (!isFinite(tTotal) || tTotal <= 0) return;
+  const x = sx(I);
+  const y = sy(Math.min(Math.max(tTotal, Y_MIN), Y_MAX));
+
+  ctx.save();
+  ctx.setLineDash([6, 5]);
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(42,195,221,0.8)';
+  ctx.shadowBlur  = 8;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  setLabelBox(x, y, I, tTotal);
+}
+
+// ── Main redraw ──
+function redrawGraph() {
+  const I         = parseFloat(IEl.value);
+  const Ip        = parseFloat(IpEl.value);
+  const n         = parseFloat(nEl.value);
+  const f         = parseFloat(freqEl.value);
+  const extraRaw  = (extraEl.value || '').trim();
+  const unit      = extraUnitEl.value;
+  const curveName = curveEl.value || 'extremely_inverse';
+
+  drawGrid();
+
+  if (!(isFinite(Ip) && Ip > 0 && isFinite(n) && n > 0 && isFinite(f) && f > 0)) {
+    hideLabel();
+    return;
+  }
+
+  let extraSec = 0;
+  if (extraRaw) {
+    try { extraSec = extraToSeconds(f, parseFractionOrFloat(extraRaw), unit); }
+    catch { extraSec = 0; }
+  }
+
+  const base  = buildCurvePoints(Ip, n, curveName, 0);
+  const total = buildCurvePoints(Ip, n, curveName, extraSec);
+
+  if (extraSec > 0) fillBetween(base.data, total.data);
+  strokeCurve(base.pts);
+  if (extraSec > 0) strokeCurve(total.pts);
+
+  hideLabel();
+  if (isFinite(I) && I > 0) {
+    try {
+      const baseT  = computeTripTime(I, Ip, n, curveName);
+      const totalT = isFinite(baseT) ? baseT + extraSec : Infinity;
+      if (isFinite(totalT)) drawOperatingPoint(I, totalT);
+    } catch { /* invalid inputs */ }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CALCULATE
+// ─────────────────────────────────────────────────────────────────────────────
+function handleCalculate() {
+  clearMessage(); clearResult(); clearAllErrors();
+
+  const I  = parseFloat(IEl.value);
+  const Ip = parseFloat(IpEl.value);
+  const n  = parseFloat(nEl.value);
+  const f  = parseFloat(freqEl.value);
+  const curveName = curveEl.value || 'extremely_inverse';
+
+  let valid = true;
+  if (!isFinite(I) || I <= 0)  { markError(IEl);  valid = false; }
+  if (!isFinite(Ip) || Ip <= 0){ markError(IpEl); valid = false; }
+  // FIX 1: validate n > 0
+  if (!isFinite(n) || n <= 0)  { markError(nEl);  valid = false; }
+  if (!isFinite(f) || f <= 0)  { markError(freqEl); valid = false; }
+
+  if (!valid) {
+    setResultBox('Please fix the highlighted fields (all values must be positive numbers).', false);
+    return;
+  }
+
+  let baseTime;
+  try {
+    baseTime = computeTripTime(I, Ip, n, curveName);
+  } catch (e) {
+    setResultBox(e.message, false);
+    return;
+  }
+
+  if (!isFinite(baseTime)) {
+    setResultBox('No trip — fault current must exceed pickup current (I &gt; Ip).', false);
+    redrawGraph();
+    return;
+  }
+
+  let extraSeconds = 0;
+  const raw = (extraEl.value || '').trim();
+  if (raw) {
+    try {
+      extraSeconds = extraToSeconds(f, parseFractionOrFloat(raw), extraUnitEl.value);
+    } catch (e) {
+      setResultBox('Invalid extra delay: ' + e.message, false);
+      return;
     }
-    init();
-  </script>
+  }
+
+  const total = baseTime + extraSeconds;
+  const M     = (I / Ip).toFixed(3);
+
+  setResultBox(
+    `<b>M = I / Ip = ${M}</b><br>
+     Base trip time: <b>${baseTime.toFixed(6)} s</b>
+       &nbsp;(<b>${(baseTime * f).toFixed(2)} cycles</b>)<br>
+     Extra delay: <b>${extraSeconds.toFixed(6)} s</b><br>
+     <span style="font-size:1rem;">Total operating time: <b style="font-size:1.1rem;">${total.toFixed(6)} s</b>
+       &nbsp;(<b>${(total * f).toFixed(2)} cycles</b>)</span>`,
+    true
+  );
+
+  redrawGraph();
+}
+
+function handleReset() {
+  IEl.value = 1712; IpEl.value = 300; nEl.value = 1; freqEl.value = 60;
+  extraEl.value = ''; extraUnitEl.value = 'cycles';
+  clearMessage(); clearResult(); clearAllErrors();
+  redrawGraph();
+}
+
+function handleApplyJSON() {
+  try {
+    CURVES = JSON.parse(jsonArea.value);
+    populateCurvesSelect();
+    showMessage('✅ Curves updated successfully.');
+    redrawGraph();
+  } catch (e) {
+    showMessage('❌ JSON parse error: ' + e.message);
+  }
+}
+
+function handleDownloadJSON() {
+  const blob = new Blob([jsonArea.value], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'ansi_curves.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Re-draw on any input change ──
+[IEl, IpEl, nEl, freqEl, extraEl].forEach(el => el.addEventListener('input', redrawGraph));
+extraUnitEl.addEventListener('change', redrawGraph);
+curveEl.addEventListener('change', redrawGraph);
+
+// ── FIX 2: Re-position label on resize ──
+window.addEventListener('resize', () => { redrawGraph(); });
+
+// ── Init ──
+loadDefaultJSON();
+calcBtn.addEventListener('click', handleCalculate);
+resetBtn.addEventListener('click', handleReset);
+applyJsonBtn.addEventListener('click', handleApplyJSON);
+downloadBtn.addEventListener('click', handleDownloadJSON);
+redrawGraph();
+</script>
 </body>
 </html>
