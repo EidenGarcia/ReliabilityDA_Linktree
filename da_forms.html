@@ -1,259 +1,96 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Reliability DA · Field Forms</title>
-
-<style>
-:root{
-  --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-  --panel:#ffffff10;
-  --ink:#ffffff;
-  --muted:#d0e6f2;
-  --accent:#6bd27d;
-  --accent-2:#2ac3dd;
-  --warn:#ffcc66;
-  --radius:16px;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  padding:24px;
-  background:var(--bg);
-  color:var(--ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-  min-height:100vh;
-}
-
-.wrap{
-  width:100%;
-  max-width:520px;
-  margin:0 auto;
-}
-
-header{
-  text-align:center;
-  margin-bottom:16px;
-}
-
-h1{
-  margin:0 0 8px;
-  font-size:1.9rem;
-}
-
-p.lead{
-  margin:0;
-  color:var(--muted);
-}
-
-.card{
-  background:var(--panel);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:var(--radius);
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-  backdrop-filter: blur(8px);
-  padding:22px;
-}
-
-.brand{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.brand img{
-  width:min(260px,70%);
-  height:auto;
-  display:block;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.25);
-  box-shadow:0 8px 18px rgba(0,0,0,.25);
-  background:rgba(0,0,0,.12);
-}
-
-.meta{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:8px 0 16px 0;
-  flex-wrap:wrap;
-}
-
-.pill{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.15);
-  border:1px solid rgba(255,255,255,.2);
-  color:var(--muted);
-  font-size:.82rem;
-}
-
-/* ALWAYS ONE COLUMN */
-.groups{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:16px;
-  margin-top:12px;
-}
-
-.group{
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:14px;
-  padding:16px;
-  background:rgba(0,0,0,.18);
-}
-
-.group h3{
-  margin:0 0 10px 0;
-  font-size:1rem;
-  color:var(--muted);
-  font-weight:600;
-}
-
-.links{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-}
-
-a.btn{
-  display:block;
-  text-decoration:none;
-  text-align:center;
-  color:#0b1020;
-  font-weight:700;
-  background:var(--accent-2);
-  padding:12px 14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:0 10px 18px rgba(0,0,0,.22);
-  transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
-}
-
-a.btn:hover{
-  transform:translateY(-1px);
-  filter:saturate(1.05);
-  box-shadow:0 14px 24px rgba(0,0,0,.28);
-}
-
-a.btn.secondary{
-  background:transparent;
-  color:var(--ink);
-  font-weight:600;
-  border:1px solid rgba(255,255,255,.35);
-}
-
-footer{
-  text-align:center;
-  margin-top:14px;
-  color:var(--muted);
-  font-size:.85rem;
-}
-</style>
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Field Forms</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<main class="wrap">
+<div class="page-wrapper">
+  <div class="wrap-narrow">
 
-<header>
-<h1>Reliability DA · Field Forms</h1>
-<p class="lead">Quick access to Forms.</p>
-</header>
+    <a class="back-link" href="index.html">← Back to Home</a>
 
-<section class="card">
+    <header class="site-header">
+      <h1>Field Forms</h1>
+      <p class="lead">Quick access to Microsoft Forms.</p>
+    </header>
 
-<div class="brand">
-<img src="Luma White logo (1).png" alt="LUMA Logo">
+    <div class="card">
+      <div class="brand">
+        <img src="Luma White logo (1).png" alt="LUMA Logo">
+      </div>
+
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="groups">
+        <div class="group">
+          <h3>Microsoft Forms</h3>
+          <div class="links">
+
+            <a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
+              3-Ph Recloser – Commissioning
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
+              Versa-Tech XC – Commissioning
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/g/ukNm5MgsUC">
+              3-Ph Recloser – Quarterly Logs
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/g/hG09322044">
+              1-Ph Recloser – Quarterly Logs
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu">
+              Legacy In-Service
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u">
+              SensorOn
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u">
+              Vehicle Request
+            </a>
+
+            <a class="btn secondary" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/_layouts/15/listforms.aspx?cid=NWY4ZjE1NWYtODgyMi00M2FmLWI0ZTQtMThmYjgyYTkxYjBh&ct=1773675699005&or=OWA-NT-Mail&cid=8e014a43-973e-94d0-3f85-848ba256a582&nav=ZjFhODNjNzEtODM3ZC00ODc5LThhZDUtOWRjYWE4OWU2ZGM4&LOF=1">
+              Recloser Investigation
+            </a>
+
+            <a class="btn secondary" href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUNjRYSVRXV002M1k3VENONDg0VE1BMklQTiQlQCN0PWcu">
+              Preventive Maintenance Checks &amp; Services (PMCS)
+            </a>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="footer-credit">Developed by Eiden O. Garcia Torres</span>
+      </div>
+    </div>
+
+  </div>
 </div>
-
-<div class="meta">
-<span class="pill" id="lastUpdated">Last Updated: —</span>
-</div>
-
-<div class="groups">
-
-<div class="group">
-<h3>Microsoft Forms</h3>
-
-<div class="links">
-
-<a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
-3-Ph Recloser – Commissioning
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/g/ALhAvHZKzc">
-Versa-Tech XC – Commissioning
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/g/ukNm5MgsUC">
-3-Ph Recloser – Quarterly Logs
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/g/hG09322044">
-1-Ph Recloser – Quarterly Logs
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROTJ5OpCTqbZPnSPODRxkbYtUQ0xDVlBSQTRTSkgxTlVQUzVNWVZaSkxRVSQlQCN0PWcu">
-Legacy In-Service
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROY-zkTVPIT9FnZS-vjbRCXJUQ1ZUWjZITEdPQjBPTkc0QVEzUlFESTdSSS4u">
-SensorOn
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/pages/responsepage.aspx?id=jrOpsONbEEqP3M70MGtROasbfmAIFSFEs8NSCoUKGRRUNFVKM0JDQUE2MkZKUDQ2Nk1JSjVGSk9ENS4u">
-Vehicle Request
-</a>
-
-<a class="btn secondary" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/_layouts/15/listforms.aspx?cid=NWY4ZjE1NWYtODgyMi00M2FmLWI0ZTQtMThmYjgyYTkxYjBh&ct=1773675699005&or=OWA-NT-Mail&cid=8e014a43-973e-94d0-3f85-848ba256a582&nav=ZjFhODNjNzEtODM3ZC00ODc5LThhZDUtOWRjYWE4OWU2ZGM4&LOF=1">
-Recloser Investigation
-</a>
-
-<a class="btn secondary" href="https://forms.office.com/Pages/ResponsePage.aspx?id=jrOpsONbEEqP3M70MGtROZ9v6jUD8UVJnEFpSSpjulBUNjRYSVRXV002M1k3VENONDg0VE1BMklQTiQlQCN0PWcu">
-Preventive Maintenance Checks & Services (PMCS)
-</a>
-
-</div>
-</div>
-
-</div>
-
-<footer>
-<span class="pill">Developed by Eiden O. Garcia Torres</span>
-</footer>
-
-</section>
-</main>
 
 <script>
-(function updateLastUpdated(){
-  const fixedDate = new Date('2026-03-17T12:55');
-
-  const opts = {
-    weekday:'long',
-    year:'numeric',
-    month:'long',
-    day:'numeric',
-    hour:'numeric',
-    minute:'numeric',
-    hour12:true
-  };
-
-  document.getElementById('lastUpdated').textContent =
-    'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
-
-})();
+  (function(){
+    const fixedDate = new Date('2026-03-17T12:55');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
 </script>
 
 </body>
 </html>
-
