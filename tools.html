@@ -3,111 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reliability DA · LinkTree</title>
-  <style>
-    :root{
-      /* Same palette & tokens used in your calculator */
-      --bg: linear-gradient(90deg, #6bd27d, #2ac3dd, #1b2a65);
-      --panel:#ffffff10;             /* translucent card */
-      --ink:#ffffff;                 /* primary text */
-      --muted:#d0e6f2;               /* secondary text */
-      --accent:#6bd27d;              /* green */
-      --accent-2:#2ac3dd;            /* cyan (buttons) */
-      --danger:#ff6b6b;
-      --ok:#87fba4;
-      --warn:#ffcc66;
-      --radius:16px;
-    }
-
-    *{box-sizing:border-box}
-    body{
-      margin:0; padding:24px; background:var(--bg); color:var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
-    }
-
-    .wrap{
-      width:100%; max-width:860px;
-    }
-
-    header{ text-align:center; margin-bottom:16px; }
-    h1{ margin:0 0 8px; font-size:1.9rem; }
-    p.lead{ margin:0; color:var(--muted); }
-
-    .card{
-      background:var(--panel);
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:var(--radius);
-      box-shadow:0 10px 30px rgba(0,0,0,.3);
-      backdrop-filter: blur(8px);
-      padding:22px;
-    }
-
-    .brand{
-      display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:16px;
-    }
-    .brand img{
-      width:min(260px,70%); height:auto; display:block;
-      border-radius:12px; border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-      background:rgba(0,0,0,.12);
-    }
-
-    .meta{
-      display:flex; justify-content:center; gap:10px; margin:12px 0 4px 0; flex-wrap:wrap;
-    }
-    .pill{
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
-      color:var(--muted); font-size:.82rem;
-    }
-
-    .links{
-      display:grid; grid-template-columns:1fr; gap:12px; margin-top:10px;
-    }
-
-    a.btn{
-      text-decoration:none; color:#0b1020; font-weight:700;
-      background:var(--accent-2);
-      padding:14px 16px; text-align:center; border-radius:12px;
-      border:1px solid rgba(255,255,255,.28);
-      box-shadow:0 10px 18px rgba(0,0,0,.22);
-      transition:transform .08s ease, box-shadow .18s ease, filter .18s ease;
-    }
-    a.btn:hover{ transform:translateY(-1px); filter:saturate(1.05); box-shadow:0 14px 24px rgba(0,0,0,.28); }
-
-    /* Neutral/secondary button styling to match calculator "secondary" */
-    a.btn.secondary{
-      background:transparent; color:var(--ink); font-weight:600;
-      border:1px solid rgba(255,255,255,.35);
-    }
-
-    /* Special yellow callout button (kept from your original intent, but styled to match) */
-    a.btn.warn{
-      background:var(--warn); color:#3a2800; font-weight:800;
-      border-color:rgba(0,0,0,.15);
-    }
-
-    footer{ text-align:center; margin-top:14px; color:var(--muted); font-size:.85rem; }
-
-    @media (max-width:640px){
-      body{ padding:18px; }
-      .card{ padding:16px; }
-      h1{ font-size:1.6rem; }
-    }
-  </style>
+  <title>Reliability DA · Tools</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="wrap">
-    <header>
-      <h1>Reliability&nbsp;DA · Tools</h1>
-      <p class="lead">Quick access to interactive calculators.
-      </p>
+
+<div class="page-wrapper">
+  <div class="wrap-narrow">
+
+    <a class="back-link" href="index.html">← Back to Home</a>
+
+    <header class="site-header">
+      <h1>Tools</h1>
+      <p class="lead">Quick access to interactive calculators.</p>
     </header>
 
-    <section class="card">
+    <div class="card">
       <div class="brand">
-        <!-- Use your local file or hosted logo; filename kept from your snippet -->
         <img src="Luma White logo (1).png" alt="LUMA Logo">
       </div>
 
@@ -115,35 +27,50 @@
         <span class="pill" id="lastUpdated">Last Updated: —</span>
       </div>
 
-      <div class="links">
-        <!-- Buttons kept in your original order; labels unchanged -->
-        <a class="btn secondary" href="ip_calculator.html">IP Calculator</a>
-        <a class="btn secondary" href="ansi_overcurrent_calculator_with_graph.html">ANSI Overcurrent Trip Time Calculator</a>
-        <a class="btn secondary" href="S&C_K_Speed FuseLinks_TCCalculator.html">S&C “K” Speed Fuse Links · TCC Calculator</a>
-        <a class="btn secondary" href="qr_code_generator_tool.html">QR Generator</a>
+      <div class="divider"></div>
+
+      <div class="groups">
+        <div class="group">
+          <h3>Calculators &amp; Utilities</h3>
+          <div class="links">
+
+            <a class="btn secondary" href="ip_calculator.html">
+              IP Calculator
+            </a>
+
+            <a class="btn secondary" href="ansi_overcurrent_calculator_with_graph.html">
+              ANSI Overcurrent Trip Time Calculator
+            </a>
+
+            <a class="btn secondary" href="S&C_K_Speed FuseLinks_TCCalculator.html">
+              S&amp;C "K" Speed Fuse Links · TCC Calculator
+            </a>
+
+            <a class="btn secondary" href="qr_code_generator_tool.html">
+              QR Generator
+            </a>
+
+          </div>
+        </div>
       </div>
 
-      <footer>
-        <span class="pill">Develope by Eiden O. Garcia Torres
-        </span>
-      </footer>
-    </section>
-  </main>
+      <div class="card-footer">
+        <span class="footer-credit">Developed by Eiden O. Garcia Torres</span>
+      </div>
+    </div>
 
-  <script>
-    // Keep your “fixed manual date” behavior, but formatted like the calculator’s UI
-    (function updateLastUpdated(){
-      const fixedDate = new Date('2025-08-21T20:40'); // ← update manually when you publish
-      const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
-                     hour:'numeric', minute:'numeric', hour12:true };
-      document.getElementById('lastUpdated').textContent =
-        'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
-    })();
-  </script>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const fixedDate = new Date('2025-08-21T20:40');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
+</script>
+
 </body>
 </html>
-
-
-
-
-
