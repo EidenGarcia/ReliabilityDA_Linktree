@@ -225,9 +225,215 @@
       padding: 8px 12px; font-size: 0.76rem;
       color: rgba(255,230,150,0.85); margin-bottom: 14px; line-height: 1.5;
     }
+
+    /* ── Disclaimer Modal ── */
+    #disclaimerOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(5, 12, 30, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      animation: fadeIn 0.3s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes modalUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+
+    #disclaimerBox {
+      background: linear-gradient(160deg, rgba(15,26,62,0.98) 0%, rgba(8,18,40,0.98) 100%);
+      border: 1px solid rgba(255,200,80,0.35);
+      border-radius: 20px;
+      box-shadow:
+        0 24px 64px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 0 60px rgba(255,180,40,0.06);
+      padding: 36px 36px 30px;
+      max-width: 560px;
+      width: 100%;
+      animation: modalUp 0.35s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+    }
+
+    .disc-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,200,60,0.18), rgba(255,130,30,0.12));
+      border: 1px solid rgba(255,200,60,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(255,180,40,0.12);
+    }
+
+    #disclaimerBox h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .disc-subtitle {
+      font-size: 0.78rem;
+      color: rgba(255,200,80,0.75);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .disc-body {
+      font-size: 0.88rem;
+      color: rgba(200,220,240,0.85);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .disc-body strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .disc-body .disc-warning-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.22);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 0.84rem;
+      color: rgba(255,210,210,0.9);
+      line-height: 1.55;
+    }
+
+    .disc-warning-line .warn-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .disc-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      margin: 0 0 22px;
+    }
+
+    .disc-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .disc-checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--cyan);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .disc-checkbox-row span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    #acceptBtn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      cursor: not-allowed;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s ease;
+    }
+
+    #acceptBtn.ready {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--cyan), #1fa8c0);
+      color: #041820;
+      border-color: transparent;
+      box-shadow: 0 4px 20px rgba(42,195,221,0.3);
+    }
+
+    #acceptBtn.ready:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(42,195,221,0.4);
+      filter: brightness(1.05);
+    }
+
+    /* Blur the content behind the modal */
+    #mainContent {
+      filter: blur(3px);
+      pointer-events: none;
+      user-select: none;
+      transition: filter 0.3s ease;
+    }
   </style>
 </head>
 <body>
+
+<!-- ── Disclaimer Modal ── -->
+<div id="disclaimerOverlay">
+  <div id="disclaimerBox">
+    <div class="disc-icon">⚠️</div>
+    <div class="disc-subtitle">Important Notice — Read Before Use</div>
+    <h2>Estimation Tool Disclaimer</h2>
+
+    <div class="disc-body">
+      <p>This tool is an <strong>estimation calculator</strong> for the operating time of overcurrent
+      protection devices using ANSI standard curves (Extremely Inverse and Very Inverse). It applies
+      the selected curve equations to approximate the expected trip time based on the input parameters
+      you provide.</p>
+
+      <div class="disc-warning-line">
+        <span class="warn-icon">🚫</span>
+        <span>
+          <strong>This calculator must NOT be used as the basis for any final engineering determination,
+          protection coordination study, or equipment design decision.</strong>
+          Results are approximate and intended solely as a preliminary reference or guidance tool to
+          estimate operating time. Always verify results using certified relay-coordination software
+          and consult a qualified protection engineer before making any operational or design decision.
+        </span>
+      </div>
+    </div>
+
+    <div class="disc-divider"></div>
+
+    <label class="disc-checkbox-row" for="discCheck">
+      <input type="checkbox" id="discCheck"/>
+      <span>I understand that this tool provides estimates only and must not be used for final
+      engineering determinations or protection coordination decisions.</span>
+    </label>
+
+    <button id="acceptBtn" disabled>Check the box above to continue</button>
+  </div>
+</div>
+
+<!-- ── Main Content (blurred until accepted) ── -->
+<div id="mainContent">
 <div class="page-wrapper" style="align-items:flex-start;">
   <div style="width:100%;max-width:1400px;">
 
@@ -699,6 +905,39 @@ resetBtn.addEventListener('click', handleReset);
 applyJsonBtn.addEventListener('click', handleApplyJSON);
 downloadBtn.addEventListener('click', handleDownloadJSON);
 redrawGraph();
+</script>
+</div><!-- /#mainContent -->
+
+<script>
+// ── Disclaimer modal logic ──
+(function () {
+  const overlay   = document.getElementById('disclaimerOverlay');
+  const acceptBtn = document.getElementById('acceptBtn');
+  const discCheck = document.getElementById('discCheck');
+  const mainContent = document.getElementById('mainContent');
+
+  discCheck.addEventListener('change', function () {
+    if (this.checked) {
+      acceptBtn.disabled = false;
+      acceptBtn.classList.add('ready');
+      acceptBtn.textContent = 'I Accept — Continue to Calculator';
+    } else {
+      acceptBtn.disabled = true;
+      acceptBtn.classList.remove('ready');
+      acceptBtn.textContent = 'Check the box above to continue';
+    }
+  });
+
+  acceptBtn.addEventListener('click', function () {
+    if (acceptBtn.disabled) return;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity = '0';
+    mainContent.style.filter = 'none';
+    mainContent.style.pointerEvents = 'auto';
+    mainContent.style.userSelect = 'auto';
+    setTimeout(() => overlay.remove(), 320);
+  });
+})();
 </script>
 </body>
 </html>
