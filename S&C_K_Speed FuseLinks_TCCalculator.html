@@ -1151,9 +1151,9 @@ function redrawForSet(h, idx) {
       const tcRes = smu20Lookup(fuse.tc, I);
       if (mmRes && isFinite(mmRes.t)) mmT = mmRes.t;
       if (tcRes && isFinite(tcRes.t)) tcT = tcRes.t;
-      // idx=0 → upstream  → use Total Clearing time (TC) for the dot
-      // idx=1 → downstream → use Minimum Melting time (MM) for the dot
-      const dotT = idx === 0 ? tcT : mmT;
+      // idx=0 → upstream   → use Minimum Melting time (MM) for the dot
+      // idx=1 → downstream → use Total Clearing time (TC) for the dot
+      const dotT = idx === 0 ? mmT : tcT;
       if (isFinite(dotT)) drawOperatingPoint(I, dotT, COLORS[idx].dot, h.labelBox);
     }
     return { baseT: mmT, totalT: tcT, smu20: true, f };
@@ -1184,9 +1184,9 @@ function redrawForSet(h, idx) {
 function updateTCI(rUp, rDn) {
   if (!rUp || !rDn || rUp.hidden || rDn.hidden) { tciChip.style.display = 'none'; return; }
 
-  // Upstream SMU-20 → use TC (totalT). Downstream SMU-20 → use MM (baseT).
-  const upT  = (rUp.smu20)  ? rUp.totalT : rUp.totalT;   // TC for upstream
-  const dnT  = (rDn.smu20)  ? rDn.baseT  : rDn.totalT;   // MM for downstream
+  // Upstream SMU-20 → use MM (baseT). Downstream SMU-20 → use TC (totalT).
+  const upT  = (rUp.smu20)  ? rUp.baseT  : rUp.totalT;   // MM for upstream
+  const dnT  = (rDn.smu20)  ? rDn.totalT : rDn.totalT;   // TC for downstream
 
   if (!isFinite(upT) || !isFinite(dnT)) { tciChip.style.display = 'none'; return; }
 
