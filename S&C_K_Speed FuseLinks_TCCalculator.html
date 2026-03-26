@@ -191,6 +191,24 @@
     box-shadow: 0 4px 14px rgba(0,0,0,0.5); font-family: 'Menlo','Consolas',monospace; display: none;
   }
 
+
+  /* ── Hover crosshair tooltip ── */
+  #hoverTooltip {
+    position: absolute;
+    background: rgba(8,18,40,0.92);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: var(--ink);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+    font-family: 'Menlo','Consolas',monospace;
+    display: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    line-height: 1.6;
+  }
   textarea { min-height: 150px; resize: vertical; font-family: 'Menlo','Consolas',monospace; font-size: 0.79rem; line-height: 1.5; }
 
   /* ── Disclaimer Modal ── */
@@ -447,6 +465,7 @@
         <canvas id="ocCanvas" width="1060" height="740"></canvas>
         <div id="labelBox1" class="label-chip"></div>
         <div id="labelBox2" class="label-chip"></div>
+      <div id="hoverTooltip"></div>
       </div>
     </div>
 
@@ -642,6 +661,73 @@ window.addEventListener('mouseup', () => {
   isDragging = false;
   canvas.classList.remove('dragging');
 });
+
+// ════════════════════════════════════════════════════════
+//  HOVER CROSSHAIR + TOOLTIP
+// ════════════════════════════════════════════════════════
+const hoverTooltip = el('hoverTooltip');
+let hoverAnimFrame = null;
+
+canvas.addEventListener('mousemove', e => {
+  if (isDragging) { hoverTooltip.style.display = 'none'; return; }
+  const { x, y } = getCanvasPos(e);
+
+  // Only show inside the plot area
+  if (x < PAD_L || x > canvas.width - PAD_R || y < PAD_T || y > canvas.height - PAD_B) {
+    hoverTooltip.style.display = 'none';
+    return;
+  }
+
+  if (hoverAnimFrame) cancelAnimationFrame(hoverAnimFrame);
+  hoverAnimFrame = requestAnimationFrame(() => {
+    const I = ixs(x);
+    const t = iys(y);
+
+    // Format labels
+    const iLabel = I >= 1000 ? (I/1000).toFixed(2) + ' kA' : I.toFixed(1) + ' A';
+    const tLabel = t >= 1    ? t.toFixed(3) + ' s'   : (t * 1000).toFixed(2) + ' ms';
+
+    hoverTooltip.innerHTML = `<span style="color:var(--muted-2)">I =</span> <b>${iLabel}</b>&nbsp;&nbsp;<span style="color:var(--muted-2)">t =</span> <b>${tLabel}</b>`;
+
+    // Position tooltip — follow cursor, flip if near right/bottom edge
+    const rect    = canvas.getBoundingClientRect();
+    const scaleX  = rect.width  / canvas.width;
+    const scaleY  = rect.height / canvas.height;
+    const cssX    = x * scaleX;
+    const cssY    = y * scaleY;
+    const tipW    = 190, tipH = 30;
+    const margin  = 14;
+    let left = cssX + margin;
+    let top  = cssY - tipH - 8;
+    if (left + tipW > rect.width - 8)  left = cssX - tipW - margin;
+    if (top < 4) top = cssY + margin;
+
+    hoverTooltip.style.left    = left + 'px';
+    hoverTooltip.style.top     = top  + 'px';
+    hoverTooltip.style.display = 'block';
+
+    // Draw crosshair overlay
+    drawAll();
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+    ctx.setLineDash([]);
+    // Small circle at intersection
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  });
+});
+
+canvas.addEventListener('mouseleave', () => {
+  hoverTooltip.style.display = 'none';
+  if (hoverAnimFrame) { cancelAnimationFrame(hoverAnimFrame); hoverAnimFrame = null; }
+  drawAll(); // remove crosshair overlay
+});
+
 
 // Touch support
 let lastTouchDist = null;
@@ -1065,8 +1151,10 @@ function redrawForSet(h, idx) {
       const tcRes = smu20Lookup(fuse.tc, I);
       if (mmRes && isFinite(mmRes.t)) mmT = mmRes.t;
       if (tcRes && isFinite(tcRes.t)) tcT = tcRes.t;
-      // Show operating point at MM time (conservative)
-      if (isFinite(mmT)) drawOperatingPoint(I, mmT, COLORS[idx].dot, h.labelBox);
+      // idx=0 → upstream  → use Total Clearing time (TC) for the dot
+      // idx=1 → downstream → use Minimum Melting time (MM) for the dot
+      const dotT = idx === 0 ? tcT : mmT;
+      if (isFinite(dotT)) drawOperatingPoint(I, dotT, COLORS[idx].dot, h.labelBox);
     }
     return { baseT: mmT, totalT: tcT, smu20: true, f };
   }
@@ -1094,10 +1182,15 @@ function redrawForSet(h, idx) {
 }
 
 function updateTCI(rUp, rDn) {
-  if (!rUp || !rDn || rUp.hidden || rDn.hidden || !isFinite(rUp.totalT) || !isFinite(rDn.totalT)) {
-    tciChip.style.display = 'none'; return;
-  }
-  const delta = rUp.totalT - rDn.totalT;
+  if (!rUp || !rDn || rUp.hidden || rDn.hidden) { tciChip.style.display = 'none'; return; }
+
+  // Upstream SMU-20 → use TC (totalT). Downstream SMU-20 → use MM (baseT).
+  const upT  = (rUp.smu20)  ? rUp.totalT : rUp.totalT;   // TC for upstream
+  const dnT  = (rDn.smu20)  ? rDn.baseT  : rDn.totalT;   // MM for downstream
+
+  if (!isFinite(upT) || !isFinite(dnT)) { tciChip.style.display = 'none'; return; }
+
+  const delta = upT - dnT;
   const sign  = delta >= 0 ? '+' : '−';
   const abs   = Math.abs(delta);
   let text = `Δt (TCI): ${sign}${abs.toFixed(5)} s`;
