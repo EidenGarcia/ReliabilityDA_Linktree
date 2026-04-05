@@ -679,11 +679,6 @@ function addAmpLine(val) {
   const v = val != null ? val : parseFloat(def.toFixed(1));
   const id = ++lineIdCounter;
   ampLines.push({ id, value: v });
-  // Also add a paired time line with same sequential id
-  const tDef = Math.pow(10, (log10(view.yMin) + log10(view.yMax)) / 2);
-  const tv = parseFloat(tDef.toFixed(4));
-  const tid = ++lineIdCounter;
-  timeLines.push({ id: tid, value: tv });
   renderLineChips();
   drawAll();
 }
@@ -692,11 +687,6 @@ function addTimeLine(val) {
   const v = val != null ? val : parseFloat(def.toFixed(4));
   const id = ++lineIdCounter;
   timeLines.push({ id, value: v });
-  // Also add a paired amp line
-  const aDef = Math.pow(10, (log10(view.xMin) + log10(view.xMax)) / 2);
-  const av = parseFloat(aDef.toFixed(1));
-  const aid = ++lineIdCounter;
-  ampLines.push({ id: aid, value: av });
   renderLineChips();
   drawAll();
 }
