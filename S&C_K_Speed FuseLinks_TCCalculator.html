@@ -381,9 +381,10 @@
     <h2>Estimation Tool Disclaimer</h2>
     <div class="disc-body">
       <p>This tool is an <strong>estimation calculator</strong> for the operating time of
-      overcurrent protection devices using ANSI standard curves (S&amp;C IntelliRupter) and
-      S&amp;C TripSaver II K-Speed fuse link TCC curves, and S&amp;C Power Fuses Type SMU-20
-      tabulated TCC data (TCC 165-2 &amp; 165-2-2).</p>
+      overcurrent protection devices using ANSI standard curves (S&amp;C IntelliRupter),
+      S&amp;C TripSaver II K-Speed fuse link TCC curves, S&amp;C Power Fuses Type SMU-20
+      tabulated TCC data (TCC 165-2 &amp; 165-2-2), and the ABB DPU2000R ANSI Time
+      Overcurrent characteristic curves.</p>
       <div class="disc-warning-line">
         <span class="warn-icon">🚫</span>
         <span>
@@ -414,7 +415,7 @@
 
   <header class="site-header">
     <h1>TCC Coordination Calculator</h1>
-    <p class="lead">S&amp;C IntelliRupter (ANSI) &amp; TripSaver II (K-Speed) — upstream/downstream TCI with zoom &amp; pan.</p>
+    <p class="lead">S&amp;C IntelliRupter (ANSI) · TripSaver II (K-Speed) · SMU-20 (Table) · ABB DPU2000R — TCI coordination with zoom &amp; pan.</p>
   </header>
 
   <div class="calc-container">
@@ -472,7 +473,7 @@
       </div>
 
       <div class="graph-legend" id="graphLegend">
-        <span class="legend-item" style="font-size:0.71rem;color:var(--muted-2)">Shaded = extra delay · SMU-20: solid=MM, dashed=TC</span>
+        <span class="legend-item" style="font-size:0.71rem;color:var(--muted-2)">Shaded = extra delay · SMU-20: solid=MM, dashed=TC · DPU: T=(A/(Mᴾ−C)+B)×(14n−5)/9</span>
         <span id="tciChip" class="tci-chip">Δt (TCI): —</span>
       </div>
 
@@ -516,7 +517,18 @@ const DEFAULT_CURVES = {
   "Fuse-80K":  { pickup:180.0,   A:5.21350,  B:0, C:1, P:2, type:"kspeed" },
   "Fuse-100K": { pickup:219.5,   A:5.35890,  B:0, C:1, P:2, type:"kspeed" },
   "Fuse-140K": { pickup:309.0,   A:7.033346, B:0, C:1, P:2, type:"kspeed" },
-  "Fuse-200K": { pickup:479.787, A:7.540324, B:0, C:1, P:2, type:"kspeed" }
+  "Fuse-200K": { pickup:479.787, A:7.540324, B:0, C:1, P:2, type:"kspeed" },
+  // ABB DPU2000R — ANSI Time Overcurrent: T = (A/(M^P−C)+B)×(14n−5)/9
+  // Constants from Table 1-14 (ABB DPU2000R instruction manual)
+  "DPU – Extremely Inverse":    { A:6.407,   B:0.025,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Very Inverse":         { A:2.855,   B:0.0712, C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Inverse":              { A:0.0086,  B:0.0185, C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Short Time Inverse":   { A:0.00172, B:0.0037, C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Short Time Ext. Inv.": { A:1.281,   B:0.005,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Ext. Inv.":  { A:64.07,   B:0.250,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Very Inv.":  { A:28.55,   B:0.712,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Inverse":    { A:0.086,   B:0.185,  C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Recloser Curve #8":    { A:4.211,   B:0.013,  C:0.35, P:1.8, type:"dpu2000r" }
 };
 let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
 
@@ -551,7 +563,7 @@ function makeDevice(defaultDeviceType) {
     open:       true,
     deviceType: defaultDeviceType || 'intellirupter',
     curveVal:   '',
-    I: '', Ip: '', n: '', freq: '60',
+    Ip: '', n: '', freq: '60',
     extra: '', extraUnit: 'cycles',
     show: true,
   };
@@ -566,7 +578,6 @@ function getH(id) {
     id,
     device:      el(`${p}_device`),
     badge:       el(`${p}_badge`),
-    I:           el(`${p}_I`),
     Ip:          el(`${p}_Ip`),
     IpLabel:     el(`${p}_IpLabel`),
     n:           el(`${p}_n`),
@@ -619,6 +630,7 @@ function renderDeviceList() {
             <option value="intellirupter" ${dev.deviceType==='intellirupter'?'selected':''}>S&C – IntelliRupter (ANSI curves)</option>
             <option value="tripsaver"     ${dev.deviceType==='tripsaver'    ?'selected':''}>S&C – TripSaver II (K-Speed fuse)</option>
             <option value="smu20"         ${dev.deviceType==='smu20'        ?'selected':''}>S&C Power Fuses – Type SMU-20 (7.2 and 14.4 kV)</option>
+            <option value="dpu2000r"      ${dev.deviceType==='dpu2000r'     ?'selected':''}>ABB – DPU2000R (ANSI TOC)</option>
           </select>
           <div class="device-badge" id="d${dev.id}_badge">
             <span class="dot" style="background:${col.hex}"></span>
@@ -628,10 +640,7 @@ function renderDeviceList() {
 
         <fieldset>
           <legend>Fault Parameters</legend>
-          <div class="grid-3">
-            <div><label>Fault current I (A)</label>
-              <input id="d${dev.id}_I" type="number" min="0.001" step="any" placeholder="e.g. 1712"
-                value="${dev.I}" oninput="saveDev(${dev.id});drawAll()"/></div>
+          <div class="grid-2">
             <div><label id="d${dev.id}_IpLabel">Pickup Ip (A)</label>
               <input id="d${dev.id}_Ip" type="number" min="0.001" step="any" placeholder="enter value"
                 value="${dev.Ip}" oninput="saveDev(${dev.id});drawAll()"/></div>
@@ -783,8 +792,7 @@ function saveDev(id) {
   const dev = devices.find(d => d.id === id);
   if (!dev) return;
   const h = getH(id);
-  if (h.device)    dev.deviceType = h.device.value;          // ← was missing
-  if (h.I)         dev.I          = h.I.value;
+  if (h.device)    dev.deviceType = h.device.value;
   if (h.Ip)        dev.Ip         = h.Ip.value;
   if (h.n)         dev.n          = h.n.value;
   if (h.freq)      dev.freq       = h.freq.value;
@@ -797,8 +805,9 @@ function saveDev(id) {
 // ═══════════════════════════════════════════════════════════════
 //  DEVICE TYPE SWITCHING
 // ═══════════════════════════════════════════════════════════════
-function isKSpeed(h) { return h.device && h.device.value === 'tripsaver'; }
-function isSMU20(h)  { return h.device && h.device.value === 'smu20'; }
+function isKSpeed(h)   { return h.device && h.device.value === 'tripsaver'; }
+function isSMU20(h)    { return h.device && h.device.value === 'smu20'; }
+function isDPU2000R(h) { return h.device && h.device.value === 'dpu2000r'; }
 
 /**
  * FIX #2 — onDeviceTypeChange first saves (capturing the NEW deviceType),
@@ -841,12 +850,15 @@ function applyDeviceUI(id) {
 
   const ks  = isKSpeed(h);
   const smu = isSMU20(h);
+  const dpu = isDPU2000R(h);
   const col = colorOf(getDevIdx(id));
 
   // Badge
-  h.badge.innerHTML = `<span class="dot" style="background:${col.hex}"></span><span>${
-    smu ? 'SMU-20 · Table Lookup' : ks ? 'K-Speed · TripSaver II' : 'ANSI · EI / Very Inverse'
-  }</span>`;
+  const badgeLabel = smu ? 'SMU-20 · Table Lookup'
+                   : ks  ? 'K-Speed · TripSaver II'
+                   : dpu ? 'ABB DPU2000R · ANSI TOC'
+                   :       'ANSI · EI / Very Inverse';
+  h.badge.innerHTML = `<span class="dot" style="background:${col.hex}"></span><span>${badgeLabel}</span>`;
 
   // Field enable/disable state
   const lockForSMU = (input) => {
@@ -860,7 +872,7 @@ function applyDeviceUI(id) {
   h.Ip.style.opacity = (smu || ks) ? '0.35' : '1';
   h.Ip.style.cursor  = (smu || ks) ? 'not-allowed' : '';
   if (h.extraUnit) {
-    h.extraUnit.disabled    = smu;
+    h.extraUnit.disabled      = smu;
     h.extraUnit.style.opacity = smu ? '0.35' : '1';
   }
 
@@ -877,6 +889,12 @@ function applyDeviceUI(id) {
     h.IpLabel.textContent      = 'Pickup Ip (auto)';
     h.formulaPill.firstChild.textContent = 'K-Speed Formula (M = I/Ip): ';
     h.formulaCode.textContent  = 'T = (A/(M²−1) + B) × TM + TS';
+  } else if (dpu) {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time Dial n';
+    h.IpLabel.textContent      = 'Pickup Ip (A)';
+    h.formulaPill.firstChild.textContent = 'ABB DPU2000R Formula (M = I/Ipu): ';
+    h.formulaCode.textContent  = 'T = (A/(Mᴾ−C) + B) × (14n−5)/9';
   } else {
     h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
     h.nLabel.textContent       = 'Time dial n';
@@ -893,12 +911,12 @@ function applyDeviceUI(id) {
 function resetDevice(id) {
   const dev = devices.find(d => d.id === id);
   if (!dev) return;
-  dev.I = ''; dev.Ip = ''; dev.n = ''; dev.freq = '60';
+  dev.Ip = ''; dev.n = ''; dev.freq = '60';
   dev.extra = ''; dev.extraUnit = 'cycles'; dev.curveVal = '';
 
   const h = getH(id);
-  if (!h.I) return;
-  h.I.value = ''; h.n.value = ''; h.extra.value = ''; h.freq.value = '60';
+  if (!h.Ip) return;
+  h.n.value = ''; h.extra.value = ''; h.freq.value = '60';
   h.curve.value = ''; h.extraUnit.value = 'cycles';
   [h.n, h.Ip, h.freq, h.extra].forEach(e => {
     if (!e) return;
@@ -922,7 +940,10 @@ function populateCurveSelect(sel, deviceType) {
     });
     return;
   }
-  const filterType = deviceType === 'tripsaver' ? 'kspeed' : 'ansi';
+  // dpu2000r uses its own curve type; tripsaver uses kspeed; everything else uses ansi
+  const filterType = deviceType === 'tripsaver' ? 'kspeed'
+                   : deviceType === 'dpu2000r'  ? 'dpu2000r'
+                   : 'ansi';
   Object.entries(CURVES).forEach(([name, p]) => {
     if (p.type === filterType) {
       const opt = document.createElement('option');
@@ -1323,13 +1344,14 @@ function parseFractionOrFloat(t) {
 }
 
 /**
- * FIX #4 — computeTime EI branch.
- * The original expression was:
- *   (((9.96644/denom)+0.0388889) - 0.01389 - (3.55944/denom)) * TM + TS
- *   = ((9.96644-3.55944)/denom + 0.025) * TM + TS
- *   = (6.407/denom + 0.025) * TM + TS
- * Which matches the standard ANSI EI formula.
- * The arithmetic was correct but needlessly opaque and fragile; simplified here.
+ * computeTime — unified trip time calculator.
+ *
+ * For ANSI (IntelliRupter / standard):  T = (A/(M^P−C) + B) × TM + TS
+ * For ABB DPU2000R:                     T = (A/(M^P−C) + B) × (14·TM−5)/9 + TS
+ *   where TM is the Time Dial setting (n) per the DPU2000R manual.
+ * For K-Speed (TripSaver):              same general formula, TM = user TM value.
+ *
+ * params.isDPU flags the DPU2000R multiplier.
  */
 function computeTime(I, Ip, params, TM, TS) {
   if (Ip <= 0) throw new Error('Ip must be > 0');
@@ -1338,11 +1360,18 @@ function computeTime(I, Ip, params, TM, TS) {
   const C     = params.C !== undefined ? params.C : 1;
   const denom = Math.pow(M, params.P) - C;
   if (denom <= 0) return Infinity;
+  const base = params.A / denom + params.B;
+  if (params.isDPU) {
+    // ABB DPU2000R: Trip Time = (A/(M^P−C)+B) × (14n−5)/9
+    const timeMult = (14 * TM - 5) / 9;
+    if (timeMult <= 0) return Infinity;
+    return base * timeMult + TS;
+  }
   if (params.isEI) {
     // Standard ANSI Extremely Inverse: T = (6.407/(M²−1) + 0.025) × n
     return (6.407 / denom + 0.025) * TM + TS;
   }
-  return (params.A / denom + params.B) * TM + TS;
+  return base * TM + TS;
 }
 
 function extraToSeconds(freq, val, unit) {
@@ -1559,18 +1588,20 @@ function getSetParams(h) {
     if (!fuse) return null;
     return { smu20:true, fuseKey, fuse, f:60 };
   }
-  const p = CURVES[curveName];
-  if (!p) return null;
+  const rawP = CURVES[curveName];
+  if (!rawP) return null;
   const TM = parseFloat(h.n.value);
   const f  = parseFloat(h.freq.value || '60');
   if (!isFinite(TM)||TM<=0) return null;
   let Ip;
   if (isKSpeed(h)) {
-    Ip = p.pickup;
+    Ip = rawP.pickup;
   } else {
     Ip = parseFloat(h.Ip.value);
     if (!isFinite(Ip)||Ip<=0) return null;
   }
+  // Tag DPU2000R params so computeTime uses the correct multiplier
+  const p = isDPU2000R(h) ? { ...rawP, isDPU: true } : rawP;
   const raw = (h.extra.value||'').trim();
   let TS = 0;
   if (raw) { try { TS = extraToSeconds(f, parseFractionOrFloat(raw), h.extraUnit.value); } catch { TS=0; } }
@@ -1593,18 +1624,7 @@ function redrawForSet(h, idx) {
     strokeCurve(mmCurve.pts, col.line, false);
     strokeCurve(tcCurve.pts, col.line, true);
     hideLabel(lb);
-    const I = parseFloat(h.I.value);
-    let mmT=Infinity, tcT=Infinity;
-    if (isFinite(I)&&I>0) {
-      const mmRes=smu20Lookup(sp.fuse.mm,I);
-      const tcRes=smu20Lookup(sp.fuse.tc,I);
-      if (mmRes&&isFinite(mmRes.t)) mmT=mmRes.t;
-      if (tcRes&&isFinite(tcRes.t)) tcT=tcRes.t;
-      // Show MM dot for first device, TC dot for others
-      const dotT = (idx===0) ? mmT : tcT;
-      if (isFinite(dotT)) drawOperatingPoint(I, dotT, col.dot, lb);
-    }
-    return { baseT:mmT, totalT:tcT, smu20:true, f:sp.f };
+    return { baseT:Infinity, totalT:Infinity, smu20:true, f:sp.f };
   }
 
   const { p, Ip, TM, TS, f } = sp;
@@ -1613,18 +1633,8 @@ function redrawForSet(h, idx) {
   if (TS>0) fillBetween(base.data, total.data, col.fill);
   strokeCurve(base.pts, col.line, false);
   if (TS>0) strokeCurve(total.pts, col.line, false);
-
   hideLabel(lb);
-  const I = parseFloat(h.I.value);
-  let baseT=Infinity, totalT=Infinity;
-  if (isFinite(I)&&I>0) {
-    try {
-      baseT  = computeTime(I, Ip, p, TM, 0);
-      totalT = isFinite(baseT) ? baseT+TS : Infinity;
-      if (isFinite(totalT)) drawOperatingPoint(I, totalT, col.dot, lb);
-    } catch { /* skip */ }
-  }
-  return { baseT, totalT, f };
+  return { baseT:Infinity, totalT:Infinity, f };
 }
 
 /**
