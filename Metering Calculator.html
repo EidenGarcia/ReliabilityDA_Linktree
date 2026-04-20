@@ -1,493 +1,390 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Metering Check Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <style>
-:root {
- --green: #6bd27d;
- --cyan: #2ac3dd;
- --glass: rgba(255,255,255,0.06);
- --glass-border: rgba(255,255,255,0.10);
- --ink: #f0f8ff;
- --muted: #8db4cc;
- --muted-2: #5a8aaa;
- --radius-sm: 8px;
- --radius: 14px;
- --radius-lg: 20px;
- --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
- --cyan-glow: 0 0 20px rgba(42,195,221,0.15);
- --pass: #6bd27d;
- --fail: #f87171;
+/* ── Page overrides ── */
+.tol-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  margin-bottom: 20px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{
- font-family:'DM Sans',sans-serif;
- background:#0f1a3e;
- color:var(--ink);
- min-height:100vh;
- overflow-x:hidden;
- position:relative;
+.tol-wrap { display: flex; align-items: center; gap: 8px; }
+.tol-wrap label { color: var(--muted); font-size: 0.85rem; }
+.tol-input {
+  width: 64px;
+  background: rgba(42,195,221,0.08);
+  border: 1px solid rgba(42,195,221,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--cyan);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  text-align: center; padding: 5px 8px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
 }
-body::before{
- content:'';position:fixed;inset:0;
- background:
-   radial-gradient(ellipse 80% 60% at 10% 20%,rgba(107,210,125,0.10) 0%,transparent 60%),
-   radial-gradient(ellipse 60% 50% at 85% 70%,rgba(42,195,221,0.09) 0%,transparent 55%),
-   linear-gradient(160deg,#0d1f18 0%,#0a1a30 45%,#0f1a3e 100%);
- z-index:0;pointer-events:none;
+.tol-input::-webkit-outer-spin-button,
+.tol-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.tol-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(42,195,221,0.18);
 }
-body::after{
- content:'';position:fixed;inset:0;
- background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.03) 1px,transparent 0);
- background-size:32px 32px;z-index:0;pointer-events:none;
+.tol-unit { color: var(--muted-2); font-size: 0.82rem; }
+
+/* ── Table ── */
+.table-wrap {
+overflow-x: auto;
+border-radius: var(–radius-sm);
+border: 1px solid var(–glass-border);
+margin-bottom: 20px;
 }
-.page-wrapper{
- position:relative;z-index:1;
- min-height:100vh;padding:32px 16px 48px;
- display:flex;flex-direction:column;align-items:center;
+
+table {
+width: 100%;
+table-layout: auto;
+border-collapse: collapse;
+font-size: 0.8rem;
+font-family: ‘DM Sans’, sans-serif;
 }
-/* ── Back link ── */
-.back-link{
-align-self:flex-start;
-display:inline-flex;align-items:center;gap:6px;
-color:var(–muted);text-decoration:none;font-size:0.82rem;font-weight:500;
-margin-bottom:20px;padding:5px 12px;border-radius:999px;
-border:1px solid var(–glass-border);background:var(–glass);
-transition:all 0.2s ease;
+
+thead tr.group-row th {
+padding: 8px 6px; text-align: center;
+font-family: ‘Syne’, sans-serif;
+font-size: 0.62rem; font-weight: 700;
+letter-spacing: 0.1em; text-transform: uppercase;
+white-space: nowrap;
+border-bottom: 1px solid var(–glass-border);
 }
-.back-link:hover{color:var(–ink);background:rgba(255,255,255,0.09);}
-/* ── Header ── */
-.site-header{text-align:center;margin-bottom:24px;animation:fadeDown 0.5s ease both;}
-.header-badge{
-display:inline-flex;align-items:center;gap:6px;
-padding:4px 12px;border-radius:999px;
-background:rgba(42,195,221,0.08);border:1px solid rgba(42,195,221,0.2);
-color:var(–cyan);font-size:0.72rem;font-weight:600;
-letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;
+.gh-pole  { background: rgba(0,0,0,0.3);        color: var(–muted-2); }
+.gh-inj   { background: rgba(96,165,250,0.07);  color: #60a5fa;       border-top: 2px solid rgba(96,165,250,0.35); }
+.gh-range { background: rgba(107,210,125,0.05); color: #86efac;       border-top: 2px solid rgba(107,210,125,0.3); }
+.gh-real  { background: rgba(42,195,221,0.06);  color: var(–cyan);   border-top: 2px solid rgba(42,195,221,0.35); }
+.gh-res   { background: rgba(0,0,0,0.3);        color: var(–muted-2);border-top: 2px solid var(–glass-border); }
+
+thead tr.sub-row th {
+padding: 6px; text-align: center;
+font-size: 0.62rem; letter-spacing: 0.04em;
+background: rgba(0,0,0,0.22);
+border-bottom: 2px solid var(–glass-border);
+white-space: nowrap; color: var(–muted-2);
 }
-.header-badge::before{
-content:’’;width:5px;height:5px;border-radius:50%;
-background:var(–cyan);animation:pulse 2s infinite;
+.sh-inj  { color: rgba(147,197,253,0.85); }
+.sh-lo   { color: rgba(253,211,77,0.85); }
+.sh-hi   { color: rgba(134,239,172,0.85); }
+.sh-real { color: rgba(42,195,221,0.85); }
+
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.025); }
+tbody tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+td { padding: 7px 5px; text-align: center; vertical-align: middle; }
+
+.td-pole {
+font-family: ‘Syne’, sans-serif;
+font-weight: 700; font-size: 0.88rem;
+color: var(–cyan); background: rgba(0,0,0,0.2);
+white-space: nowrap; padding: 7px 12px;
 }
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
-.site-header h1{
-font-family:‘Syne’,sans-serif;font-weight:800;
-font-size:clamp(1.4rem,3.5vw,2rem);letter-spacing:-0.02em;
-background:linear-gradient(135deg,#fff 30%,var(–cyan) 100%);
--webkit-background-clip:text;-webkit-text-fill-color:transparent;
-background-clip:text;line-height:1.2;margin-bottom:6px;
+
+.cell-input {
+width: 100%; min-width: 62px;
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,255,255,0.12);
+border-radius: 8px;
+color: var(–ink);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.8rem; text-align: center;
+padding: 6px 4px; outline: none;
+transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+-moz-appearance: textfield;
 }
-.site-header .lead{color:var(–muted);font-size:0.88rem;}
-/* ── Card ── */
-.card{
-width:100%;max-width:820px;
-background:var(–glass);border:1px solid var(–glass-border);
-border-radius:var(–radius-lg);backdrop-filter:blur(20px);
--webkit-backdrop-filter:blur(20px);
-box-shadow:var(–shadow-lg),inset 0 1px 0 rgba(255,255,255,0.07);
-padding:24px;animation:fadeUp 0.5s ease 0.1s both;
+.cell-input::-webkit-outer-spin-button,
+.cell-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.cell-input:focus {
+border-color: var(–cyan);
+background: rgba(42,195,221,0.07);
+box-shadow: 0 0 0 2px rgba(42,195,221,0.18);
 }
-/* ── Tolerance row ── */
-.controls-row{
-display:flex;align-items:center;justify-content:space-between;
-flex-wrap:wrap;gap:10px;
-padding:10px 14px;
-background:rgba(0,0,0,0.18);border:1px solid var(–glass-border);
-border-radius:var(–radius);margin-bottom:20px;
+
+.cell-input.inj {
+background: rgba(96,165,250,0.06);
+border-color: rgba(96,165,250,0.2);
+color: #93c5fd;
 }
-.controls-label{
-font-family:‘Syne’,sans-serif;font-size:0.72rem;font-weight:600;
-letter-spacing:0.1em;text-transform:uppercase;color:var(–cyan);
+.cell-input.inj:focus {
+border-color: #60a5fa;
+background: rgba(96,165,250,0.1);
+box-shadow: 0 0 0 2px rgba(96,165,250,0.18);
 }
-.tol-wrap{display:flex;align-items:center;gap:8px;}
-.tol-wrap label{color:var(–muted);font-size:0.82rem;}
-.tol-input{
-width:60px;
-background:rgba(42,195,221,0.08);border:1px solid rgba(42,195,221,0.28);
-border-radius:var(–radius-sm);color:var(–cyan);
-font-family:‘Syne’,sans-serif;font-size:0.95rem;font-weight:700;
-text-align:center;padding:5px 8px;outline:none;
-transition:border-color 0.2s,box-shadow 0.2s;
--moz-appearance:textfield;
+
+.cell-input.real.r-pass {
+border-color: rgba(107,210,125,0.55);
+background: rgba(107,210,125,0.08);
+color: #a7f3b4;
 }
-.tol-input::-webkit-outer-spin-button,.tol-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.tol-input:focus{border-color:var(–cyan);box-shadow:var(–cyan-glow);}
-.tol-unit{color:var(–muted-2);font-size:0.82rem;}
-/* ── Table wrapper ── */
-.table-wrap{overflow-x:auto;border-radius:var(–radius);border:1px solid var(–glass-border);}
-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
-/* Column group headers */
-thead tr.group-row th{
-padding:8px 10px;text-align:center;
-font-family:‘Syne’,sans-serif;font-size:0.65rem;font-weight:700;
-letter-spacing:0.1em;text-transform:uppercase;
-border-bottom:1px solid var(–glass-border);
+.cell-input.real.r-fail {
+border-color: rgba(248,113,113,0.55);
+background: rgba(248,113,113,0.08);
+color: #fca5a5;
 }
-.gh-pole  {background:rgba(0,0,0,0.25);color:var(–muted-2);width:52px;}
-.gh-inj   {background:rgba(96,165,250,0.08);color:#60a5fa;border-top:2px solid rgba(96,165,250,0.4);}
-.gh-range {background:rgba(107,210,125,0.06);color:#86efac;border-top:2px solid rgba(107,210,125,0.35);}
-.gh-real  {background:rgba(42,195,221,0.07);color:var(–cyan);border-top:2px solid rgba(42,195,221,0.4);}
-.gh-res   {background:rgba(0,0,0,0.25);color:var(–muted-2);border-top:2px solid var(–glass-border);}
-/* Sub-headers */
-thead tr.sub-row th{
-padding:6px 8px;text-align:center;
-font-size:0.66rem;color:var(–muted-2);letter-spacing:0.04em;
-background:rgba(0,0,0,0.2);
-border-bottom:2px solid var(–glass-border);
-white-space:nowrap;
+
+.td-lo { color: #fcd34d; font-family: ‘Syne’, sans-serif; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+.td-hi { color: #86efac; font-family: ‘Syne’, sans-serif; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+
+.td-result { white-space: nowrap; }
+.badge {
+display: inline-flex; align-items: center; gap: 5px;
+padding: 4px 10px; border-radius: 999px;
+font-family: ‘Syne’, sans-serif;
+font-size: 0.62rem; font-weight: 700;
+letter-spacing: 0.08em; text-transform: uppercase;
+border: 1px solid var(–glass-border);
+color: var(–muted); background: rgba(255,255,255,0.03);
+transition: all 0.25s ease; white-space: nowrap;
 }
-.sh-inj  {color:rgba(147,197,253,0.8);}
-.sh-lo   {color:rgba(253,211,77,0.8);}
-.sh-hi   {color:rgba(134,239,172,0.8);}
-.sh-real {color:rgba(42,195,221,0.8);}
-/* Body rows */
-tbody tr{transition:background 0.15s;}
-tbody tr:hover{background:rgba(255,255,255,0.025);}
-tbody tr:not(:last-child) td{border-bottom:1px solid rgba(255,255,255,0.04);}
-td{
-padding:8px 8px;text-align:center;
-vertical-align:middle;
+.badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.badge.pass {
+background: rgba(107,210,125,0.13);
+border-color: rgba(107,210,125,0.38);
+color: var(–green);
+box-shadow: 0 0 10px rgba(107,210,125,0.12);
 }
-/* Pole # cell */
-.td-pole{
-font-family:‘Syne’,sans-serif;font-weight:700;font-size:0.9rem;
-color:var(–cyan);background:rgba(0,0,0,0.2);
-width:48px;
+.badge.fail {
+background: rgba(248,113,113,0.13);
+border-color: rgba(248,113,113,0.38);
+color: #f87171;
+box-shadow: 0 0 10px rgba(248,113,113,0.12);
 }
-/* Inputs — injected & real */
-.cell-input{
-width:88px;
-background:rgba(255,255,255,0.04);
-border:1px solid rgba(255,255,255,0.1);
-border-radius:6px;
-color:var(–ink);
-font-family:‘DM Sans’,sans-serif;font-size:0.82rem;
-text-align:center;padding:5px 6px;outline:none;
-transition:border-color 0.2s,background 0.2s,box-shadow 0.2s;
--moz-appearance:textfield;
-}
-.cell-input::-webkit-outer-spin-button,.cell-input::-webkit-inner-spin-button{-webkit-appearance:none;}
-.cell-input:focus{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.07);}
-/* Injected input accent */
-.cell-input.inj{
-background:rgba(96,165,250,0.06);
-border-color:rgba(96,165,250,0.2);
-color:#93c5fd;
-}
-.cell-input.inj:focus{border-color:rgba(96,165,250,0.45);box-shadow:0 0 14px rgba(96,165,250,0.12);}
-/* Real input states */
-.cell-input.real{}
-.cell-input.real:focus{border-color:rgba(42,195,221,0.5);box-shadow:var(–cyan-glow);}
-.cell-input.real.r-pass{border-color:rgba(107,210,125,0.5);background:rgba(107,210,125,0.07);color:#a7f3b4;}
-.cell-input.real.r-fail{border-color:rgba(248,113,113,0.5);background:rgba(248,113,113,0.07);color:#fca5a5;}
-/* Range cells */
-.td-lo,.td-hi{
-font-family:‘Syne’,sans-serif;font-size:0.76rem;font-weight:600;
-width:80px;
-}
-.td-lo{color:#fcd34d;}
-.td-hi{color:#86efac;}
-/* Result badge */
-.td-result{width:80px;}
-.badge{
-display:inline-flex;align-items:center;gap:5px;
-padding:4px 10px;border-radius:999px;
-font-family:‘Syne’,sans-serif;font-size:0.62rem;font-weight:700;
-letter-spacing:0.08em;text-transform:uppercase;
-border:1px solid var(–glass-border);color:var(–muted);
-background:rgba(255,255,255,0.03);
-transition:all 0.25s ease;white-space:nowrap;
-}
-.badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
-.badge.pass{background:rgba(107,210,125,0.14);border-color:rgba(107,210,125,0.4);color:var(–pass);box-shadow:0 0 10px rgba(107,210,125,0.15);}
-.badge.fail{background:rgba(248,113,113,0.14);border-color:rgba(248,113,113,0.4);color:var(–fail);box-shadow:0 0 10px rgba(248,113,113,0.15);}
-/* Section label rows */
-tr.section-label td{
-padding:6px 10px;
-font-family:‘Syne’,sans-serif;font-size:0.65rem;font-weight:700;
-letter-spacing:0.12em;text-transform:uppercase;color:var(–muted-2);
-background:rgba(0,0,0,0.18);border-bottom:1px solid var(–glass-border);
-text-align:left;
-}
-/* ── Summary strip ── */
-.summary-strip{
-display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;
-}
-.sum-stat{
-flex:1;min-width:100px;
-background:rgba(0,0,0,0.18);border:1px solid var(–glass-border);
-border-radius:var(–radius);padding:12px 14px;text-align:center;
-position:relative;overflow:hidden;
-}
-.sum-stat::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;}
-.sum-stat.s-total::before{background:var(–cyan);}
-.sum-stat.s-pass::before{background:var(–pass);}
-.sum-stat.s-fail::before{background:var(–fail);}
-.sum-num{font-family:‘Syne’,sans-serif;font-size:1.6rem;font-weight:800;line-height:1;margin-bottom:4px;}
-.s-total .sum-num{color:var(–cyan);}
-.s-pass  .sum-num{color:var(–pass);}
-.s-fail  .sum-num{color:var(–fail);}
-.sum-lbl{font-size:0.65rem;color:var(–muted-2);letter-spacing:0.08em;text-transform:uppercase;font-weight:500;}
+
 /* Reset button */
-.btn-reset{
-display:block;width:100%;margin-top:14px;padding:11px 16px;
-border-radius:var(–radius-sm);
-background:rgba(255,255,255,0.04);color:var(–muted);
-border:1px solid rgba(255,255,255,0.1);
-font-family:‘DM Sans’,sans-serif;font-size:0.85rem;font-weight:500;
-cursor:pointer;transition:all 0.18s ease;letter-spacing:0.03em;
+.btn-reset {
+display: block; width: 100%;
+padding: 13px 18px; border-radius: var(–radius-sm);
+background: rgba(255,255,255,0.05);
+color: var(–muted);
+border: 1px solid rgba(255,255,255,0.14);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.9rem; font-weight: 500;
+cursor: pointer; transition: all 0.18s ease;
+letter-spacing: 0.03em;
 }
-.btn-reset:hover{background:rgba(255,255,255,0.08);color:var(–ink);border-color:rgba(255,255,255,0.2);}
-/* Footer */
-.card-footer{
-margin-top:18px;padding-top:14px;
-border-top:1px solid var(–glass-border);
-text-align:center;color:var(–muted-2);font-size:0.74rem;letter-spacing:0.03em;
-}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeUp  {from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)}}
-@media(max-width:520px){
-.page-wrapper{padding:20px 10px 36px;}
-.card{padding:16px;}
-.cell-input{width:72px;}
-.td-lo,.td-hi{width:64px;}
+.btn-reset:hover {
+background: rgba(255,255,255,0.09);
+color: var(–ink);
+border-color: rgba(255,255,255,0.22);
 }
 </style>
+
 </head>
 <body>
 <div class="page-wrapper">
+  <div class="wrap-wide">
+
+```
 <a class="back-link" href="tools.html">← Back to Tools</a>
+
 <header class="site-header">
-<div class="header-badge">⚡ Electrical Metering</div>
-<h1>Metering Check Calculator</h1>
-<p class="lead">Enter injected &amp; real values — Pass/Fail checks automatically within tolerance</p>
+  <h1>Metering Check Calculator</h1>
+  <p class="lead">Enter injected &amp; real values — Pass/Fail checks automatically within tolerance</p>
 </header>
+
 <div class="card">
+
+  <!-- Tolerance -->
+  <div class="group tol-row">
+    <h3>⚙ Tolerance</h3>
+    <div class="tol-wrap">
+      <label for="tolInput">±</label>
+      <input class="tol-input" type="number" id="tolInput" value="0.5" min="0.01" max="50" step="0.01">
+      <span class="tol-unit">% of injected value</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="group-row">
+          <th class="gh-pole"  rowspan="2">Pole</th>
+          <th class="gh-inj"   colspan="3">Injected Values</th>
+          <th class="gh-range" colspan="6">Acceptable Range (auto)</th>
+          <th class="gh-real"  colspan="3">Real Measured Values</th>
+          <th class="gh-res"   rowspan="2">Result</th>
+        </tr>
+        <tr class="sub-row">
+          <th class="sh-inj">X-V (kV)</th>
+          <th class="sh-inj">Y-V (kV)</th>
+          <th class="sh-inj">I (A)</th>
+          <th class="sh-lo">X-V Low</th>
+          <th class="sh-hi">X-V High</th>
+          <th class="sh-lo">Y-V Low</th>
+          <th class="sh-hi">Y-V High</th>
+          <th class="sh-lo">I Low</th>
+          <th class="sh-hi">I High</th>
+          <th class="sh-real">X-V (kV)</th>
+          <th class="sh-real">Y-V (kV)</th>
+          <th class="sh-real">I (A)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Reset -->
+  <button class="btn-reset" id="resetBtn">↺ Reset All Values</button>
+
+  <div class="divider" style="margin-top: 20px;"></div>
+  <div class="card-footer">
+    <span class="footer-credit">Metering Check Calculator · Developed by Eiden O. Garcia Torres</span>
+  </div>
+</div>
 ```
-<!-- Controls -->
-<div class="controls-row">
-<span class="controls-label">⚙ Tolerance</span>
-<div class="tol-wrap">
-<label for="tolInput">±</label>
-<input class="tol-input" type="number" id="tolInput" value="0.5" min="0.1" max="50" step="0.1">
-<span class="tol-unit">% of injected value</span>
+
+  </div>
 </div>
-</div>
-<!-- Table -->
-<div class="table-wrap">
-<table id="meteringTable">
-<thead>
-<tr class="group-row">
-<th class="gh-pole" rowspan="2">Pole</th>
-<th class="gh-inj"   colspan="3">Injected Values</th>
-<th class="gh-range" colspan="6">Acceptable Range (auto)</th>
-<th class="gh-real"  colspan="3">Real Measured Values</th>
-<th class="gh-res"   rowspan="2">Result</th>
-</tr>
-<tr class="sub-row">
-<!-- Injected -->
-<th class="sh-inj">X-V (kV)</th>
-<th class="sh-inj">Y-V (kV)</th>
-<th class="sh-inj">I (A)</th>
-<!-- Range -->
-<th class="sh-lo">X-V Low</th>
-<th class="sh-hi">X-V High</th>
-<th class="sh-lo">Y-V Low</th>
-<th class="sh-hi">Y-V High</th>
-<th class="sh-lo">I Low</th>
-<th class="sh-hi">I High</th>
-<!-- Real -->
-<th class="sh-real">X-V (kV)</th>
-<th class="sh-real">Y-V (kV)</th>
-<th class="sh-real">I (A)</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-</div>
-<!-- Summary -->
-<div class="summary-strip">
-<div class="sum-stat s-total"><div class="sum-num">3</div><div class="sum-lbl">Poles</div></div>
-<div class="sum-stat s-pass"><div class="sum-num" id="sumPass">0</div><div class="sum-lbl">Passed</div></div>
-<div class="sum-stat s-fail"><div class="sum-num" id="sumFail">0</div><div class="sum-lbl">Failed</div></div>
-</div>
-<button class="btn-reset" id="resetBtn">↺ Reset All Values</button>
-<div class="card-footer">Metering Check Calculator · Developed by Eiden O. Garcia Torres</div>
-```
-</div>
-</div>
+
 <script>
 var POLES  = [1, 2, 3];
 var FIELDS = ['xv', 'yv', 'cur'];
+
 function getTol() {
- var v = parseFloat(document.getElementById('tolInput').value);
- return (isNaN(v) || v <= 0) ? 5 : v;
+  var v = parseFloat(document.getElementById('tolInput').value);
+  return (isNaN(v) || v <= 0) ? 0.5 : v;
 }
-// ── Build table rows ──────────────────────────────────
+
 function buildTable() {
- var tbody = document.getElementById('tableBody');
- tbody.innerHTML = '';
- POLES.forEach(function(p) {
-   var tr = document.createElement('tr');
-tr.id = 'row-' + p;
-   // Pole # cell
-   var tdPole = document.createElement('td');
-   tdPole.className = 'td-pole';
-   tdPole.textContent = p;
-   tr.appendChild(tdPole);
-   // Injected inputs
-   FIELDS.forEach(function(f) {
-     var td = document.createElement('td');
-     var inp = document.createElement('input');
-     inp.type = 'number';
-     inp.step = '0.0001';
-     inp.placeholder = '—';
-     inp.className = 'cell-input inj';
-inp.id = 'inj-' + p + '-' + f;
-     inp.addEventListener('input', function() { recalcRow(p); });
-     td.appendChild(inp);
-     tr.appendChild(td);
-   });
-   // Range cells (auto-computed): lo/hi for each field
-   FIELDS.forEach(function(f) {
-     var tdLo = document.createElement('td');
-     tdLo.className = 'td-lo';
-tdLo.id = 'lo-' + p + '-' + f;
-     tdLo.textContent = '—';
-     tr.appendChild(tdLo);
-     var tdHi = document.createElement('td');
-     tdHi.className = 'td-hi';
-tdHi.id = 'hi-' + p + '-' + f;
-     tdHi.textContent = '—';
-     tr.appendChild(tdHi);
-   });
-   // Real inputs
-   FIELDS.forEach(function(f) {
-     var td = document.createElement('td');
-     var inp = document.createElement('input');
-     inp.type = 'number';
-     inp.step = '0.0001';
-     inp.placeholder = '—';
-     inp.className = 'cell-input real';
-inp.id = 'real-' + p + '-' + f;
-     inp.addEventListener('input', function() { recalcRow(p); });
-     td.appendChild(inp);
-     tr.appendChild(td);
-   });
-   // Result badge
-   var tdRes = document.createElement('td');
-   tdRes.className = 'td-result';
-   tdRes.innerHTML = '<span class="badge" id="badge-' + p + '"><span class="dot"></span> —</span>';
-   tr.appendChild(tdRes);
-   tbody.appendChild(tr);
- });
+  var tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  POLES.forEach(function(p) {
+    var tr = document.createElement('tr');
+
+    // Pole #
+    var tdPole = document.createElement('td');
+    tdPole.className = 'td-pole';
+    tdPole.textContent = p;
+    tr.appendChild(tdPole);
+
+    // Injected inputs
+    FIELDS.forEach(function(f) {
+      var td = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.0001'; inp.placeholder = '—';
+      inp.className = 'cell-input inj'; inp.id = 'inj-' + p + '-' + f;
+      inp.addEventListener('input', function() { recalcRow(p); });
+      td.appendChild(inp); tr.appendChild(td);
+    });
+
+    // Range cells
+    FIELDS.forEach(function(f) {
+      var tdLo = document.createElement('td');
+      tdLo.className = 'td-lo'; tdLo.id = 'lo-' + p + '-' + f;
+      tdLo.textContent = '—'; tr.appendChild(tdLo);
+
+      var tdHi = document.createElement('td');
+      tdHi.className = 'td-hi'; tdHi.id = 'hi-' + p + '-' + f;
+      tdHi.textContent = '—'; tr.appendChild(tdHi);
+    });
+
+    // Real inputs
+    FIELDS.forEach(function(f) {
+      var td = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.0001'; inp.placeholder = '—';
+      inp.className = 'cell-input real'; inp.id = 'real-' + p + '-' + f;
+      inp.addEventListener('input', function() { recalcRow(p); });
+      td.appendChild(inp); tr.appendChild(td);
+    });
+
+    // Result badge
+    var tdRes = document.createElement('td');
+    tdRes.className = 'td-result';
+    tdRes.innerHTML = '<span class="badge" id="badge-' + p + '"><span class="dot"></span> —</span>';
+    tr.appendChild(tdRes);
+
+    tbody.appendChild(tr);
+  });
 }
-// ── Recalc a single row ───────────────────────────────
+
 function recalcRow(p) {
- var tol = getTol();
- var allInjected = true;
- var allReal     = true;
- var allPass     = true;
- FIELDS.forEach(function(f) {
-   var injEl  = document.getElementById('inj-'  + p + '-' + f);
-   var realEl = document.getElementById('real-' + p + '-' + f);
-   var loEl   = document.getElementById('lo-'   + p + '-' + f);
-   var hiEl   = document.getElementById('hi-'   + p + '-' + f);
-   var injVal  = parseFloat(injEl.value.trim());
-   var realVal = parseFloat(realEl.value.trim());
-   // Update range chips from injected
-   if (!isNaN(injVal)) {
-     var lo = injVal * (1 - tol / 100);
-     var hi = injVal * (1 + tol / 100);
-     loEl.textContent = lo.toFixed(4);
-     hiEl.textContent = hi.toFixed(4);
-   } else {
-     loEl.textContent = '—';
-     hiEl.textContent = '—';
-     allInjected = false;
-   }
-   // Evaluate real vs range
-   if (injEl.value.trim() === '' || isNaN(injVal)) {
-     realEl.className = 'cell-input real';
-     allInjected = false;
-     allPass = false;
-     return;
-   }
-   if (realEl.value.trim() === '' || isNaN(realVal)) {
-     realEl.className = 'cell-input real';
-     allReal = false;
-     allPass = false;
-     return;
-   }
-   var lo2 = injVal * (1 - tol / 100);
-   var hi2 = injVal * (1 + tol / 100);
-   var pass = (realVal >= lo2 && realVal <= hi2);
-   if (!pass) allPass = false;
-   realEl.className = 'cell-input real ' + (pass ? 'r-pass' : 'r-fail');
- });
- // Badge
- var badge = document.getElementById('badge-' + p);
- if (!allInjected || !allReal) {
-   badge.className = 'badge';
-   badge.innerHTML = '<span class="dot"></span> —';
- } else if (allPass) {
-   badge.className = 'badge pass';
-   badge.innerHTML = '<span class="dot"></span> PASS';
- } else {
-   badge.className = 'badge fail';
-   badge.innerHTML = '<span class="dot"></span> FAIL';
- }
- updateSummary();
+  var tol = getTol();
+  var allInjected = true, allReal = true, allPass = true;
+
+  FIELDS.forEach(function(f) {
+    var injEl  = document.getElementById('inj-'  + p + '-' + f);
+    var realEl = document.getElementById('real-' + p + '-' + f);
+    var loEl   = document.getElementById('lo-'   + p + '-' + f);
+    var hiEl   = document.getElementById('hi-'   + p + '-' + f);
+
+    var injVal  = parseFloat(injEl.value.trim());
+    var realVal = parseFloat(realEl.value.trim());
+
+    if (!isNaN(injVal)) {
+      loEl.textContent = (injVal * (1 - tol / 100)).toFixed(4);
+      hiEl.textContent = (injVal * (1 + tol / 100)).toFixed(4);
+    } else {
+      loEl.textContent = '—'; hiEl.textContent = '—';
+      allInjected = false;
+    }
+
+    if (injEl.value.trim() === '' || isNaN(injVal)) {
+      realEl.className = 'cell-input real';
+      allInjected = false; allPass = false; return;
+    }
+    if (realEl.value.trim() === '' || isNaN(realVal)) {
+      realEl.className = 'cell-input real';
+      allReal = false; allPass = false; return;
+    }
+
+    var lo = injVal * (1 - tol / 100);
+    var hi = injVal * (1 + tol / 100);
+    var pass = (realVal >= lo && realVal <= hi);
+    if (!pass) allPass = false;
+    realEl.className = 'cell-input real ' + (pass ? 'r-pass' : 'r-fail');
+  });
+
+  var badge = document.getElementById('badge-' + p);
+  if (!allInjected || !allReal) {
+    badge.className = 'badge';
+    badge.innerHTML = '<span class="dot"></span> —';
+  } else if (allPass) {
+    badge.className = 'badge pass';
+    badge.innerHTML = '<span class="dot"></span> PASS';
+  } else {
+    badge.className = 'badge fail';
+    badge.innerHTML = '<span class="dot"></span> FAIL';
+  }
 }
-// ── Summary ───────────────────────────────────────────
-function updateSummary() {
- var tol = getTol();
- var passed = 0, failed = 0;
- POLES.forEach(function(p) {
-   var allInjected = true, allReal = true, allPass = true;
-   FIELDS.forEach(function(f) {
-     var injVal  = parseFloat(document.getElementById('inj-'  + p + '-' + f).value);
-     var realVal = parseFloat(document.getElementById('real-' + p + '-' + f).value);
-     if (isNaN(injVal))  { allInjected = false; allPass = false; return; }
-     if (isNaN(realVal)) { allReal     = false; allPass = false; return; }
-     var lo = injVal * (1 - tol / 100);
-     var hi = injVal * (1 + tol / 100);
-     if (realVal < lo || realVal > hi) allPass = false;
-   });
-   if (allInjected && allReal && allPass)  passed++;
-   if (allInjected && allReal && !allPass) failed++;
- });
- document.getElementById('sumPass').textContent = passed;
- document.getElementById('sumFail').textContent = failed;
-}
-// ── Tolerance change → recalc all ────────────────────
+
 document.getElementById('tolInput').addEventListener('input', function() {
- POLES.forEach(function(p) { recalcRow(p); });
+  POLES.forEach(function(p) { recalcRow(p); });
 });
-// ── Reset ─────────────────────────────────────────────
+
 document.getElementById('resetBtn').addEventListener('click', function() {
- POLES.forEach(function(p) {
-   FIELDS.forEach(function(f) {
-     var injEl  = document.getElementById('inj-'  + p + '-' + f);
-     var realEl = document.getElementById('real-' + p + '-' + f);
-     var loEl   = document.getElementById('lo-'   + p + '-' + f);
-     var hiEl   = document.getElementById('hi-'   + p + '-' + f);
-     if (injEl)  { injEl.value  = ''; injEl.className  = 'cell-input inj'; }
-     if (realEl) { realEl.value = ''; realEl.className = 'cell-input real'; }
-     if (loEl)   loEl.textContent = '—';
-     if (hiEl)   hiEl.textContent = '—';
-     var badge = document.getElementById('badge-' + p);
-     if (badge) { badge.className = 'badge'; badge.innerHTML = '<span class="dot"></span> —'; }
-   });
- });
- document.getElementById('sumPass').textContent = '0';
- document.getElementById('sumFail').textContent = '0';
+  POLES.forEach(function(p) {
+    FIELDS.forEach(function(f) {
+      var injEl  = document.getElementById('inj-'  + p + '-' + f);
+      var realEl = document.getElementById('real-' + p + '-' + f);
+      var loEl   = document.getElementById('lo-'   + p + '-' + f);
+      var hiEl   = document.getElementById('hi-'   + p + '-' + f);
+      if (injEl)  { injEl.value  = ''; injEl.className  = 'cell-input inj'; }
+      if (realEl) { realEl.value = ''; realEl.className = 'cell-input real'; }
+      if (loEl)   loEl.textContent = '—';
+      if (hiEl)   hiEl.textContent = '—';
+      var badge = document.getElementById('badge-' + p);
+      if (badge) { badge.className = 'badge'; badge.innerHTML = '<span class="dot"></span> —'; }
+    });
+  });
 });
-// ── Init ──────────────────────────────────────────────
+
 buildTable();
 </script>
+
 </body>
 </html>
