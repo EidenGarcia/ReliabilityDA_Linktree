@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metering Check Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #6bd27d;
+  --cyan: #2ac3dd;
+  --bg-to: #0f1a3e;
+  --glass: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --ink: #f0f8ff;
+  --muted: #8db4cc;
+  --muted-2: #5a8aaa;
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+  --cyan-glow: 0 0 30px rgba(42,195,221,0.15);
+  --pass: #6bd27d;
+  --fail: #f87171;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg-to);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(107,210,125,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 70%, rgba(42,195,221,0.10) 0%, transparent 55%),
+    linear-gradient(160deg, #0d1f18 0%, #0a1a30 45%, #0f1a3e 100%);
+  z-index: 0; pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+  background-size: 32px 32px;
+  z-index: 0; pointer-events: none; opacity: 0.6;
+}
+.page-wrapper {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  padding: 36px 20px 56px;
+  display: flex; flex-direction: column; align-items: center;
+}
+/* Header */
+.site-header { text-align: center; margin-bottom: 32px; animation: fadeDown 0.6s ease both; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 999px;
+  background: rgba(42,195,221,0.08); border: 1px solid rgba(42,195,221,0.22);
+  color: var(--cyan); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px;
+}
+.header-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.4; transform:scale(0.8); }
+}
+.site-header h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 30%, var(--cyan) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1.15; margin-bottom: 8px;
+}
+.site-header .lead { color: var(--muted); font-size: 0.92rem; }
+/* Card */
+.card {
+  width: 100%; max-width: 860px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 30px; animation: fadeUp 0.6s ease 0.1s both; margin-bottom: 20px;
+}
+/* Tolerance */
+.tolerance-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 28px;
+}
+.tolerance-label {
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan);
+}
+.tolerance-controls { display: flex; align-items: center; gap: 10px; }
+.tolerance-controls label { color: var(--muted); font-size: 0.85rem; }
+.tol-input {
+  width: 70px; background: rgba(42,195,221,0.08);
+  border: 1px solid rgba(42,195,221,0.3); border-radius: var(--radius-sm);
+  color: var(--cyan); font-family: 'Syne', sans-serif;
+  font-size: 1rem; font-weight: 700; text-align: center;
+  padding: 6px 10px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
+}
+.tol-input::-webkit-outer-spin-button,
+.tol-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.tol-input:focus { border-color: var(--cyan); box-shadow: var(--cyan-glow); }
+.tol-unit { color: var(--muted-2); font-size: 0.85rem; }
+/* Poles */
+.poles-grid { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+.pole-card {
+  background: rgba(0,0,0,0.18); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); overflow: hidden; position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.pole-card.pass-state { border-color: rgba(107,210,125,0.45); box-shadow: 0 0 24px rgba(107,210,125,0.08); }
+.pole-card.fail-state { border-color: rgba(248,113,113,0.45); box-shadow: 0 0 24px rgba(248,113,113,0.08); }
+.pole-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  opacity: 0.5; transition: background 0.3s, opacity 0.3s;
+}
+.pole-card.pass-state::before { background: var(--pass); opacity: 0.9; }
+.pole-card.fail-state::before { background: var(--fail); opacity: 0.9; }
+.pole-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--glass-border);
+  background: rgba(0,0,0,0.12);
+}
+.pole-title { display: flex; align-items: center; gap: 10px; }
+.pole-number {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), #1fa8c0);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.9rem;
+  color: #041820; flex-shrink: 0; box-shadow: 0 4px 12px rgba(42,195,221,0.3);
+}
+.pole-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+.result-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 999px;
+  font-family: 'Syne', sans-serif; font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  transition: all 0.3s ease;
+  border: 1px solid var(--glass-border); color: var(--muted);
+  background: rgba(255,255,255,0.04);
+}
+.result-badge.pass { background: rgba(107,210,125,0.15); border-color: rgba(107,210,125,0.4); color: var(--pass); box-shadow: 0 0 14px rgba(107,210,125,0.2); }
+.result-badge.fail { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--fail); box-shadow: 0 0 14px rgba(248,113,113,0.2); }
+.result-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pole-body { padding: 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 620px) { .pole-body { grid-template-columns: 1fr; } }
+.field-group { display: flex; flex-direction: column; gap: 12px; }
+.field-group-title {
+  font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2);
+  padding-bottom: 6px; border-bottom: 1px solid var(--glass-border);
+}
+.field-group-title.injected { color: #60a5fa; }
+.field-group-title.real     { color: var(--cyan); }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 0.72rem; color: var(--muted-2); letter-spacing: 0.04em; }
+.injected-val {
+  background: rgba(96,165,250,0.07); border: 1px solid rgba(96,165,250,0.18);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 600;
+  color: #93c5fd; text-align: right;
+}
+.range-row { display: flex; gap: 6px; }
+.range-chip {
+  flex: 1; text-align: center; padding: 6px 4px;
+  border-radius: 6px; font-size: 0.68rem; font-weight: 600;
+  font-family: 'Syne', sans-serif;
+}
+.range-chip.low  { background: rgba(251,191,36,0.1);  border: 1px solid rgba(251,191,36,0.25);  color: #fcd34d; }
+.range-chip.high { background: rgba(107,210,125,0.1); border: 1px solid rgba(107,210,125,0.25); color: #86efac; }
+.real-input {
+  background: rgba(42,195,221,0.06); border: 1px solid rgba(42,195,221,0.22);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+  color: var(--ink); outline: none; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -moz-appearance: textfield;
+}
+.real-input::-webkit-outer-spin-button,
+.real-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.real-input:focus { border-color: var(--cyan); background: rgba(42,195,221,0.1); box-shadow: var(--cyan-glow); }
+.real-input.input-pass { border-color: rgba(107,210,125,0.55); background: rgba(107,210,125,0.07); color: #a7f3b4; }
+.real-input.input-fail { border-color: rgba(248,113,113,0.55); background: rgba(248,113,113,0.07); color: #fca5a5; }
+.field-status {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; text-align: right; min-height: 14px;
+  transition: color 0.2s; color: transparent;
+}
+.field-status.pass { color: var(--pass); }
+.field-status.fail { color: var(--fail); }
+/* Reset */
+.btn-reset {
+  display: block; width: 100%; margin-top: 4px; padding: 13px 18px;
+  border-radius: var(--radius-sm); background: rgba(255,255,255,0.05);
+  color: var(--muted); border: 1px solid rgba(255,255,255,0.12);
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
+  cursor: pointer; transition: all 0.18s ease; letter-spacing: 0.04em;
+}
+.btn-reset:hover { background: rgba(255,255,255,0.09); color: var(--ink); border-color: rgba(255,255,255,0.22); }
+/* Summary */
+.summary-card {
+  width: 100%; max-width: 860px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 24px 30px; animation: fadeUp 0.6s ease 0.25s both;
+}
+.summary-title {
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan); margin-bottom: 16px;
+}
+.summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.summary-stat {
+  background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.summary-stat::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+.stat-total::before { background: var(--cyan); }
+.stat-pass::before  { background: var(--pass); }
+.stat-fail::before  { background: var(--fail); }
+.stat-num { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; line-height:1; margin-bottom:6px; }
+.stat-total .stat-num { color: var(--cyan); }
+.stat-pass  .stat-num { color: var(--pass); }
+.stat-fail  .stat-num { color: var(--fail); }
+.stat-label { font-size:0.72rem; color:var(--muted-2); letter-spacing:0.08em; text-transform:uppercase; font-weight:500; }
+footer { margin-top:28px; color:var(--muted-2); font-size:0.75rem; letter-spacing:0.04em; text-align:center; animation:fadeUp 0.6s ease 0.35s both; }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+@media(max-width:520px){.page-wrapper{padding:20px 14px 40px}.card,.summary-card{padding:18px}.summary-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+  <header class="site-header">
+    <div class="header-badge">⚡ Electrical Metering</div>
+    <h1>Metering Check Calculator</h1>
+    <p class="lead">Enter real measured values — Pass/Fail updates instantly within tolerance</p>
+  </header>
+
+  <div class="card">
+    <div class="tolerance-strip">
+      <span class="tolerance-label">⚙ Acceptable Tolerance</span>
+      <div class="tolerance-controls">
+        <label for="toleranceInput">±</label>
+        <input class="tol-input" type="number" id="toleranceInput" value="5" min="0.1" max="50" step="0.1">
+        <span class="tol-unit">% of injected value</span>
+      </div>
+    </div>
+    <div class="poles-grid" id="polesGrid"></div>
+    <button class="btn-reset" id="resetBtn">↺ Reset All Values</button>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-title">📊 Summary</div>
+    <div class="summary-grid">
+      <div class="summary-stat stat-total">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Poles Total</div>
+      </div>
+      <div class="summary-stat stat-pass">
+        <div class="stat-num" id="sumPass">0</div>
+        <div class="stat-label">Passed</div>
+      </div>
+      <div class="summary-stat stat-fail">
+        <div class="stat-num" id="sumFail">0</div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Metering Check Calculator · ±5% Acceptable Tolerance · 3 Poles</footer>
+</div>
+
+<script>
+var POLES = [
+  { id: 1, xV: 2.47, yV: 2.47, current: 5  },
+  { id: 2, xV: 2.45, yV: 2.45, current: 19 },
+  { id: 3, xV: 2.51, yV: 2.51, current: 2  }
+];
+
+var FIELDS = [
+  { key: 'xV',      label: 'X-Side Voltage (kV)' },
+  { key: 'yV',      label: 'Y-Side Voltage (kV)' },
+  { key: 'current', label: 'Current (A)' }
+];
+
+function getTol() {
+  var v = parseFloat(document.getElementById('toleranceInput').value);
+  return (isNaN(v) || v <= 0) ? 5 : v;
+}
+
+function buildPoles() {
+  var grid = document.getElementById('polesGrid');
+  grid.innerHTML = '';
+
+  POLES.forEach(function(pole) {
+    var tol = getTol();
+
+    // --- Build injected rows ---
+    var injHtml = FIELDS.map(function(f) {
+      return '<div class="field">'
+        + '<label>' + f.label + '</label>'
+        + '<div class="injected-val">' + pole[f.key].toFixed(4) + '</div>'
+        + '</div>';
+    }).join('');
+
+    // --- Build range rows ---
+    var rngHtml = FIELDS.map(function(f) {
+      var lo = (pole[f.key] * (1 - tol/100)).toFixed(4);
+      var hi = (pole[f.key] * (1 + tol/100)).toFixed(4);
+      return '<div class="field">'
+        + '<label>' + f.label + '</label>'
+        + '<div class="range-row">'
+        + '<div class="range-chip low"  id="lo-' + pole.id + '-' + f.key + '">' + lo + '</div>'
+        + '<div class="range-chip high" id="hi-' + pole.id + '-' + f.key + '">' + hi + '</div>'
+        + '</div></div>';
+    }).join('');
+
+    // --- Build real input rows ---
+    var realHtml = FIELDS.map(function(f) {
+      return '<div class="field">'
+        + '<label>' + f.label + '</label>'
+        + '<input class="real-input" type="number" step="0.0001" placeholder="Enter value…"'
+        + ' id="real-' + pole.id + '-' + f.key + '">'
+        + '<div class="field-status" id="fst-' + pole.id + '-' + f.key + '"></div>'
+        + '</div>';
+    }).join('');
+
+    var card = document.createElement('div');
+    card.className = 'pole-card';
+    card.id = 'card-' + pole.id;
+    card.innerHTML =
+      '<div class="pole-header">'
+        + '<div class="pole-title">'
+          + '<div class="pole-number">' + pole.id + '</div>'
+          + '<div class="pole-name">Pole #' + pole.id + '</div>'
+        + '</div>'
+        + '<div class="result-badge" id="badge-' + pole.id + '"><span class="dot"></span> Pending</div>'
+      + '</div>'
+      + '<div class="pole-body">'
+        + '<div class="field-group"><div class="field-group-title injected">Injected Values</div>' + injHtml + '</div>'
+        + '<div class="field-group"><div class="field-group-title">Acceptable Range</div>' + rngHtml + '</div>'
+        + '<div class="field-group"><div class="field-group-title real">Real Measured Values</div>' + realHtml + '</div>'
+      + '</div>';
+
+    grid.appendChild(card);
+  });
+
+  // Attach listeners AFTER elements exist in DOM
+  POLES.forEach(function(pole) {
+    FIELDS.forEach(function(f) {
+      var el = document.getElementById('real-' + pole.id + '-' + f.key);
+      if (el) {
+        el.addEventListener('input', function() { evaluatePole(pole.id); });
+      }
+    });
+  });
+}
+
+function evaluatePole(poleId) {
+  var pole = null;
+  for (var i = 0; i < POLES.length; i++) {
+    if (POLES[i].id === poleId) { pole = POLES[i]; break; }
+  }
+  if (!pole) return;
+
+  var tol = getTol();
+  var allFilled = true;
+  var allPass   = true;
+
+  FIELDS.forEach(function(f) {
+    var input  = document.getElementById('real-' + poleId + '-' + f.key);
+    var status = document.getElementById('fst-'  + poleId + '-' + f.key);
+    var loEl   = document.getElementById('lo-'   + poleId + '-' + f.key);
+    var hiEl   = document.getElementById('hi-'   + poleId + '-' + f.key);
+    if (!input || !status || !loEl || !hiEl) return;
+
+    var lo = pole[f.key] * (1 - tol / 100);
+    var hi = pole[f.key] * (1 + tol / 100);
+    loEl.textContent = lo.toFixed(4);
+    hiEl.textContent = hi.toFixed(4);
+
+    var raw = input.value.trim();
+    var val = parseFloat(raw);
+
+    if (raw === '' || isNaN(val)) {
+      allFilled = false; allPass = false;
+      input.className  = 'real-input';
+      status.className = 'field-status';
+      status.textContent = '';
+      return;
+    }
+
+    var pass = (val >= lo && val <= hi);
+    if (!pass) allPass = false;
+
+    input.className  = 'real-input ' + (pass ? 'input-pass' : 'input-fail');
+    status.className = 'field-status ' + (pass ? 'pass' : 'fail');
+    status.textContent = pass ? '✓ Pass' : '✗ Out of range';
+  });
+
+  var card  = document.getElementById('card-'  + poleId);
+  var badge = document.getElementById('badge-' + poleId);
+
+  card.className = 'pole-card' + (allFilled ? (allPass ? ' pass-state' : ' fail-state') : '');
+
+  if (!allFilled) {
+    badge.className = 'result-badge';
+    badge.innerHTML = '<span class="dot"></span> Pending';
+  } else if (allPass) {
+    badge.className = 'result-badge pass';
+    badge.innerHTML = '<span class="dot"></span> PASS';
+  } else {
+    badge.className = 'result-badge fail';
+    badge.innerHTML = '<span class="dot"></span> FAIL';
+  }
+
+  updateSummary();
+}
+
+function updateSummary() {
+  var tol = getTol();
+  var passed = 0, failed = 0;
+
+  POLES.forEach(function(pole) {
+    var allFilled = true, allPass = true;
+    FIELDS.forEach(function(f) {
+      var input = document.getElementById('real-' + pole.id + '-' + f.key);
+      if (!input) return;
+      var raw = input.value.trim();
+      var val = parseFloat(raw);
+      if (raw === '' || isNaN(val)) { allFilled = false; allPass = false; return; }
+      var lo = pole[f.key] * (1 - tol / 100);
+      var hi = pole[f.key] * (1 + tol / 100);
+      if (val < lo || val > hi) allPass = false;
+    });
+    if (allFilled && allPass)  passed++;
+    if (allFilled && !allPass) failed++;
+  });
+
+  document.getElementById('sumPass').textContent = passed;
+  document.getElementById('sumFail').textContent = failed;
+}
+
+document.getElementById('toleranceInput').addEventListener('input', function() {
+  POLES.forEach(function(p) { evaluatePole(p.id); });
+});
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+  POLES.forEach(function(pole) {
+    FIELDS.forEach(function(f) {
+      var input  = document.getElementById('real-' + pole.id + '-' + f.key);
+      var status = document.getElementById('fst-'  + pole.id + '-' + f.key);
+      if (input)  { input.value = ''; input.className = 'real-input'; }
+      if (status) { status.className = 'field-status'; status.textContent = ''; }
+    });
+    var card  = document.getElementById('card-'  + pole.id);
+    var badge = document.getElementById('badge-' + pole.id);
+    if (card)  card.className = 'pole-card';
+    if (badge) { badge.className = 'result-badge'; badge.innerHTML = '<span class="dot"></span> Pending'; }
+  });
+  document.getElementById('sumPass').textContent = '0';
+  document.getElementById('sumFail').textContent = '0';
+});
+
+// Init
+buildPoles();
+</script>
+
+</body>
+</html>
