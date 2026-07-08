@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metering Check Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ── Page overrides ── */
+.tol-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  margin-bottom: 20px;
+}
+.tol-wrap { display: flex; align-items: center; gap: 8px; }
+.tol-wrap label { color: var(--muted); font-size: 0.85rem; }
+.tol-input {
+  width: 64px;
+  background: rgba(31,58,122,0.08);
+  border: 1px solid rgba(31,58,122,0.3);
+  border-radius: var(--radius-sm);
+  color: var(--cyan);
+  font-family: 'Dubai', 'DM Sans', sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  text-align: center; padding: 5px 8px; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
+}
+.tol-input::-webkit-outer-spin-button,
+.tol-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.tol-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(31,58,122,0.18);
+}
+.tol-unit { color: var(--muted-2); font-size: 0.82rem; }
+
+/* ── Table ── */
+.table-wrap {
+overflow-x: auto;
+border-radius: var(–radius-sm);
+border: 1px solid var(–glass-border);
+margin-bottom: 20px;
+}
+
+table {
+width: 100%;
+table-layout: auto;
+border-collapse: collapse;
+font-size: 0.8rem;
+font-family: 'Dubai', 'DM Sans', sans-serif;
+}
+
+thead tr.group-row th {
+padding: 8px 6px; text-align: center;
+font-family: 'Dubai', 'DM Sans', sans-serif;
+font-size: 0.62rem; font-weight: 700;
+letter-spacing: 0.1em; text-transform: uppercase;
+white-space: nowrap;
+border-bottom: 1px solid var(–glass-border);
+}
+.gh-pole  { background: rgba(20,33,75,0.06);        color: var(–muted-2); }
+.gh-inj   { background: rgba(31,58,122,0.07);  color: #1D4ED8;       border-top: 2px solid rgba(31,58,122,0.35); }
+.gh-range { background: rgba(121,169,65,0.05); color: #618A31;       border-top: 2px solid rgba(121,169,65,0.3); }
+.gh-real  { background: rgba(31,58,122,0.06);  color: var(–cyan);   border-top: 2px solid rgba(31,58,122,0.35); }
+.gh-res   { background: rgba(20,33,75,0.06);        color: var(–muted-2);border-top: 2px solid var(–glass-border); }
+
+thead tr.sub-row th {
+padding: 6px; text-align: center;
+font-size: 0.62rem; letter-spacing: 0.04em;
+background: rgba(0,0,0,0.22);
+border-bottom: 2px solid var(–glass-border);
+white-space: nowrap; color: var(–muted-2);
+}
+.sh-inj  { color: rgba(147,197,253,0.85); }
+.sh-lo   { color: rgba(253,211,77,0.85); }
+.sh-hi   { color: rgba(134,239,172,0.85); }
+.sh-real { color: rgba(31,58,122,0.85); }
+
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.025); }
+tbody tr:not(:last-child) td { border-bottom: 1px solid rgba(20,33,75,0.06); }
+
+td { padding: 7px 5px; text-align: center; vertical-align: middle; }
+
+.td-pole {
+font-family: 'Dubai', 'DM Sans', sans-serif;
+font-weight: 700; font-size: 0.88rem;
+color: var(–cyan); background: rgba(20,33,75,0.06);
+white-space: nowrap; padding: 7px 12px;
+}
+
+.cell-input {
+width: 100%; min-width: 62px;
+background: rgba(20,33,75,0.06);
+border: 1px solid rgba(20,33,75,0.06);
+border-radius: 8px;
+color: var(–ink);
+font-family: 'Dubai', 'DM Sans', sans-serif;
+font-size: 0.8rem; text-align: center;
+padding: 6px 4px; outline: none;
+transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+-moz-appearance: textfield;
+}
+.cell-input::-webkit-outer-spin-button,
+.cell-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.cell-input:focus {
+border-color: var(–cyan);
+background: rgba(31,58,122,0.07);
+box-shadow: 0 0 0 2px rgba(31,58,122,0.18);
+}
+
+.cell-input.inj {
+background: rgba(31,58,122,0.06);
+border-color: rgba(31,58,122,0.2);
+color: #93c5fd;
+}
+.cell-input.inj:focus {
+border-color: #1D4ED8;
+background: rgba(31,58,122,0.1);
+box-shadow: 0 0 0 2px rgba(31,58,122,0.18);
+}
+
+.cell-input.real.r-pass {
+border-color: rgba(121,169,65,0.55);
+background: rgba(121,169,65,0.08);
+color: #a7f3b4;
+}
+.cell-input.real.r-fail {
+border-color: rgba(248,113,113,0.55);
+background: rgba(248,113,113,0.08);
+color: #fca5a5;
+}
+
+.td-lo { color: #B45309; font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+.td-hi { color: #618A31; font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+
+.td-result { white-space: nowrap; }
+.badge {
+display: inline-flex; align-items: center; gap: 5px;
+padding: 4px 10px; border-radius: 999px;
+font-family: 'Dubai', 'DM Sans', sans-serif;
+font-size: 0.62rem; font-weight: 700;
+letter-spacing: 0.08em; text-transform: uppercase;
+border: 1px solid var(–glass-border);
+color: var(–muted); background: rgba(20,33,75,0.06);
+transition: all 0.25s ease; white-space: nowrap;
+}
+.badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.badge.pass {
+background: rgba(121,169,65,0.13);
+border-color: rgba(121,169,65,0.38);
+color: var(–green);
+box-shadow: 0 0 10px rgba(121,169,65,0.12);
+}
+.badge.fail {
+background: rgba(248,113,113,0.13);
+border-color: rgba(248,113,113,0.38);
+color: #f87171;
+box-shadow: 0 0 10px rgba(248,113,113,0.12);
+}
+
+/* Reset button */
+.btn-reset {
+display: block; width: 100%;
+padding: 13px 18px; border-radius: var(–radius-sm);
+background: rgba(20,33,75,0.06);
+color: var(–muted);
+border: 1px solid rgba(20,33,75,0.06);
+font-family: 'Dubai', 'DM Sans', sans-serif;
+font-size: 0.9rem; font-weight: 500;
+cursor: pointer; transition: all 0.18s ease;
+letter-spacing: 0.03em;
+}
+.btn-reset:hover {
+background: rgba(20,33,75,0.06);
+color: var(–ink);
+border-color: rgba(20,33,75,0.06);
+}
+</style>
+
+</head>
+<body>
+<div class="page-wrapper">
+  <div class="wrap-wide">
+
+```
+<a class="back-link" href="tools.html">← Back to Tools</a>
+
+<header class="site-header">
+  <h1>Metering Check Calculator</h1>
+  <p class="lead">Enter injected &amp; real values — Pass/Fail checks automatically within tolerance</p>
+</header>
+
+<div class="card">
+
+  <!-- Tolerance -->
+  <div class="group tol-row">
+    <h3>⚙ Tolerance</h3>
+    <div class="tol-wrap">
+      <label for="tolInput">±</label>
+      <input class="tol-input" type="number" id="tolInput" value="0.5" min="0.01" max="50" step="0.01">
+      <span class="tol-unit">% of injected value</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="group-row">
+          <th class="gh-pole"  rowspan="2">Pole</th>
+          <th class="gh-inj"   colspan="3">Injected Values</th>
+          <th class="gh-range" colspan="6">Acceptable Range (auto)</th>
+          <th class="gh-real"  colspan="3">Real Measured Values</th>
+          <th class="gh-res"   rowspan="2">Result</th>
+        </tr>
+        <tr class="sub-row">
+          <th class="sh-inj">X-V (kV)</th>
+          <th class="sh-inj">Y-V (kV)</th>
+          <th class="sh-inj">I (A)</th>
+          <th class="sh-lo">X-V Low</th>
+          <th class="sh-hi">X-V High</th>
+          <th class="sh-lo">Y-V Low</th>
+          <th class="sh-hi">Y-V High</th>
+          <th class="sh-lo">I Low</th>
+          <th class="sh-hi">I High</th>
+          <th class="sh-real">X-V (kV)</th>
+          <th class="sh-real">Y-V (kV)</th>
+          <th class="sh-real">I (A)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Reset -->
+  <button class="btn-reset" id="resetBtn">↺ Reset All Values</button>
+
+  <div class="divider" style="margin-top: 20px;"></div>
+  <div class="card-footer">
+    <span class="footer-credit">Metering Check Calculator · Developed by Eiden O. Garcia Torres</span>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+var POLES  = [1, 2, 3];
+var FIELDS = ['xv', 'yv', 'cur'];
+
+function getTol() {
+  var v = parseFloat(document.getElementById('tolInput').value);
+  return (isNaN(v) || v <= 0) ? 0.5 : v;
+}
+
+function buildTable() {
+  var tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  POLES.forEach(function(p) {
+    var tr = document.createElement('tr');
+
+    // Pole #
+    var tdPole = document.createElement('td');
+    tdPole.className = 'td-pole';
+    tdPole.textContent = p;
+    tr.appendChild(tdPole);
+
+    // Injected inputs
+    FIELDS.forEach(function(f) {
+      var td = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.0001'; inp.placeholder = '—';
+      inp.className = 'cell-input inj'; inp.id = 'inj-' + p + '-' + f;
+      inp.addEventListener('input', function() { recalcRow(p); });
+      td.appendChild(inp); tr.appendChild(td);
+    });
+
+    // Range cells
+    FIELDS.forEach(function(f) {
+      var tdLo = document.createElement('td');
+      tdLo.className = 'td-lo'; tdLo.id = 'lo-' + p + '-' + f;
+      tdLo.textContent = '—'; tr.appendChild(tdLo);
+
+      var tdHi = document.createElement('td');
+      tdHi.className = 'td-hi'; tdHi.id = 'hi-' + p + '-' + f;
+      tdHi.textContent = '—'; tr.appendChild(tdHi);
+    });
+
+    // Real inputs
+    FIELDS.forEach(function(f) {
+      var td = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.0001'; inp.placeholder = '—';
+      inp.className = 'cell-input real'; inp.id = 'real-' + p + '-' + f;
+      inp.addEventListener('input', function() { recalcRow(p); });
+      td.appendChild(inp); tr.appendChild(td);
+    });
+
+    // Result badge
+    var tdRes = document.createElement('td');
+    tdRes.className = 'td-result';
+    tdRes.innerHTML = '<span class="badge" id="badge-' + p + '"><span class="dot"></span> —</span>';
+    tr.appendChild(tdRes);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function recalcRow(p) {
+  var tol = getTol();
+  var allInjected = true, allReal = true, allPass = true;
+
+  FIELDS.forEach(function(f) {
+    var injEl  = document.getElementById('inj-'  + p + '-' + f);
+    var realEl = document.getElementById('real-' + p + '-' + f);
+    var loEl   = document.getElementById('lo-'   + p + '-' + f);
+    var hiEl   = document.getElementById('hi-'   + p + '-' + f);
+
+    var injVal  = parseFloat(injEl.value.trim());
+    var realVal = parseFloat(realEl.value.trim());
+
+    if (!isNaN(injVal)) {
+      loEl.textContent = (injVal * (1 - tol / 100)).toFixed(4);
+      hiEl.textContent = (injVal * (1 + tol / 100)).toFixed(4);
+    } else {
+      loEl.textContent = '—'; hiEl.textContent = '—';
+      allInjected = false;
+    }
+
+    if (injEl.value.trim() === '' || isNaN(injVal)) {
+      realEl.className = 'cell-input real';
+      allInjected = false; allPass = false; return;
+    }
+    if (realEl.value.trim() === '' || isNaN(realVal)) {
+      realEl.className = 'cell-input real';
+      allReal = false; allPass = false; return;
+    }
+
+    var lo = injVal * (1 - tol / 100);
+    var hi = injVal * (1 + tol / 100);
+    var pass = (realVal >= lo && realVal <= hi);
+    if (!pass) allPass = false;
+    realEl.className = 'cell-input real ' + (pass ? 'r-pass' : 'r-fail');
+  });
+
+  var badge = document.getElementById('badge-' + p);
+  if (!allInjected || !allReal) {
+    badge.className = 'badge';
+    badge.innerHTML = '<span class="dot"></span> —';
+  } else if (allPass) {
+    badge.className = 'badge pass';
+    badge.innerHTML = '<span class="dot"></span> PASS';
+  } else {
+    badge.className = 'badge fail';
+    badge.innerHTML = '<span class="dot"></span> FAIL';
+  }
+}
+
+document.getElementById('tolInput').addEventListener('input', function() {
+  POLES.forEach(function(p) { recalcRow(p); });
+});
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+  POLES.forEach(function(p) {
+    FIELDS.forEach(function(f) {
+      var injEl  = document.getElementById('inj-'  + p + '-' + f);
+      var realEl = document.getElementById('real-' + p + '-' + f);
+      var loEl   = document.getElementById('lo-'   + p + '-' + f);
+      var hiEl   = document.getElementById('hi-'   + p + '-' + f);
+      if (injEl)  { injEl.value  = ''; injEl.className  = 'cell-input inj'; }
+      if (realEl) { realEl.value = ''; realEl.className = 'cell-input real'; }
+      if (loEl)   loEl.textContent = '—';
+      if (hiEl)   hiEl.textContent = '—';
+      var badge = document.getElementById('badge-' + p);
+      if (badge) { badge.className = 'badge'; badge.innerHTML = '<span class="dot"></span> —'; }
+    });
+  });
+});
+
+buildTable();
+</script>
+
+</body>
+</html>

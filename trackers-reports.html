@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Trackers &amp; Reports</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    @media (min-width: 760px) {
+      .groups { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <div class="wrap">
+    <a class="back-link" href="index.html">← Back to Home</a>
+    <header class="site-header">
+      <h1>Trackers &amp; Reports</h1>
+      <p class="lead">Central access to databases, Power BI reports, and Excel/SharePoint trackers.</p>
+    </header>
+    <div class="card">
+      <div class="brand">
+        <img src="assets/images/luma-logo-white.png" alt="LUMA Logo">
+      </div>
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
+      <div class="divider"></div>
+      <div class="groups">
+        <!-- Database -->
+        <div class="group">
+          <h3>Database &amp; Web App</h3>
+          <div class="links">
+            <a class="btn secondary" href="https://cp-luma-da-tracker.azurewebsites.net">
+              Distribution Automation Database
+            </a>
+            <a class="btn secondary" href="http://10.50.5.44:7001/apx21/sir/r/sir1/home?session=9923996399454">
+              SIR+
+            </a>
+            <a class="btn secondary" href="https://webapps.lumapr.com/apx21/sir/r/ert/login">
+              ERT
+            </a>
+          </div>
+        </div>
+        <!-- Analytics -->
+        <div class="group">
+          <h3>Analytics (Power BI)</h3>
+          <div class="links">
+            <a class="btn warn" href="https://app.powerbigov.us/groups/me/reports/0a5a3f36-eb91-4a07-b11b-5112c126fdb7/ReportSectionbe1012005e1ec22166cb">
+              Distribution Automation Tracker Analytics
+            </a>
+            <a class="btn warn" href="https://app.powerbigov.us/groups/me/reports/06377a6c-87b0-4f86-b3fd-7e650fe1dc05/ReportSection?ctid=b0a9b38e-5be3-4a10-8fdc-cef4306b5139">
+              CRRT: Commissioned Recloser Reliability Tracker
+            </a>
+          </div>
+        </div>
+        <!-- Excel Trackers -->
+        <div class="group">
+          <h3>Trackers (.xlsx)</h3>
+          <div class="links">
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-CP-Home/Projects/Distribution%20Projects/30059%20-%20T%20%26%20D%20Automation%20Program/Commissioning%20Planning/Commissioning%20Coordination%20Tracker.xlsx?d=w96e25591077c4269a7cca34d1abf31de&csf=1&web=1&e=tLKSCB">
+              Commissioning Coordination Tracker
+            </a>
+            <a class="btn green" href="https://aeepr-my.sharepoint.com/:x:/r/personal/joel_hernandezrobles_lumapr_com/Documents/Commissioning%20Coordination%20Tracker(Modified).xlsx?d=w6423f77bfbcd4cfeb61e10752f24978b&csf=1&web=1&e=6zfG70">
+              Commissioning Coordination Tracker (Modified)
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/RELIABILITY/_layouts/15/Doc.aspx?sourcedoc=%7BC6222B1C-324F-4B05-98EE-56C50C5FF085%7D&file=Quartleys%20Plan%20Tracker.xlsx&action=default&mobileredirect=true">
+              Quarterlys Plan Tracker
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/RELIABILITY/Shared%20Documents/Grid%20Automation%20(TA_DA)/Reliability%20DA/Feeder%20Assessment%20Workflow%20Tracker_FY26.xlsx?d=w2066fd91fc71476e920c3d6447bb5bd8&csf=1&web=1&e=hY2g7W">
+              Feeder Assessment Workflow Tracker_FY26
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/RELIABILITY/Shared%20Documents/Grid%20Automation%20(TA_DA)/Reliability%20DA/DA%20Design%20Team/Coord-OPS-Team-Tracker-SupplementaryWOPs.xlsx?d=wf983484bd597446793c1618b75408629&csf=1&web=1&e=CSMM87">
+              Coord-OPS-Team-Tracker-SupplementaryWOPs
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/RELIABILITY/Shared%20Documents/Distribution%20Automation/_Reliability%20Analysis%20Tracker_Rev5_FY26.xlsx?d=w846c6b3241234cc5a42a3cbe8f64e946&csf=1&web=1&e=X6ayNf">
+              _Reliability Analysis Tracker_Rev5_FY26
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/LUMA-UT-Home/_layouts/15/Doc.aspx?sourcedoc=%7B010D8B9E-04EB-446A-8827-DAEED87203CE%7D&file=Feeder%20Head%20Imbalance%20%25_V2.xlsx&action=default&mobileredirect=true">
+              SensorOn – Feeder Head Imbalance
+            </a>
+            <a class="btn green" href="https://aeepr.sharepoint.com/:x:/r/sites/RELIABILITY/Shared%20Documents/Grid%20Automation%20(TA_DA)/PBUT4%20Federal/Asset%20Management%20(SIR)/Maintenance%20Tracker/Maintenance%20Tracker.xlsx?d=w2732b990716545faad0adcabe0f076bd&csf=1&web=1&e=QfC5ZX">
+              Maintenance Tracker
+            </a>
+          </div>
+        </div>
+        <!-- SharePoint Lists -->
+        <div class="group">
+          <h3>SharePoint Lists</h3>
+          <div class="links">
+            <a class="btn blue" href="https://aeepr.sharepoint.com/sites/ReliabilityFieldSupport/Lists/Recloser%20Investigation%20Request%20Form1/AllItems.aspx?e=cx0HYm&CID=fb7dab4f%2D520f%2D492f%2Daf38%2D77a5e3db11ba">
+              Recloser Investigation Request
+            </a>
+            <a class="btn blue" href="https://aeepr.sharepoint.com/:l:/r/sites/RELIABILITY/Lists/Master%20Form%20DA?e=tOEqcA">
+              Master Form DA
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="footer-credit">Developed by Eiden O. García Torres</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    const fixedDate = new Date('2026-07-08T12:00');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
+</script>
+</body>
+</html>

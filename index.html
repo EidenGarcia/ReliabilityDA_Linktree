@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · LinkTree</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .home-links { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
+    a.btn.nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      justify-content: flex-start;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    a.btn.nav-btn .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+      background: rgba(20,33,75,0.06);
+    }
+
+    a.btn.nav-btn::after { display: none; }
+
+    a.btn.nav-btn .btn-arrow {
+      margin-left: auto;
+      color: var(--muted-2);
+      font-size: 0.85rem;
+      transition: transform 0.18s ease, color 0.18s ease;
+    }
+
+    a.btn.nav-btn:hover .btn-arrow {
+      transform: translateX(3px);
+      color: var(--ink);
+    }
+
+    /* Safety button override */
+    a.btn.safety {
+      background: rgba(240,165,0,0.12);
+      color: #8A5B00;
+      border: 1px solid rgba(240,165,0,0.45);
+      font-weight: 600;
+    }
+
+    a.btn.safety:hover {
+      background: rgba(240,165,0,0.18);
+      border-color: rgba(240,165,0,0.65);
+      box-shadow: 0 4px 20px rgba(240,165,0,0.20);
+    }
+
+    a.btn.safety .btn-icon {
+      background: rgba(240,165,0,0.15);
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <div class="wrap-narrow">
+
+    <header class="site-header">
+      <h1>Reliability DA</h1>
+      <p class="lead">Quick access to guides, forms, trackers, and tools.</p>
+    </header>
+
+    <div class="card">
+      <div class="brand">
+        <img src="assets/images/luma-logo-white.png" alt="LUMA Logo">
+      </div>
+
+      <div class="meta">
+        <span class="pill" id="lastUpdated">Last Updated: —</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <nav class="home-links">
+        <a class="btn secondary nav-btn" href="guideline-library.html">
+          <span class="btn-icon">📋</span>
+          <span>Guideline Library</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn secondary nav-btn" href="field-forms.html">
+          <span class="btn-icon">📝</span>
+          <span>Microsoft Forms</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn secondary nav-btn" href="trackers-reports.html">
+          <span class="btn-icon">📊</span>
+          <span>Trackers &amp; Reports</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn secondary nav-btn" href="tools.html">
+          <span class="btn-icon">🔧</span>
+          <span>Tools</span>
+          <span class="btn-arrow">→</span>
+        </a>
+
+        <a class="btn safety nav-btn" href="https://aeepr.sharepoint.com/:f:/r/sites/LUMA-UT-Home/Reliability/General/SAFETY%20ALERT%20RECORD%20TRAININGS?csf=1&web=1&e=BQBjpQ&xsdata=MDV8MDJ8fDBkNGQ2ZTAwMGY1ZTQ1MDBjYzdlMDhkY2VlMTAwZmYzfGIwYTliMzhlNWJlMzRhMTA4ZmRjY2VmNDMwNmI1MTM5fDB8MHw2Mzg2NDY5OTk5MzQyOTEwNzB8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxMMk5vWVhSekx6RTVPalV4T1RVMFpXRTRMV1UxTVRrdE5HVmxZUzFpWVRKaExUTmtOREUyWWpFNVkyWXpaVjlsTmpkaU1tRmtPUzB4TkdJeExUUmxNelF0T0RGbE1TMW1aamM0TkdNMFpURXpNMkZBZFc1eExtZGliQzV6Y0dGalpYTXZiV1Z6YzJGblpYTXZNVGN5T1RFd016RTVNemd6TXc9PXxkMmZhM2I0Mjk2NTU0ZGU4Y2M3ZTA4ZGNlZTEwMGZmM3wzMWUwNmIxZjgyZjQ0MGRkOTY2YjFhYzMzNDlkOTdhZQ%3D%3D&sdata=MEo1T0JaUHJWSU5UWGdXdlNhc0R2bFhEU21sSFhJcHFCcTZXMitYdlZZVT0%3D&ovuser=b0a9b38e-5be3-4a10-8fdc-cef4306b5139%2CEiden.GarciaTorres%40Lumapr.com&OR=Teams-HL&CT=1729106118656&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNDA5MDEwMTQyMyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D">
+          <span class="btn-icon">⚠️</span>
+          <span>Safety Alert Record Trainings</span>
+          <span class="btn-arrow">→</span>
+        </a>
+      </nav>
+
+      <div class="card-footer">
+        <span class="footer-credit">Developed by Eiden O. Garcia Torres</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  (function(){
+    const fixedDate = new Date('2026-07-08T12:00');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
+</script>
+</body>
+</html>

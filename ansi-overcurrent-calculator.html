@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ANSI Overcurrent Trip Time Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Layout ── */
+    .calc-container {
+      width: 100%;
+      max-width: 1400px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 420px 1fr;
+      align-items: stretch;
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .graph-card {
+      position: relative;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Mobile: single column, graph always last */
+    @media (max-width: 900px) {
+      .calc-container {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .graph-card { order: 99; }
+    }
+
+    /* ── Cards ── */
+    .calc-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(20,33,75,0.06);
+      padding: 22px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .calc-card h2 {
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 16px 0;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    fieldset { border: none; margin: 0 0 16px; padding: 0; }
+    legend {
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 480px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid #C9D2E0;
+      color: var(--ink);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(31,58,122,0.2);
+      background: rgba(20,33,75,0.06);
+    }
+    input.error { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); }
+    select option { background: #FFFFFF; color: #14214B; }
+
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+
+    .calc-btn {
+      background: linear-gradient(135deg, var(--cyan), #14214B);
+      color: #FFFFFF;
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-weight: 700;
+      border: none;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(31,58,122,0.25);
+      transition: all 0.18s ease;
+      letter-spacing: 0.02em;
+    }
+    .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(31,58,122,0.35); filter: brightness(1.05); }
+    .calc-btn.secondary {
+      background: rgba(20,33,75,0.06);
+      color: var(--muted);
+      border: 1px solid var(--glass-border);
+      box-shadow: none;
+    }
+    .calc-btn.secondary:hover { background: rgba(20,33,75,0.06); color: var(--ink); }
+
+    .formula-pill {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+    .formula-pill code {
+      display: block;
+      margin-top: 4px;
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      color: #1F3A7A;
+      font-size: 0.71rem;
+    }
+
+    .result-box {
+      display: none;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      animation: fadeUp 0.2s ease both;
+    }
+    .result-box.ok  { background: rgba(121,169,65,0.12); border: 1px solid rgba(121,169,65,0.35); color: #c8f5d0; }
+    .result-box.fail{ background: rgba(255,107,107,0.10); border: 1px solid rgba(255,107,107,0.35); color: #B42318; }
+    .result-box .rhead {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Dubai', 'DM Sans', sans-serif; font-weight: 700;
+      font-size: 0.8rem; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .rhead .badge {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(20,33,75,0.06);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .msg-box { margin-top: 10px; font-size: 0.85rem; color: var(--muted); }
+    .msg-box .msg {
+      padding: 8px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--glass-border); background: rgba(20,33,75,0.06);
+    }
+
+    .graph-legend {
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+    .legend-swatch { width: 24px; height: 3px; border-radius: 2px; background: var(--cyan); }
+    .legend-swatch.shaded {
+      height: 10px; border-radius: 3px;
+      background: rgba(31,58,122,0.25); border: 1px solid rgba(31,58,122,0.4);
+    }
+
+    canvas {
+      width: 100%; height: auto;
+      border-radius: var(--radius);
+      background: rgba(20,33,75,0.06);
+      border: 1px solid var(--glass-border);
+      display: block;
+    }
+
+    .canvas-wrap { position: relative; flex: 1; }
+    .label-chip {
+      position: absolute;
+      background: rgba(10,26,48,0.92);
+      border: 1px solid rgba(31,58,122,0.5);
+      color: #1F3A7A; font-size: 11px; padding: 5px 9px;
+      border-radius: 8px; pointer-events: none; white-space: nowrap;
+      z-index: 5; box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      display: none;
+    }
+
+    textarea {
+      min-height: 130px; resize: vertical;
+      font-family: 'Menlo', 'Consolas', ui-monospace, monospace;
+      font-size: 0.8rem; line-height: 1.5;
+    }
+
+    .notice {
+      background: rgba(255,204,102,0.08);
+      border: 1px solid rgba(255,204,102,0.25);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px; font-size: 0.76rem;
+      color: rgba(255,230,150,0.85); margin-bottom: 14px; line-height: 1.5;
+    }
+
+    /* ── Disclaimer Modal ── */
+    #disclaimerOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(20,33,75,0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      animation: fadeIn 0.3s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes modalUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+
+    #disclaimerBox {
+      background: linear-gradient(160deg, #FFFFFF 0%, #F7F9FB 100%);
+      border: 1px solid rgba(240,165,0,0.35);
+      border-radius: 20px;
+      box-shadow:
+        0 24px 64px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(20,33,75,0.06) inset,
+        0 0 60px rgba(255,180,40,0.06);
+      padding: 36px 36px 30px;
+      max-width: 560px;
+      width: 100%;
+      animation: modalUp 0.35s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+    }
+
+    .disc-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,200,60,0.18), rgba(255,130,30,0.12));
+      border: 1px solid rgba(255,200,60,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(255,180,40,0.12);
+    }
+
+    #disclaimerBox h2 {
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .disc-subtitle {
+      font-size: 0.78rem;
+      color: rgba(240,165,0,0.75);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .disc-body {
+      font-size: 0.88rem;
+      color: rgba(200,220,240,0.85);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .disc-body strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .disc-body .disc-warning-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.22);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 0.84rem;
+      color: rgba(255,210,210,0.9);
+      line-height: 1.55;
+    }
+
+    .disc-warning-line .warn-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .disc-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(20,33,75,0.06), transparent);
+      margin: 0 0 22px;
+    }
+
+    .disc-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .disc-checkbox-row input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--cyan);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .disc-checkbox-row span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    #acceptBtn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      cursor: not-allowed;
+      font-family: 'Dubai', 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      background: rgba(20,33,75,0.06);
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(20,33,75,0.06);
+      transition: all 0.2s ease;
+    }
+
+    #acceptBtn.ready {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--cyan), #14214B);
+      color: #FFFFFF;
+      border-color: transparent;
+      box-shadow: 0 4px 20px rgba(31,58,122,0.3);
+    }
+
+    #acceptBtn.ready:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(31,58,122,0.4);
+      filter: brightness(1.05);
+    }
+
+    /* Blur the content behind the modal */
+    #mainContent {
+      filter: blur(3px);
+      pointer-events: none;
+      user-select: none;
+      transition: filter 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Disclaimer Modal ── -->
+<div id="disclaimerOverlay">
+  <div id="disclaimerBox">
+    <div class="disc-icon">⚠️</div>
+    <div class="disc-subtitle">Important Notice — Read Before Use</div>
+    <h2>Estimation Tool Disclaimer</h2>
+
+    <div class="disc-body">
+      <p>This tool is an <strong>estimation calculator</strong> for the operating time of overcurrent
+      protection devices using ANSI standard curves (Extremely Inverse and Very Inverse). It applies
+      the selected curve equations to approximate the expected trip time based on the input parameters
+      you provide.</p>
+
+      <div class="disc-warning-line">
+        <span class="warn-icon">🚫</span>
+        <span>
+          <strong>This calculator must NOT be used as the basis for any final engineering determination,
+          protection coordination study, or equipment design decision.</strong>
+          Results are approximate and intended solely as a preliminary reference or guidance tool to
+          estimate operating time. Always verify results using certified relay-coordination software
+          and consult a qualified protection engineer before making any operational or design decision.
+        </span>
+      </div>
+    </div>
+
+    <div class="disc-divider"></div>
+
+    <label class="disc-checkbox-row" for="discCheck">
+      <input type="checkbox" id="discCheck"/>
+      <span>I understand that this tool provides estimates only and must not be used for final
+      engineering determinations or protection coordination decisions.</span>
+    </label>
+
+    <button id="acceptBtn" disabled>Check the box above to continue</button>
+  </div>
+</div>
+
+<!-- ── Main Content (blurred until accepted) ── -->
+<div id="mainContent">
+<div class="page-wrapper" style="align-items:flex-start;">
+  <div style="width:100%;max-width:1400px;">
+
+    <a class="back-link" href="tools.html">← Back to Tools</a>
+
+    <header class="site-header">
+      <h1>ANSI Overcurrent Trip Time</h1>
+      <p class="lead">Extremely Inverse (EI) &amp; Very Inverse curve calculator with log–log TCC graph.</p>
+    </header>
+
+    <div class="calc-container">
+
+      <!-- ── LEFT: Inputs + JSON ── -->
+      <div class="left-col">
+
+        <div class="calc-card" style="animation-delay:0.05s">
+          <h2>Inputs</h2>
+
+          <fieldset>
+            <legend>Fault Parameters</legend>
+            <div class="grid-3">
+              <div>
+                <label for="I">Fault current I (A)</label>
+                <input id="I" type="number" min="0.001" step="any" value="1712"/>
+              </div>
+              <div>
+                <label for="Ip">Pickup Ip (A)</label>
+                <input id="Ip" type="number" min="0.001" step="any" value="300"/>
+              </div>
+              <div>
+                <label for="n">Time dial (n &gt; 0)</label>
+                <input id="n" type="number" min="0.01" step="any" value="1"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>System Settings</legend>
+            <div class="grid-2">
+              <div>
+                <label for="curve">Curve type</label>
+                <select id="curve"></select>
+              </div>
+              <div>
+                <label for="freq">Frequency (Hz)</label>
+                <input id="freq" type="number" min="1" step="any" value="60"/>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Extra Delay (optional)</legend>
+            <div class="grid-2">
+              <div>
+                <label for="extra">Delay value</label>
+                <input id="extra" type="text" placeholder="e.g. 2, 2/60, 0.0333"/>
+              </div>
+              <div>
+                <label for="extraUnit">Unit</label>
+                <select id="extraUnit">
+                  <option value="cycles">cycles</option>
+                  <option value="s">seconds</option>
+                  <option value="ms">milliseconds</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="btn-row">
+            <button class="calc-btn" id="calcBtn">Calculate</button>
+            <button class="calc-btn secondary" id="resetBtn">Reset</button>
+          </div>
+
+          <div class="formula-pill">
+            ANSI EI Formula (M = I / Ip):
+            <code>(6.407 / (M²−1) + 0.025) × n</code>
+          </div>
+
+          <div class="msg-box" id="messages"></div>
+          <div class="result-box" id="result"></div>
+        </div>
+
+        <div class="calc-card" style="animation-delay:0.1s">
+          <h2>Curve Constants (JSON)</h2>
+          <div class="notice">
+            ℹ️ <strong>Extremely Inverse</strong> uses the verified EI formula.
+            <strong>Very Inverse</strong> uses: <code style="color:#1F3A7A">(A/(M^P−1)+B)×n</code>.
+          </div>
+          <label for="jsonArea">name → {A, B, P}</label>
+          <textarea id="jsonArea" spellcheck="false"></textarea>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="calc-btn" id="applyJsonBtn">Apply JSON</button>
+            <button class="calc-btn secondary" id="downloadBtn">Download</button>
+          </div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- ── RIGHT: Graph ── -->
+      <div class="calc-card graph-card" style="animation-delay:0.15s">
+        <h2>TCC Log–Log Curve · Operating Time vs. Current</h2>
+        <div class="graph-legend">
+          <span class="legend-item"><span class="legend-swatch"></span> Curve (base)</span>
+          <span class="legend-item"><span class="legend-swatch shaded"></span> Extra delay region</span>
+          <span class="legend-item" style="color:var(--muted-2);font-size:0.72rem;">Dashed lines = operating point</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="ocCanvas" width="1060" height="720"></canvas>
+          <div id="labelBox" class="label-chip"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:18px;">
+      <span style="color:var(--muted-2);font-size:0.78rem;">Developed by Eiden O. Garcia Torres</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Only EI and Very Inverse ──
+const DEFAULT_CURVES = {
+  "extremely_inverse": { A: 6.407, B: 0.025,  P: 2.0 },
+  "very_inverse":      { A: 2.855, B: 0.0712, P: 2.0 }
+};
+let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
+
+const IEl         = document.getElementById('I');
+const IpEl        = document.getElementById('Ip');
+const nEl         = document.getElementById('n');
+const curveEl     = document.getElementById('curve');
+const freqEl      = document.getElementById('freq');
+const extraEl     = document.getElementById('extra');
+const extraUnitEl = document.getElementById('extraUnit');
+const calcBtn     = document.getElementById('calcBtn');
+const resetBtn    = document.getElementById('resetBtn');
+const msgBox      = document.getElementById('messages');
+const resultBox   = document.getElementById('result');
+const jsonArea    = document.getElementById('jsonArea');
+const applyJsonBtn  = document.getElementById('applyJsonBtn');
+const downloadBtn   = document.getElementById('downloadBtn');
+const labelBox    = document.getElementById('labelBox');
+const canvas      = document.getElementById('ocCanvas');
+const ctx         = canvas.getContext('2d');
+
+function showMessage(html) { msgBox.innerHTML = `<div class="msg">${html}</div>`; }
+function clearMessage()    { msgBox.innerHTML = ''; }
+
+function setResultBox(html, ok) {
+  resultBox.style.display = 'block';
+  resultBox.className = 'result-box ' + (ok ? 'ok' : 'fail');
+  resultBox.innerHTML = (ok
+    ? `<div class="rhead"><span class="badge">✓</span> OK</div>`
+    : `<div class="rhead"><span class="badge">✗</span> Invalid</div>`) + html;
+}
+function clearResult() {
+  resultBox.style.display = 'none';
+  resultBox.innerHTML = '';
+  resultBox.className = 'result-box';
+}
+
+function markError(el)    { el.classList.add('error'); }
+function clearError(el)   { el.classList.remove('error'); }
+function clearAllErrors() { [IEl, IpEl, nEl, freqEl].forEach(clearError); }
+
+function populateCurvesSelect() {
+  curveEl.innerHTML = '';
+  Object.keys(CURVES).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name.replace(/_/g, ' ');
+    curveEl.appendChild(opt);
+  });
+  curveEl.value = 'extremely_inverse';
+}
+
+function loadDefaultJSON() {
+  jsonArea.value = JSON.stringify(CURVES, null, 2);
+  populateCurvesSelect();
+}
+
+function parseFractionOrFloat(text) {
+  const t = String(text).trim();
+  if (!t) throw new Error('Empty value');
+  if (t.includes('/')) {
+    const [num, den] = t.split('/', 2).map(s => parseFloat(s.trim()));
+    if (!isFinite(num) || !isFinite(den) || den === 0)
+      throw new Error('Invalid fraction');
+    return num / den;
+  }
+  const v = parseFloat(t);
+  if (!isFinite(v)) throw new Error('Invalid number');
+  return v;
+}
+
+function computeTripTime(I, Ip, n, curveName) {
+  if (Ip <= 0) throw new Error('Ip must be > 0');
+  if (n  <= 0) throw new Error('Time dial must be > 0');
+  const M = I / Ip;
+  const curve = CURVES[curveName] || CURVES['extremely_inverse'];
+  const { A, B, P } = curve;
+  const denom = P === 2 ? (M * M - 1) : (Math.pow(M, P) - 1);
+  if (denom <= 0) return Infinity;
+  if (curveName === 'extremely_inverse')
+    return (((9.96644 / denom) + 0.0388889) - 0.01389 - (3.55944 / denom)) * n;
+  return (A / denom + B) * n;
+}
+
+function extraToSeconds(freq, val, unit) {
+  if (!val && val !== 0) return 0;
+  if (unit === 'cycles') return val / freq;
+  if (unit === 'ms')     return val / 1000;
+  return val;
+}
+
+// ── Graph constants ──
+const X_MIN = 1,    X_MAX = 10000;
+const Y_MIN = 0.05, Y_MAX = 1000;
+const PAD_L = 72, PAD_R = 24, PAD_T = 20, PAD_B = 50;
+
+const log10    = v => Math.log(v) / Math.LN10;
+const xLogSpan = log10(X_MAX) - log10(X_MIN);
+const yLogSpan = log10(Y_MAX) - log10(Y_MIN);
+const sx = I => PAD_L + ((log10(I) - log10(X_MIN)) / xLogSpan) * (canvas.width - PAD_L - PAD_R);
+const sy = t => PAD_T + ((log10(Y_MAX) - log10(t))  / yLogSpan) * (canvas.height - PAD_T - PAD_B);
+
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.fillRect(PAD_L, PAD_T, canvas.width - PAD_L - PAD_R, canvas.height - PAD_T - PAD_B);
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(20,33,75,0.18)'; ctx.lineWidth = 1;
+
+  [1, 10, 100, 1000, 10000].forEach(d => {
+    const x = sx(d);
+    ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+    ctx.fillStyle = '#4E5C7E'; ctx.font = '12px Dubai, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(String(d), x, canvas.height - PAD_B + 7);
+  });
+
+  [0.1, 1, 10, 100, 1000].forEach(d => {
+    const y = sy(Math.min(Math.max(d, Y_MIN), Y_MAX));
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+    ctx.fillStyle = '#4E5C7E'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(d), PAD_L - 8, y);
+  });
+
+  ctx.strokeStyle = 'rgba(20,33,75,0.18)';
+  for (let dec = 0; dec < 4; dec++) {
+    const base = Math.pow(10, dec);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= X_MIN && v <= X_MAX) {
+        ctx.beginPath(); ctx.moveTo(sx(v), PAD_T); ctx.lineTo(sx(v), canvas.height - PAD_B); ctx.stroke();
+      }
+    }
+  }
+  for (let dec = -1; dec < 3; dec++) {
+    const base = Math.pow(10, dec);
+    for (let m = 2; m < 10; m++) {
+      const v = base * m;
+      if (v >= Y_MIN && v <= Y_MAX) {
+        ctx.beginPath(); ctx.moveTo(PAD_L, sy(v)); ctx.lineTo(canvas.width - PAD_R, sy(v)); ctx.stroke();
+      }
+    }
+  }
+
+  ctx.fillStyle = '#14214B'; ctx.font = 'bold 13px Dubai, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('Current (A · log scale)', (PAD_L + canvas.width - PAD_R) / 2, canvas.height - 22);
+  ctx.save();
+  ctx.translate(16, (PAD_T + canvas.height - PAD_B) / 2);
+  ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Operating Time (s · log scale)', 0, 0);
+  ctx.restore();
+  ctx.restore();
+}
+
+const CURVE_COLOR = 'rgba(42,195,221,1)';
+
+function buildCurvePoints(Ip, n, curveName, extraSeconds) {
+  const N = 700;
+  const logXmin = log10(Math.max(X_MIN, Ip * 1.001));
+  const logXmax = log10(X_MAX);
+  const pts = [], data = [];
+  for (let i = 0; i < N; i++) {
+    const I = Math.pow(10, logXmin + (logXmax - logXmin) * i / (N - 1));
+    let t;
+    try { t = computeTripTime(I, Ip, n, curveName); } catch { continue; }
+    if (!isFinite(t) || t <= 0) continue;
+    if (extraSeconds) t += extraSeconds;
+    t = Math.max(Y_MIN, Math.min(Y_MAX, t));
+    pts.push([sx(I), sy(t)]);
+    data.push({ I, t });
+  }
+  return { pts, data };
+}
+
+function strokeCurve(pts) {
+  if (pts.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = CURVE_COLOR; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (const [x, y] of pts.slice(1)) ctx.lineTo(x, y);
+  ctx.stroke(); ctx.restore();
+}
+
+function fillBetween(baseData, totalData) {
+  if (baseData.length < 2 || totalData.length < 2) return;
+  const n = Math.min(baseData.length, totalData.length);
+  ctx.save();
+  ctx.fillStyle = 'rgba(31,58,122,0.14)';
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = sx(totalData[i].I), y = sy(totalData[i].t);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  for (let i = n - 1; i >= 0; i--) ctx.lineTo(sx(baseData[i].I), sy(baseData[i].t));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function setLabelBox(canvasX, canvasY, I, t) {
+  const rect   = canvas.getBoundingClientRect();
+  const scaleX = rect.width  / canvas.width;
+  const scaleY = rect.height / canvas.height;
+  const cssX   = canvasX * scaleX;
+  const cssY   = canvasY * scaleY;
+  const pad = 8, chipW = 150;
+  labelBox.style.left    = Math.min(cssX + 14, rect.width - chipW - pad) + 'px';
+  labelBox.style.top     = Math.max(pad, cssY - 22) + 'px';
+  labelBox.textContent   = `${I.toFixed(1)} A  ·  ${t.toFixed(4)} s`;
+  labelBox.style.display = 'block';
+}
+function hideLabel() { labelBox.style.display = 'none'; }
+
+function drawOperatingPoint(I, tTotal) {
+  if (!isFinite(tTotal) || tTotal <= 0) return;
+  const x = sx(I), y = sy(Math.min(Math.max(tTotal, Y_MIN), Y_MAX));
+  ctx.save();
+  ctx.setLineDash([6, 5]); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(20,33,75,0.35)';
+  ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, canvas.height - PAD_B); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(canvas.width - PAD_R, y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#ffffff'; ctx.shadowColor = 'rgba(31,58,122,0.8)'; ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  setLabelBox(x, y, I, tTotal);
+}
+
+function redrawGraph() {
+  const I         = parseFloat(IEl.value);
+  const Ip        = parseFloat(IpEl.value);
+  const n         = parseFloat(nEl.value);
+  const f         = parseFloat(freqEl.value);
+  const extraRaw  = (extraEl.value || '').trim();
+  const unit      = extraUnitEl.value;
+  const curveName = curveEl.value || 'extremely_inverse';
+
+  drawGrid();
+  if (!(isFinite(Ip) && Ip > 0 && isFinite(n) && n > 0 && isFinite(f) && f > 0)) { hideLabel(); return; }
+
+  let extraSec = 0;
+  if (extraRaw) {
+    try { extraSec = extraToSeconds(f, parseFractionOrFloat(extraRaw), unit); }
+    catch { extraSec = 0; }
+  }
+
+  const base  = buildCurvePoints(Ip, n, curveName, 0);
+  const total = buildCurvePoints(Ip, n, curveName, extraSec);
+
+  if (extraSec > 0) fillBetween(base.data, total.data);
+  strokeCurve(base.pts);
+  if (extraSec > 0) strokeCurve(total.pts);
+
+  hideLabel();
+  if (isFinite(I) && I > 0) {
+    try {
+      const baseT  = computeTripTime(I, Ip, n, curveName);
+      const totalT = isFinite(baseT) ? baseT + extraSec : Infinity;
+      if (isFinite(totalT)) drawOperatingPoint(I, totalT);
+    } catch { /* skip */ }
+  }
+}
+
+function handleCalculate() {
+  clearMessage(); clearResult(); clearAllErrors();
+  const I  = parseFloat(IEl.value);
+  const Ip = parseFloat(IpEl.value);
+  const n  = parseFloat(nEl.value);
+  const f  = parseFloat(freqEl.value);
+  const curveName = curveEl.value || 'extremely_inverse';
+
+  let valid = true;
+  if (!isFinite(I)  || I  <= 0) { markError(IEl);    valid = false; }
+  if (!isFinite(Ip) || Ip <= 0) { markError(IpEl);   valid = false; }
+  if (!isFinite(n)  || n  <= 0) { markError(nEl);    valid = false; }
+  if (!isFinite(f)  || f  <= 0) { markError(freqEl); valid = false; }
+
+  if (!valid) {
+    setResultBox('Please fix the highlighted fields — all values must be positive numbers.', false);
+    return;
+  }
+
+  let baseTime;
+  try { baseTime = computeTripTime(I, Ip, n, curveName); }
+  catch (e) { setResultBox(e.message, false); return; }
+
+  if (!isFinite(baseTime)) {
+    setResultBox('No trip — fault current must exceed pickup current (I &gt; Ip).', false);
+    redrawGraph(); return;
+  }
+
+  let extraSeconds = 0;
+  const raw = (extraEl.value || '').trim();
+  if (raw) {
+    try { extraSeconds = extraToSeconds(f, parseFractionOrFloat(raw), extraUnitEl.value); }
+    catch (e) { setResultBox('Invalid extra delay: ' + e.message, false); return; }
+  }
+
+  const total = baseTime + extraSeconds;
+  const M     = (I / Ip).toFixed(3);
+
+  setResultBox(
+    `<b>M = I / Ip = ${M}</b><br>
+     Base trip time: <b>${baseTime.toFixed(6)} s</b>&nbsp;(<b>${(baseTime * f).toFixed(2)} cycles</b>)<br>
+     Extra delay:&nbsp;<b>${extraSeconds.toFixed(6)} s</b><br>
+     Total: <b style="font-size:1.05rem;">${total.toFixed(6)} s</b>&nbsp;(<b>${(total * f).toFixed(2)} cycles</b>)`,
+    true
+  );
+  redrawGraph();
+}
+
+function handleReset() {
+  IEl.value = 1712; IpEl.value = 300; nEl.value = 1; freqEl.value = 60;
+  extraEl.value = ''; extraUnitEl.value = 'cycles';
+  clearMessage(); clearResult(); clearAllErrors();
+  redrawGraph();
+}
+
+function handleApplyJSON() {
+  try {
+    CURVES = JSON.parse(jsonArea.value);
+    populateCurvesSelect();
+    showMessage('✅ Curves updated.');
+    redrawGraph();
+  } catch (e) { showMessage('❌ JSON error: ' + e.message); }
+}
+
+function handleDownloadJSON() {
+  const blob = new Blob([jsonArea.value], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ansi_curves.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+[IEl, IpEl, nEl, freqEl, extraEl].forEach(el => el.addEventListener('input', redrawGraph));
+extraUnitEl.addEventListener('change', redrawGraph);
+curveEl.addEventListener('change', redrawGraph);
+window.addEventListener('resize', redrawGraph);
+
+loadDefaultJSON();
+calcBtn.addEventListener('click', handleCalculate);
+resetBtn.addEventListener('click', handleReset);
+applyJsonBtn.addEventListener('click', handleApplyJSON);
+downloadBtn.addEventListener('click', handleDownloadJSON);
+redrawGraph();
+</script>
+</div><!-- /#mainContent -->
+
+<script>
+// ── Disclaimer modal logic ──
+(function () {
+  const overlay   = document.getElementById('disclaimerOverlay');
+  const acceptBtn = document.getElementById('acceptBtn');
+  const discCheck = document.getElementById('discCheck');
+  const mainContent = document.getElementById('mainContent');
+
+  discCheck.addEventListener('change', function () {
+    if (this.checked) {
+      acceptBtn.disabled = false;
+      acceptBtn.classList.add('ready');
+      acceptBtn.textContent = 'I Accept — Continue to Calculator';
+    } else {
+      acceptBtn.disabled = true;
+      acceptBtn.classList.remove('ready');
+      acceptBtn.textContent = 'Check the box above to continue';
+    }
+  });
+
+  acceptBtn.addEventListener('click', function () {
+    if (acceptBtn.disabled) return;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity = '0';
+    mainContent.style.filter = 'none';
+    mainContent.style.pointerEvents = 'auto';
+    mainContent.style.userSelect = 'auto';
+    setTimeout(() => overlay.remove(), 320);
+  });
+})();
+</script>
+</body>
+</html>
