@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reliability DA · Tools</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+  <div class="wrap-narrow">
+
+<a class="back-link" href="index.html">← Back to Home</a>
+
+<header class="site-header">
+  <h1>Tools</h1>
+  <p class="lead">Quick access to interactive calculators.</p>
+</header>
+
+<div class="card">
+  <div class="brand">
+    <img src="assets/images/luma-logo-white.png" alt="LUMA Logo">
+  </div>
+
+  <div class="meta">
+    <span class="pill" id="lastUpdated">Last Updated: —</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="groups">
+    <div class="group">
+      <h3>Calculators &amp; Utilities</h3>
+      <div class="links">
+
+        <a class="btn secondary" href="ip-calculator.html">
+          IP Calculator
+        </a>
+
+        <a class="btn secondary" href="tcc-coordination-calculator.html">
+          TCC Coordination Calculator
+        </a>
+
+        <a class="btn secondary" href="qr-code-generator.html">
+          QR Generator
+        </a>
+
+        <a class="btn secondary" href="metering-calculator.html">
+          Metering Check
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <span class="footer-credit">Developed by Eiden O. Garcia Torres</span>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<script>
+  (function(){
+    const fixedDate = new Date('2026-07-08T12:00');
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric',
+                   hour:'numeric', minute:'numeric', hour12:true };
+    document.getElementById('lastUpdated').textContent =
+      'Last Updated: ' + fixedDate.toLocaleDateString('en-US', opts);
+  })();
+</script>
+
+</body>
+</html>

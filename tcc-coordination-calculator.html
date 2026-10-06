@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TCC Coordination Calculator</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .calc-container {
+    width: 100%;
+    max-width: 1500px;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 460px 1fr;
+    align-items: start;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .graph-card { position: relative; min-width: 0; display: flex; flex-direction: column; }
+  .json-card  { grid-column: 1 / -1; }
+
+  @media (max-width: 1000px) {
+    .calc-container { grid-template-columns: 1fr; max-width: 660px; margin: 0 auto; }
+    .graph-card { order: 99; }
+    .json-card  { order: 100; }
+  }
+
+  .calc-card {
+    background: var(--glass, rgba(20,33,75,0.06));
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    border-radius: var(--radius-lg, 16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.4)), inset 0 1px 0 rgba(20,33,75,0.06);
+    padding: 0;
+    animation: fadeUp 0.5s ease both;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.18s;
+    border-bottom: 1px solid transparent;
+  }
+  .card-header:hover { background: rgba(20,33,75,0.06); }
+  .card-header.open { border-bottom: 1px solid var(--glass-border, rgba(20,33,75,0.06)); }
+  .card-header-left { display: flex; flex-direction: column; gap: 2px; }
+  .calc-card h2 {
+    font-family: 'Dubai', 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    margin: 0; color: var(--ink, #1F3A7A); letter-spacing: -0.01em;
+  }
+  .set-hint { font-size: 0.75rem; color: var(--muted-2, rgba(78,92,126,0.5)); display: block; font-style: italic; }
+  .collapse-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(20,33,75,0.06); border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--muted, rgba(78,92,126,0.7)); transition: all 0.2s; flex-shrink: 0;
+  }
+  .card-header.open .collapse-icon { transform: rotate(180deg); background: rgba(31,58,122,0.12); border-color: rgba(31,58,122,0.3); color: var(--cyan, #1F3A7A); }
+
+  .card-body {
+    padding: 18px 22px 22px;
+    display: none;
+  }
+  .card-body.open { display: block; }
+
+  .graph-card { padding: 22px; }
+  .json-card  { padding: 22px; }
+
+  .dev-accent-0 { border-top: 2px solid #1F3A7A; }
+  .dev-accent-1 { border-top: 2px solid #79A941; }
+  .dev-accent-2 { border-top: 2px solid #C05717; }
+  .dev-accent-3 { border-top: 2px solid #6C3FC5; }
+  .dev-accent-4 { border-top: 2px solid #C2255C; }
+  .dev-accent-5 { border-top: 2px solid #B45309; }
+  .dev-accent-6 { border-top: 2px solid #A93226; }
+  .dev-accent-7 { border-top: 2px solid #0E7490; }
+
+  .dev-accent-0 .card-header.open .collapse-icon { background:rgba(31,58,122,0.12);border-color:rgba(31,58,122,0.3);color:#1F3A7A; }
+  .dev-accent-1 .card-header.open .collapse-icon { background:rgba(121,169,65,0.12);border-color:rgba(121,169,65,0.3);color:#79A941; }
+  .dev-accent-2 .card-header.open .collapse-icon { background:rgba(255,159,67,0.12);border-color:rgba(255,159,67,0.3);color:#C05717; }
+  .dev-accent-3 .card-header.open .collapse-icon { background:rgba(108,63,197,0.12);border-color:rgba(108,63,197,0.3);color:#6C3FC5; }
+  .dev-accent-4 .card-header.open .collapse-icon { background:rgba(194,37,92,0.12);border-color:rgba(194,37,92,0.3);color:#C2255C; }
+  .dev-accent-5 .card-header.open .collapse-icon { background:rgba(180,83,9,0.12);border-color:rgba(180,83,9,0.3);color:#B45309; }
+  .dev-accent-6 .card-header.open .collapse-icon { background:rgba(169,50,38,0.12);border-color:rgba(169,50,38,0.3);color:#A93226; }
+  .dev-accent-7 .card-header.open .collapse-icon { background:rgba(14,116,144,0.12);border-color:rgba(14,116,144,0.3);color:#0E7490; }
+
+  .dev-accent-0 legend { color:#1F3A7A; }
+  .dev-accent-1 legend { color:#79A941; }
+  .dev-accent-2 legend { color:#C05717; }
+  .dev-accent-3 legend { color:#6C3FC5; }
+  .dev-accent-4 legend { color:#C2255C; }
+  .dev-accent-5 legend { color:#B45309; }
+  .dev-accent-6 legend { color:#A93226; }
+  .dev-accent-7 legend { color:#0E7490; }
+
+  .device-card-wrap { position: relative; transition: opacity 0.15s; }
+  .device-card-wrap.dragging-card { opacity: 0.4; }
+  .device-card-wrap.drag-over-card { outline: 2px dashed rgba(20,33,75,0.35); border-radius: var(--radius-lg, 16px); }
+
+  .drag-handle {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(20,33,75,0.06); border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    display: flex; align-items: center; justify-content: center;
+    cursor: grab; color: var(--muted-2, rgba(78,92,126,0.5)); font-size: 0.85rem; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .drag-handle:hover { background: rgba(20,33,75,0.06); color: var(--ink, #1F3A7A); }
+  .drag-handle:active { cursor: grabbing; }
+
+  .card-delete-btn {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(255,80,80,0.08); border: 1px solid rgba(255,80,80,0.22);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: rgba(255,120,120,0.7); font-size: 0.8rem; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .card-delete-btn:hover { background: rgba(255,80,80,0.25); color: #fff; border-color: rgba(255,80,80,0.5); }
+
+  .add-device-btn {
+    width: 100%; padding: 14px;
+    background: rgba(20,33,75,0.06); border: 1.5px dashed rgba(20,33,75,0.06);
+    border-radius: var(--radius-lg, 16px); cursor: pointer; color: var(--muted-2, rgba(78,92,126,0.5));
+    font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600;
+    letter-spacing: 0.04em; transition: all 0.18s; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .add-device-btn:hover { background: rgba(20,33,75,0.06); border-color: rgba(20,33,75,0.3); color: var(--ink, #1F3A7A); }
+
+  fieldset { border: none; margin: 0 0 12px; padding: 0; }
+  legend {
+    font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.71rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan, #1F3A7A); margin-bottom: 8px; opacity: 0.85;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  @media (max-width: 480px) { .grid-3 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+
+  label { font-size: 0.79rem; color: var(--muted, rgba(78,92,126,0.7)); display: block; margin: 0 0 5px; font-weight: 500; }
+
+  input, select, textarea {
+    width: 100%; background: rgba(20,33,75,0.06); color: var(--ink, #1F3A7A);
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06)); border-radius: var(--radius-sm, 8px);
+    padding: 9px 11px; font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.88rem;
+    outline: none; transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    box-sizing: border-box;
+  }
+  input::placeholder { color: rgba(78,92,126,0.45); }
+  input[readonly] { background: rgba(20,33,75,0.06); color: var(--muted-2, rgba(78,92,126,0.5)); cursor: default; }
+  input:focus:not([readonly]), select:focus, textarea:focus {
+    border-color: var(--cyan, #1F3A7A); box-shadow: 0 0 0 3px rgba(31,58,122,0.18); background: rgba(20,33,75,0.06);
+  }
+  input.error { border-color: #C0392B; box-shadow: 0 0 0 3px rgba(255,107,107,0.18); }
+  select option { background: #FFFFFF; color: #14214B; }
+
+  .device-select-wrap {
+    background: rgba(20,33,75,0.06);
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    border-radius: var(--radius-sm, 8px);
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .device-select-wrap label { margin: 0 0 6px; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .device-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 6px; font-size: 0.75rem; color: var(--muted, rgba(78,92,126,0.7));
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(20,33,75,0.06); border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+  }
+  .device-badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .calc-btn {
+    background: linear-gradient(135deg, var(--cyan, #1F3A7A), #14214B); color: #FFFFFF;
+    font-family: 'Dubai', 'DM Sans', sans-serif; font-weight: 700; border: none;
+    padding: 10px 18px; border-radius: var(--radius-sm, 8px); cursor: pointer;
+    font-size: 0.87rem; box-shadow: 0 4px 14px rgba(31,58,122,0.22);
+    transition: all 0.18s; letter-spacing: 0.02em;
+  }
+  .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(31,58,122,0.32); filter: brightness(1.05); }
+  .calc-btn.secondary {
+    background: rgba(20,33,75,0.06); color: var(--muted, rgba(78,92,126,0.7));
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06)); box-shadow: none;
+  }
+  .calc-btn.secondary:hover { background: rgba(20,33,75,0.06); color: var(--ink, #1F3A7A); }
+  .calc-btn.outline {
+    background: transparent; color: var(--muted, rgba(78,92,126,0.7));
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06)); box-shadow: none; font-size: 0.8rem; padding: 7px 12px;
+  }
+  .calc-btn.outline:hover { background: rgba(20,33,75,0.06); color: var(--ink, #1F3A7A); }
+
+  .formula-pill {
+    background: rgba(0,0,0,0.22); border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    border-radius: var(--radius-sm, 8px); padding: 8px 11px;
+    font-size: 0.72rem; color: var(--muted, rgba(78,92,126,0.7)); line-height: 1.5; margin-top: 10px;
+  }
+  .formula-pill code { display: block; margin-top: 3px; font-family: 'Menlo','Consolas',monospace; color: #1F3A7A; font-size: 0.69rem; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; font-size: 0.79rem; color: var(--muted-2, rgba(78,92,126,0.5)); }
+  .switch { position: relative; display: inline-block; width: 34px; height: 19px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: rgba(20,33,75,0.06); transition: 0.2s; border-radius: 999px; border: 1px solid rgba(20,33,75,0.06); }
+  .slider::before { content:""; position:absolute; height:13px; width:13px; left:2px; top:2px; background:white; transition:0.2s; border-radius:50%; }
+  input:checked + .slider { background: var(--cyan, #1F3A7A); border-color: var(--cyan, #1F3A7A); }
+  input:checked + .slider::before { transform: translateX(15px); }
+
+  .graph-legend { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    background: #FFFFFF; border: 1px solid #C9D2E0;
+    font-size: 0.76rem; color: var(--muted, rgba(78,92,126,0.7)); transition: opacity 0.2s; cursor: default;
+  }
+  .legend-swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .tci-chip {
+    margin-left: auto; padding: 5px 13px; border-radius: 999px;
+    background: rgba(0,0,0,0.42); border: 1px solid rgba(20,33,75,0.06);
+    color: var(--ink, #1F3A7A); font-size: 0.79rem; display: none;
+    font-family: 'Menlo','Consolas',monospace; white-space: nowrap;
+  }
+
+  .zoom-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .zoom-info { font-size: 0.72rem; color: var(--muted-2, rgba(78,92,126,0.5)); margin-left: auto; font-family: 'Menlo','Consolas',monospace; }
+
+  canvas {
+    width: 100%; height: auto; border-radius: var(--radius, 10px);
+    background: #FFFFFF; border: 1px solid #C9D2E0;
+    display: block;
+  }
+  .canvas-wrap { position: relative; flex: 1; user-select: none; }
+  .label-chip {
+    position: absolute; background: rgba(10,26,48,0.93); border: 1px solid rgba(20,33,75,0.06);
+    color: #fff; font-size: 11px; padding: 5px 9px; border-radius: 8px;
+    pointer-events: none; white-space: nowrap; z-index: 5;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5); font-family: 'Menlo','Consolas',monospace; display: none;
+  }
+
+  #hoverTooltip {
+    position: absolute; background: rgba(8,18,40,0.92);
+    border: 1px solid rgba(20,33,75,0.3); color: #FFFFFF;
+    font-size: 11px; padding: 5px 10px; border-radius: 8px;
+    pointer-events: none; white-space: nowrap; z-index: 10;
+    font-family: 'Menlo','Consolas',monospace; display: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5); line-height: 1.6;
+  }
+
+  .graph-toolbar {
+    margin-top: 12px; background: rgba(0,0,0,0.22);
+    border: 1px solid var(--glass-border, rgba(20,33,75,0.06));
+    border-radius: var(--radius-sm, 8px); padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toolbar-title {
+    font-family: 'Dubai', 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2, rgba(78,92,126,0.5));
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toolbar-section { display: flex; flex-direction: column; gap: 7px; }
+  .toolbar-section-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .toolbar-label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px; }
+  .toolbar-label.amp-label  { color: #618A31; }
+  .toolbar-label.time-label { color: #1F3A7A; }
+  .line-dot-amp  { width: 9px; height: 9px; border-radius: 50%; background: #618A31; box-shadow: 0 0 5px #618A31; }
+  .line-dot-time { width: 9px; height: 9px; border-radius: 50%; background: #1F3A7A; box-shadow: 0 0 5px #1F3A7A; }
+  .lines-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .line-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(20,33,75,0.06); border-radius: 8px; padding: 4px 6px; font-size: 0.78rem;
+  }
+  .line-chip input[type="number"] {
+    width: 75px; padding: 4px 6px; font-size: 0.78rem;
+    border-radius: 5px; background: rgba(20,33,75,0.06);
+    border: 1px solid rgba(20,33,75,0.3); color: #FFFFFF;
+    font-family: 'Menlo','Consolas',monospace;
+  }
+  .line-chip input[type="number"].amp-input  { border-color: rgba(57,255,142,0.35); }
+  .line-chip input[type="number"].time-input { border-color: rgba(0,200,255,0.35); }
+  .line-chip input[type="number"].amp-input:focus  { border-color: #618A31; box-shadow: 0 0 0 2px rgba(57,255,142,0.2); }
+  .line-chip input[type="number"].time-input:focus { border-color: #1F3A7A; box-shadow: 0 0 0 2px rgba(0,200,255,0.2); }
+  .line-chip-label { font-size: 0.7rem; color: var(--muted-2, rgba(78,92,126,0.5)); }
+  .line-remove-btn {
+    width: 18px; height: 18px; border-radius: 50%; background: rgba(255,80,80,0.15);
+    border: 1px solid rgba(255,80,80,0.3); color: rgba(255,120,120,0.8);
+    font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0; line-height: 1;
+  }
+  .line-remove-btn:hover { background: rgba(255,80,80,0.35); color: #fff; }
+  .len-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .len-label { font-size: 0.71rem; color: var(--muted-2, rgba(78,92,126,0.5)); white-space: nowrap; }
+  .len-slider { -webkit-appearance: none; width: 90px; height: 4px; border-radius: 2px; outline: none; cursor: pointer; background: rgba(20,33,75,0.06); border: none; padding: 0; }
+  .len-slider.amp-slider::-webkit-slider-thumb  { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:#618A31; box-shadow: 0 0 6px #618A31; cursor:pointer; }
+  .len-slider.time-slider::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:#1F3A7A; box-shadow: 0 0 6px #1F3A7A; cursor:pointer; }
+  .add-line-btn {
+    padding: 4px 10px; border-radius: 6px; border: 1px solid; font-size: 0.74rem;
+    cursor: pointer; font-family: 'Dubai', 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s;
+  }
+  .add-line-btn.amp  { border-color: rgba(57,255,142,0.4); color: #618A31; background: rgba(57,255,142,0.07); }
+  .add-line-btn.amp:hover  { background: rgba(57,255,142,0.18); }
+  .add-line-btn.time { border-color: rgba(0,200,255,0.4); color: #1F3A7A; background: rgba(0,200,255,0.07); }
+  .add-line-btn.time:hover { background: rgba(0,200,255,0.18); }
+
+  textarea { min-height: 150px; resize: vertical; font-family: 'Menlo','Consolas',monospace; font-size: 0.79rem; line-height: 1.5; }
+
+  #disclaimerOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: rgba(5,12,30,0.87); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    animation: fadeIn 0.3s ease both;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes fadeUp  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes modalUp {
+    from { opacity:0; transform: translateY(26px) scale(0.97); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+  #disclaimerBox {
+    background: linear-gradient(160deg, #FFFFFF, #F7F9FB);
+    border: 1px solid rgba(240,165,0,0.35); border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(20,33,75,0.06);
+    padding: 34px 34px 28px; max-width: 560px; width: 100%;
+    animation: modalUp 0.35s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+    position: relative; z-index: 10000;
+  }
+  .disc-icon { width: 50px; height: 50px; border-radius: 13px; background: linear-gradient(135deg,rgba(255,200,60,0.18),rgba(255,130,30,0.12)); border: 1px solid rgba(255,200,60,0.3); display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:16px; }
+  #disclaimerBox h2 { font-family:'Dubai','DM Sans',sans-serif; font-size:1.15rem; font-weight:800; color:#14214B; margin:0 0 5px; letter-spacing:-0.02em; }
+  .disc-subtitle { font-size:0.76rem; color:#B45309; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:18px; }
+  .disc-body { font-size:0.87rem; color:#4E5C7E; line-height:1.7; margin-bottom:22px; }
+  .disc-body strong { color:#14214B; font-weight:600; }
+  .disc-warning-line { display:flex; align-items:flex-start; gap:10px; background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.22); border-radius:10px; padding:11px 13px; margin-top:13px; font-size:0.83rem; color:#B42318; line-height:1.55; }
+  .warn-icon { font-size:0.95rem; flex-shrink:0; margin-top:1px; }
+  .disc-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(20,33,75,0.06),transparent); margin:0 0 20px; }
+  .disc-checkbox-row { display:flex; align-items:center; gap:10px; margin-bottom:18px; cursor:pointer; user-select:none; }
+  .disc-checkbox-row input[type="checkbox"] { width:17px; height:17px; accent-color:var(--cyan,#1F3A7A); cursor:pointer; flex-shrink:0; }
+  .disc-checkbox-row span { font-size:0.81rem; color:var(--muted,rgba(78,92,126,0.7)); line-height:1.4; }
+  #acceptBtn {
+    width:100%; padding:13px; border-radius:12px; border:1px solid rgba(20,33,75,0.06); cursor:not-allowed;
+    font-family:'Dubai','DM Sans',sans-serif; font-weight:700; font-size:0.93rem; letter-spacing:0.03em;
+    background:rgba(20,33,75,0.06); color:rgba(20,33,75,0.35); transition:all 0.2s;
+  }
+  #acceptBtn.ready { cursor:pointer; background:linear-gradient(135deg,var(--cyan,#1F3A7A),#14214B); color:#FFFFFF; border-color:transparent; box-shadow:0 4px 18px rgba(31,58,122,0.28); }
+  #acceptBtn.ready:hover { transform:translateY(-1px); box-shadow:0 8px 26px rgba(31,58,122,0.38); filter:brightness(1.05); }
+  #mainContent { filter:blur(3px); pointer-events:none; user-select:none; transition:filter 0.3s; }
+
+  .msg-box { margin-top: 8px; font-size: 0.83rem; color: var(--muted, rgba(78,92,126,0.7)); }
+  .msg-box .msg { padding: 7px 11px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--glass-border, rgba(20,33,75,0.06)); background: rgba(0,0,0,0.18); }
+
+  :root {
+    --cyan: #1F3A7A; --green: #79A941; --ink: #1F3A7A;
+    --muted: rgba(78,92,126,0.7); --muted-2: rgba(78,92,126,0.5);
+    --glass: rgba(20,33,75,0.06); --glass-border: rgba(20,33,75,0.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+    --radius: 10px; --radius-sm: 8px; --radius-lg: 16px;
+  }
+  body { background: #EEF2F6; font-family: 'Dubai', 'DM Sans', sans-serif; color: var(--ink); margin: 0; }
+  .page-wrapper { display:flex; justify-content:center; padding: 24px 16px 40px; }
+  .site-header { margin-bottom: 22px; }
+  .site-header h1 { font-family:'Dubai','DM Sans',sans-serif; font-size:1.6rem; font-weight:800; margin:0 0 6px; color:var(--ink); }
+  .site-header .lead { color:var(--muted); margin:0; font-size:0.9rem; }
+  .back-link { display:inline-block; margin-bottom:14px; font-size:0.8rem; color:var(--muted); text-decoration:none; }
+  .back-link:hover { color:var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- Disclaimer Modal -->
+<div id="disclaimerOverlay">
+  <div id="disclaimerBox">
+    <div class="disc-icon">⚠️</div>
+    <div class="disc-subtitle">Important Notice — Read Before Use</div>
+    <h2>Estimation Tool Disclaimer</h2>
+    <div class="disc-body">
+      <p>This tool is an <strong>estimation calculator</strong> for the operating time of
+      overcurrent protection devices using ANSI standard curves (S&amp;C IntelliRupter),
+      S&amp;C TripSaver II K-Speed fuse link TCC curves, S&amp;C Power Fuses Type SMU-20
+      tabulated TCC data (TCC 165-2 &amp; 165-2-2), the ABB DPU2000R ANSI Time
+      Overcurrent characteristic curves, GE Multilin 350 5-constant ANSI curves,
+      and ABB RE620 ANSI/IEC IDMT curves.</p>
+      <div class="disc-warning-line">
+        <span class="warn-icon">🚫</span>
+        <span>
+          <strong>This calculator must NOT be used as the basis for any final engineering
+          determination, protection coordination study, fuse sizing, or equipment design decision.</strong>
+          Results are approximate estimates intended solely as preliminary guidance.
+          Always verify using certified relay-coordination software and consult a qualified
+          protection engineer before any operational or design decision.
+        </span>
+      </div>
+    </div>
+    <div class="disc-divider"></div>
+    <label class="disc-checkbox-row" for="discCheck">
+      <input type="checkbox" id="discCheck"/>
+      <span>I understand this tool provides estimates only and must not be used for final
+      engineering determinations or protection coordination decisions.</span>
+    </label>
+    <button id="acceptBtn" disabled>Check the box above to continue</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div id="mainContent">
+<div class="page-wrapper" style="align-items:flex-start;">
+<div style="width:100%;max-width:1500px;">
+
+  <a class="back-link" href="tools.html">← Back to Tools</a>
+
+  <header class="site-header">
+    <h1>TCC Coordination Calculator</h1>
+    <p class="lead">S&amp;C IntelliRupter (ANSI) · TripSaver II (K-Speed) · SMU-20 (Table) · ABB DPU2000R · GE Multilin 350 · ABB RE620 — TCI coordination with zoom &amp; pan.</p>
+  </header>
+
+  <div class="calc-container">
+
+    <!-- LEFT: Dynamic Device Cards -->
+    <div class="left-col">
+      <div id="deviceList"></div>
+      <button class="add-device-btn" onclick="addDevice()">
+        <span style="font-size:1.1rem;">＋</span> Add Device
+      </button>
+    </div>
+
+    <!-- RIGHT: Graph -->
+    <div class="calc-card graph-card" style="animation-delay:0.15s">
+      <h2>TCC Log–Log · Operating Time vs. Current</h2>
+
+      <!-- Marker Lines Toolbar -->
+      <div class="graph-toolbar">
+        <div class="toolbar-title">
+          <span>⟵ Marker Lines</span>
+          <span style="font-size:0.65rem;color:var(--muted-2);font-weight:400;letter-spacing:0;">Drag lines on plot · or type values below</span>
+          <button class="add-line-btn" onclick="resetAllLines()" style="margin-left:auto;border-color:rgba(255,120,120,0.4);color:rgba(255,160,160,0.85);background:rgba(255,80,80,0.07);">⟳ Reset Lines</button>
+        </div>
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <span class="toolbar-label amp-label"><span class="line-dot-amp"></span> Current Lines (vertical · A)</span>
+            <button class="add-line-btn amp" onclick="addAmpLine()">+ Add</button>
+            <div class="len-row" style="margin-left:auto;">
+              <span class="len-label">Length:</span>
+              <input type="range" class="len-slider amp-slider" id="ampLenSlider" min="10" max="100" value="100" oninput="updateLenLabel('amp');drawAll()">
+              <span id="ampLenVal" style="font-size:0.7rem;color:#618A31;font-family:monospace;">100%</span>
+            </div>
+          </div>
+          <div class="lines-row" id="ampLinesRow"></div>
+        </div>
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <span class="toolbar-label time-label"><span class="line-dot-time"></span> Time Lines (horizontal · s)</span>
+            <button class="add-line-btn time" onclick="addTimeLine()">+ Add</button>
+            <div class="len-row" style="margin-left:auto;">
+              <span class="len-label">Length:</span>
+              <input type="range" class="len-slider time-slider" id="timeLenSlider" min="10" max="100" value="100" oninput="updateLenLabel('time');drawAll()">
+              <span id="timeLenVal" style="font-size:0.7rem;color:#1F3A7A;font-family:monospace;">100%</span>
+            </div>
+          </div>
+          <div class="lines-row" id="timeLinesRow"></div>
+        </div>
+      </div>
+
+      <div class="zoom-bar" style="margin-top:12px;">
+        <button class="calc-btn outline" id="zoomInBtn">＋ Zoom In</button>
+        <button class="calc-btn outline" id="zoomOutBtn">－ Zoom Out</button>
+        <button class="calc-btn outline" id="zoomResetBtn">⊙ Reset View</button>
+        <span class="zoom-info" id="zoomInfo">Scroll to zoom · Drag to pan</span>
+      </div>
+
+      <div class="graph-legend" id="graphLegend">
+        <span class="legend-item" style="font-size:0.71rem;color:var(--muted-2)">Shaded = extra delay · SMU-20: solid=MM, dashed=TC · DPU: T=(A/(Mᴾ−C)+B)×(14n−5)/9 · GE350: T=M×poly×TM · RE620: t=(A/(Mᶜ−1)+B)×k</span>
+        <span id="tciChip" class="tci-chip">Δt (TCI): —</span>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="ocCanvas" width="1060" height="740"></canvas>
+        <div id="labelBoxContainer"></div>
+        <div id="hoverTooltip"></div>
+      </div>
+    </div>
+
+  </div><!-- /calc-container -->
+
+  <div style="text-align:center;margin-top:18px;">
+    <span style="color:var(--muted-2);font-size:0.77rem;">Developed by Eiden O. Garcia Torres</span>
+  </div>
+
+</div>
+</div>
+</div><!-- /#mainContent -->
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+//  CURVE DATA
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_CURVES = {
+  "EI – Extremely Inverse":  { A:6.407,   B:0.025,  P:2.0, type:"ansi", isEI:true  },
+  "VI – Very Inverse":       { A:2.855,   B:0.0712, P:2.0, type:"ansi", isEI:false },
+  "Fuse-6K":   { pickup:13.0,    A:3.37282,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-8K":   { pickup:16.0,    A:4.34162,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-10K":  { pickup:21.0,    A:4.26300,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-12K":  { pickup:28.4,    A:3.83300,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-15K":  { pickup:34.0,    A:4.63226,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-20K":  { pickup:44.0,    A:4.55960,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-25K":  { pickup:54.0,    A:4.92290,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-30K":  { pickup:69.5,    A:4.63230,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-40K":  { pickup:85.0,    A:5.35886,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-50K":  { pickup:108.0,   A:5.60106,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-65K":  { pickup:143.0,   A:4.63230,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-80K":  { pickup:180.0,   A:5.21350,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-100K": { pickup:219.5,   A:5.35890,  B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-140K": { pickup:309.0,   A:7.033346, B:0, C:1, P:2, type:"kspeed" },
+  "Fuse-200K": { pickup:479.787, A:7.540324, B:0, C:1, P:2, type:"kspeed" },
+  // ABB DPU2000R — ANSI Time Overcurrent: T = (A/(M^P−C)+B)×(14n−5)/9
+  "DPU – Extremely Inverse":    { A:6.407,   B:0.025,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Very Inverse":         { A:2.855,   B:0.0712, C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Inverse":              { A:0.0086,  B:0.0185, C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Short Time Inverse":   { A:0.00172, B:0.0037, C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Short Time Ext. Inv.": { A:1.281,   B:0.005,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Ext. Inv.":  { A:64.07,   B:0.250,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Very Inv.":  { A:28.55,   B:0.712,  C:1, P:2.0,  type:"dpu2000r" },
+  "DPU – Long Time Inverse":    { A:0.086,   B:0.185,  C:1, P:0.02, type:"dpu2000r" },
+  "DPU – Recloser Curve #8":    { A:4.211,   B:0.013,  C:0.35, P:1.8, type:"dpu2000r" },
+  // ── GE Multilin 350 — 5-constant ANSI formula ──────────────────────────
+  // T = M × (A + B/(M−C) + D/(M−C)² + E/(M−C)³) × TM
+  // Constants from GE Multilin 350 manual Table 3 (TOC curve shapes)
+  "GE – Extremely Inverse":  { A:0.0399, B:0.2294, C:0.5000, D:3.0094,  E:0.7222, type:"ge350" },
+  "GE – Very Inverse":       { A:0.0615, B:0.7989, C:0.3400, D:-0.2840, E:4.0505, type:"ge350" },
+  "GE – Normally Inverse":   { A:0.0274, B:2.2614, C:0.3000, D:-4.1899, E:9.1272, type:"ge350" },
+  "GE – Moderately Inverse": { A:0.1735, B:0.6791, C:0.8000, D:-0.0800, E:0.1271, type:"ge350" },
+  // ── ABB RE620 — IDMT formula (Eq. 57) ──────────────────────────────────
+  // t = (A / ((I/I>)^C − 1) + B) × k
+  // Constants from RE620 manual Table 421
+  "RE – ANSI Extremely Inverse":      { A:28.2,   B:0.1217, C:2.0,  type:"re620" },
+  "RE – ANSI Very Inverse":           { A:19.61,  B:0.491,  C:2.0,  type:"re620" },
+  "RE – ANSI Normal Inverse":         { A:0.0086, B:0.0185, C:0.02, type:"re620" },
+  "RE – ANSI Moderately Inverse":     { A:0.0515, B:0.1140, C:0.02, type:"re620" },
+  "RE – Long Time Ext. Inverse":      { A:64.07,  B:0.250,  C:2.0,  type:"re620" },
+  "RE – Long Time Very Inverse":      { A:28.55,  B:0.712,  C:2.0,  type:"re620" },
+  "RE – Long Time Inverse":           { A:0.086,  B:0.185,  C:0.02, type:"re620" },
+  "RE – IEC Normal Inverse":          { A:0.14,   B:0.0,    C:0.02, type:"re620" },
+  "RE – IEC Very Inverse":            { A:13.5,   B:0.0,    C:1.0,  type:"re620" },
+  "RE – IEC Inverse":                 { A:0.14,   B:0.0,    C:0.02, type:"re620" },
+  "RE – IEC Extremely Inverse":       { A:80.0,   B:0.0,    C:2.0,  type:"re620" },
+  "RE – IEC Short Time Inverse":      { A:0.05,   B:0.0,    C:0.04, type:"re620" },
+  "RE – IEC Long Time Inverse":       { A:120.0,  B:0.0,    C:1.0,  type:"re620" },
+};
+let CURVES = JSON.parse(JSON.stringify(DEFAULT_CURVES));
+
+// ═══════════════════════════════════════════════════════════════
+//  DOM HELPER
+// ═══════════════════════════════════════════════════════════════
+const el = id => document.getElementById(id);
+
+// ═══════════════════════════════════════════════════════════════
+//  DEVICE STATE
+// ═══════════════════════════════════════════════════════════════
+const DEV_COLORS = [
+  { hex:'#1F3A7A', rgb:'31,58,122'   },
+  { hex:'#618A31', rgb:'97,138,49'   },
+  { hex:'#C05717', rgb:'192,87,23'   },
+  { hex:'#6C3FC5', rgb:'108,63,197'  },
+  { hex:'#C2255C', rgb:'194,37,92'   },
+  { hex:'#B45309', rgb:'180,83,9'    },
+  { hex:'#A93226', rgb:'169,50,38'   },
+  { hex:'#0E7490', rgb:'14,116,144'  },
+];
+
+let devices     = [];
+let devIdCounter = 0;
+let dragSrcIdx  = null;
+
+function colorOf(idx) { return DEV_COLORS[idx % DEV_COLORS.length]; }
+
+function makeDevice(defaultDeviceType) {
+  return {
+    id:         ++devIdCounter,
+    open:       true,
+    deviceType: defaultDeviceType || 'intellirupter',
+    curveVal:   '',
+    Ip: '', n: '', freq: '60',
+    extra: '', extraUnit: 'cycles',
+    show: true,
+  };
+}
+
+function getDevIdx(id) { return devices.findIndex(d => d.id === id); }
+
+function getH(id) {
+  const p = `d${id}`;
+  return {
+    id,
+    device:      el(`${p}_device`),
+    badge:       el(`${p}_badge`),
+    Ip:          el(`${p}_Ip`),
+    IpLabel:     el(`${p}_IpLabel`),
+    n:           el(`${p}_n`),
+    nLabel:      el(`${p}_nLabel`),
+    curve:       el(`${p}_curve`),
+    freq:        el(`${p}_freq`),
+    extra:       el(`${p}_extra`),
+    extraUnit:   el(`${p}_extraUnit`),
+    formulaPill: el(`${p}_formulaPill`),
+    formulaCode: el(`${p}_formulaCode`),
+    show:        el(`${p}_show`),
+    msg:         el(`${p}_msg`),
+    labelBox:    el(`${p}_label`),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER DEVICE LIST
+// ═══════════════════════════════════════════════════════════════
+function renderDeviceList() {
+  const list = el('deviceList');
+  list.innerHTML = '';
+
+  devices.forEach((dev, idx) => {
+    const col    = colorOf(idx);
+    const setNum = idx + 1;
+    const wrap   = document.createElement('div');
+    wrap.className    = 'device-card-wrap';
+    wrap.dataset.devId = dev.id;
+    wrap.draggable    = true;
+
+    wrap.innerHTML = `
+    <div class="calc-card dev-accent-${idx % DEV_COLORS.length}" style="margin-bottom:18px;">
+      <div class="card-header ${dev.open ? 'open' : ''}" id="dh${dev.id}">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="card-header-left" style="flex:1;margin:0 8px;cursor:pointer;" onclick="toggleDevCard(${dev.id})">
+          <h2 style="color:${col.hex}">Set ${setNum} — Device</h2>
+          <span class="set-hint">Protection device ${setNum}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${devices.length > 1 ? `<button class="card-delete-btn" onclick="deleteDevice(${dev.id})" title="Remove device">✕</button>` : ''}
+          <span class="collapse-icon" onclick="toggleDevCard(${dev.id})" style="cursor:pointer;">▼</span>
+        </div>
+      </div>
+      <div class="card-body ${dev.open ? 'open' : ''}" id="db${dev.id}">
+
+        <div class="device-select-wrap">
+          <label>Device Type</label>
+          <select id="d${dev.id}_device" onchange="onDeviceTypeChange(${dev.id})">
+            <option value="intellirupter" ${dev.deviceType==='intellirupter'?'selected':''}>S&C – IntelliRupter (ANSI curves)</option>
+            <option value="tripsaver"     ${dev.deviceType==='tripsaver'    ?'selected':''}>S&C – TripSaver II (K-Speed fuse)</option>
+            <option value="smu20"         ${dev.deviceType==='smu20'        ?'selected':''}>S&C Power Fuses – Type SMU-20 (7.2 and 14.4 kV)</option>
+            <option value="dpu2000r"      ${dev.deviceType==='dpu2000r'     ?'selected':''}>ABB – DPU2000R (ANSI TOC)</option>
+            <option value="ge350"         ${dev.deviceType==='ge350'        ?'selected':''}>GE – Multilin 350 (ANSI 5-constant)</option>
+            <option value="re620"         ${dev.deviceType==='re620'        ?'selected':''}>ABB – RE620 (ANSI/IEC IDMT)</option>
+          </select>
+          <div class="device-badge" id="d${dev.id}_badge">
+            <span class="dot" style="background:${col.hex}"></span>
+            <span>ANSI · EI / Very Inverse</span>
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>Fault Parameters</legend>
+          <div class="grid-2">
+            <div><label id="d${dev.id}_IpLabel">Pickup Ip (A)</label>
+              <input id="d${dev.id}_Ip" type="number" min="0.001" step="any" placeholder="enter value"
+                value="${dev.Ip}" oninput="saveDev(${dev.id});drawAll()"/></div>
+            <div><label id="d${dev.id}_nLabel">Time dial / TM</label>
+              <input id="d${dev.id}_n" type="number" min="0.01" step="any" placeholder="e.g. 1"
+                value="${dev.n}" oninput="saveDev(${dev.id});drawAll()"/></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Curve &amp; System</legend>
+          <div class="grid-2">
+            <div><label>Curve</label>
+              <select id="d${dev.id}_curve" onchange="onCurveChange(${dev.id})">
+                <option value="">Select…</option>
+              </select></div>
+            <div><label>Frequency (Hz)</label>
+              <input id="d${dev.id}_freq" type="number" min="1" step="any" value="${dev.freq}"
+                oninput="saveDev(${dev.id});drawAll()"/></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Extra Delay (optional)</legend>
+          <div class="grid-2">
+            <div><label>Delay value</label>
+              <input id="d${dev.id}_extra" type="text" placeholder="e.g. 2, 2/60, 0.033"
+                value="${dev.extra}" oninput="saveDev(${dev.id});drawAll()"/></div>
+            <div><label>Unit</label>
+              <select id="d${dev.id}_extraUnit" onchange="saveDev(${dev.id});drawAll()">
+                <option value="cycles" ${dev.extraUnit==='cycles'?'selected':''}>cycles</option>
+                <option value="s"      ${dev.extraUnit==='s'     ?'selected':''}>seconds</option>
+                <option value="ms"     ${dev.extraUnit==='ms'    ?'selected':''}>milliseconds</option>
+              </select></div>
+          </div>
+        </fieldset>
+
+        <div class="btn-row">
+          <button class="calc-btn secondary" onclick="resetDevice(${dev.id})">Reset</button>
+        </div>
+        <div class="formula-pill" id="d${dev.id}_formulaPill">
+          ANSI EI Formula (M = I/Ip):
+          <code id="d${dev.id}_formulaCode">(6.407/(M²−1) + 0.025) × n</code>
+        </div>
+        <div class="toggle-row">
+          <span>Show on plot</span>
+          <label class="switch">
+            <input type="checkbox" id="d${dev.id}_show" ${dev.show?'checked':''}
+              onchange="saveDev(${dev.id});drawAll()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="msg-box" id="d${dev.id}_msg"></div>
+      </div>
+    </div>`;
+
+    wrap.addEventListener('dragstart', e => {
+      dragSrcIdx = idx;
+      wrap.classList.add('dragging-card');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    wrap.addEventListener('dragend', () => {
+      wrap.classList.remove('dragging-card');
+      document.querySelectorAll('.drag-over-card').forEach(n => n.classList.remove('drag-over-card'));
+      dragSrcIdx = null;
+    });
+    wrap.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      wrap.classList.add('drag-over-card');
+    });
+    wrap.addEventListener('dragleave', () => wrap.classList.remove('drag-over-card'));
+    wrap.addEventListener('drop', e => {
+      e.preventDefault();
+      wrap.classList.remove('drag-over-card');
+      if (dragSrcIdx === null || dragSrcIdx === idx) return;
+      const moved = devices.splice(dragSrcIdx, 1)[0];
+      devices.splice(idx, 0, moved);
+      renderDeviceList();
+      updateLegend();
+      drawAll();
+    });
+
+    list.appendChild(wrap);
+
+    const h = getH(dev.id);
+    populateCurveSelect(h.curve, dev.deviceType);
+    if (dev.curveVal) h.curve.value = dev.curveVal;
+    applyDeviceUI(dev.id);
+  });
+
+  const lbc = el('labelBoxContainer');
+  lbc.innerHTML = '';
+  devices.forEach(dev => {
+    const lb = document.createElement('div');
+    lb.id        = `d${dev.id}_label`;
+    lb.className = 'label-chip';
+    lbc.appendChild(lb);
+  });
+
+  updateLegend();
+}
+
+function updateLegend() {
+  const legend = el('graphLegend');
+  legend.querySelectorAll('.dev-chip').forEach(c => c.remove());
+  const hint = legend.querySelector('.legend-item');
+  devices.forEach((dev, idx) => {
+    const col  = colorOf(idx);
+    const chip = document.createElement('span');
+    chip.className   = 'legend-item dev-chip';
+    chip.id          = `chip${dev.id}`;
+    chip.innerHTML   = `<span class="legend-swatch" style="background:${col.hex}"></span> Set ${idx+1} · Device`;
+    chip.style.opacity = dev.show ? '1' : '0.3';
+    legend.insertBefore(chip, hint);
+  });
+}
+
+function toggleDevCard(id) {
+  const dev = devices.find(d => d.id === id);
+  if (!dev) return;
+  dev.open = !dev.open;
+  el(`db${id}`).classList.toggle('open', dev.open);
+  el(`dh${id}`).classList.toggle('open', dev.open);
+}
+
+function addDevice() {
+  devices.push(makeDevice('intellirupter'));
+  renderDeviceList();
+  updateLegend();
+  drawAll();
+}
+
+function deleteDevice(id) {
+  if (devices.length <= 1) return;
+  devices = devices.filter(d => d.id !== id);
+  renderDeviceList();
+  updateLegend();
+  drawAll();
+}
+
+function saveDev(id) {
+  const dev = devices.find(d => d.id === id);
+  if (!dev) return;
+  const h = getH(id);
+  if (h.device)    dev.deviceType = h.device.value;
+  if (h.Ip)        dev.Ip         = h.Ip.value;
+  if (h.n)         dev.n          = h.n.value;
+  if (h.freq)      dev.freq       = h.freq.value;
+  if (h.extra)     dev.extra      = h.extra.value;
+  if (h.extraUnit) dev.extraUnit  = h.extraUnit.value;
+  if (h.curve)     dev.curveVal   = h.curve.value;
+  if (h.show)      dev.show       = h.show.checked;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DEVICE TYPE SWITCHING
+// ═══════════════════════════════════════════════════════════════
+function isKSpeed(h)   { return h.device && h.device.value === 'tripsaver'; }
+function isSMU20(h)    { return h.device && h.device.value === 'smu20'; }
+function isDPU2000R(h) { return h.device && h.device.value === 'dpu2000r'; }
+function isGE350(h)    { return h.device && h.device.value === 'ge350'; }
+function isRE620(h)    { return h.device && h.device.value === 're620'; }
+
+function onDeviceTypeChange(id) {
+  saveDev(id);
+  const dev = devices.find(d => d.id === id);
+  if (dev) dev.curveVal = '';
+  applyDeviceUI(id);
+  drawAll();
+}
+
+function onCurveChange(id) {
+  const h = getH(id);
+  syncPickup(h);
+  saveDev(id);
+  drawAll();
+}
+
+function syncPickup(h) {
+  if (!h.Ip) return;
+  if (isKSpeed(h)) {
+    const p = CURVES[h.curve.value];
+    h.Ip.value       = p ? p.pickup : '';
+    h.Ip.readOnly    = true;
+    h.Ip.placeholder = 'auto from curve';
+  } else {
+    h.Ip.readOnly    = false;
+    h.Ip.placeholder = 'enter value';
+  }
+}
+
+function applyDeviceUI(id) {
+  const dev = devices.find(d => d.id === id);
+  if (!dev) return;
+  const h   = getH(id);
+  if (!h.device) return;
+
+  const ks  = isKSpeed(h);
+  const smu = isSMU20(h);
+  const dpu = isDPU2000R(h);
+  const ge  = isGE350(h);
+  const re  = isRE620(h);
+  const col = colorOf(getDevIdx(id));
+
+  const badgeLabel = smu ? 'SMU-20 · Table Lookup'
+                   : ks  ? 'K-Speed · TripSaver II'
+                   : dpu ? 'ABB DPU2000R · ANSI TOC'
+                   : ge  ? 'GE Multilin 350 · 5-Constant ANSI'
+                   : re  ? 'ABB RE620 · ANSI/IEC IDMT'
+                   :       'ANSI · EI / Very Inverse';
+  h.badge.innerHTML = `<span class="dot" style="background:${col.hex}"></span><span>${badgeLabel}</span>`;
+
+  const lockForSMU = (input) => {
+    if (!input) return;
+    input.readOnly      = smu;
+    input.style.opacity = smu ? '0.35' : '1';
+    input.style.cursor  = smu ? 'not-allowed' : '';
+  };
+  lockForSMU(h.n); lockForSMU(h.freq); lockForSMU(h.extra);
+  h.Ip.readOnly      = smu || ks;
+  h.Ip.style.opacity = (smu || ks) ? '0.35' : '1';
+  h.Ip.style.cursor  = (smu || ks) ? 'not-allowed' : '';
+  if (h.extraUnit) {
+    h.extraUnit.disabled      = smu;
+    h.extraUnit.style.opacity = smu ? '0.35' : '1';
+  }
+  // ge350/re620: ensure all standard fields are enabled
+  if (ge || re) {
+    [h.n, h.Ip, h.freq, h.extra].forEach(e => {
+      if (!e) return;
+      e.readOnly = false; e.style.opacity = '1'; e.style.cursor = '';
+    });
+    if (h.extraUnit) { h.extraUnit.disabled = false; h.extraUnit.style.opacity = '1'; }
+  }
+
+  if (smu) {
+    h.nLabel.textContent       = 'N/A (table lookup)';
+    h.IpLabel.textContent      = 'N/A (auto from table)';
+    h.n.value = ''; h.Ip.value = '';
+    h.formulaPill.firstChild.textContent = 'SMU-20 Lookup Mode: ';
+    h.formulaCode.textContent  = 'Log-log interpolation from TCC 165-2 (MM) & 165-2-2 (TC)';
+  } else if (ks) {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time mult. TM';
+    h.IpLabel.textContent      = 'Pickup Ip (auto)';
+    h.formulaPill.firstChild.textContent = 'K-Speed Formula (M = I/Ip): ';
+    h.formulaCode.textContent  = 'T = (A/(M²−1) + B) × TM + TS';
+  } else if (dpu) {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time Dial n';
+    h.IpLabel.textContent      = 'Pickup Ip (A)';
+    h.formulaPill.firstChild.textContent = 'ABB DPU2000R Formula (M = I/Ipu): ';
+    h.formulaCode.textContent  = 'T = (A/(Mᴾ−C) + B) × (14n−5)/9';
+  } else if (ge) {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time dial TM';
+    h.IpLabel.textContent      = 'Pickup Ip (A)';
+    h.formulaPill.firstChild.textContent = 'GE Multilin 350 Formula (M = I/Ip): ';
+    h.formulaCode.textContent  = 'T = M×(A + B/(M−C) + D/(M−C)² + E/(M−C)³) × TM';
+  } else if (re) {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time mult. k';
+    h.IpLabel.textContent      = 'Pickup I> (A)';
+    h.formulaPill.firstChild.textContent = 'ABB RE620 Formula (M = I/I>): ';
+    h.formulaCode.textContent  = 't = (A / (Mᶜ − 1) + B) × k';
+  } else {
+    h.n.readOnly = false; h.freq.readOnly = false; h.extra.readOnly = false;
+    h.nLabel.textContent       = 'Time dial n';
+    h.IpLabel.textContent      = 'Pickup Ip (A)';
+    h.formulaPill.firstChild.textContent = 'ANSI Formula (M = I/Ip): ';
+    h.formulaCode.textContent  = '(6.407/(M²−1) + 0.025) × n  [EI]  or  (A/(M²−1)+B)×n  [VI]';
+  }
+
+  populateCurveSelect(h.curve, dev.deviceType);
+  if (dev.curveVal) h.curve.value = dev.curveVal;
+  syncPickup(h);
+}
+
+function resetDevice(id) {
+  const dev = devices.find(d => d.id === id);
+  if (!dev) return;
+  dev.Ip = ''; dev.n = ''; dev.freq = '60';
+  dev.extra = ''; dev.extraUnit = 'cycles'; dev.curveVal = '';
+
+  const h = getH(id);
+  if (!h.Ip) return;
+  h.n.value = ''; h.extra.value = ''; h.freq.value = '60';
+  h.curve.value = ''; h.extraUnit.value = 'cycles';
+  [h.n, h.Ip, h.freq, h.extra].forEach(e => {
+    if (!e) return;
+    e.readOnly = false; e.style.opacity = '1'; e.style.cursor = '';
+  });
+  if (h.extraUnit) { h.extraUnit.disabled = false; h.extraUnit.style.opacity = '1'; }
+  syncPickup(h);
+  el(`d${id}_msg`).innerHTML = '';
+  hideLabel(h.labelBox);
+  drawAll();
+}
+
+function populateCurveSelect(sel, deviceType) {
+  sel.innerHTML = '<option value="">Select…</option>';
+  if (deviceType === 'smu20') {
+    Object.keys(SMU20_DATA).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value       = 'smu20__' + name;
+      opt.textContent = 'SMU-20 · ' + name;
+      sel.appendChild(opt);
+    });
+    return;
+  }
+  const filterType = deviceType === 'tripsaver' ? 'kspeed'
+                   : deviceType === 'dpu2000r'  ? 'dpu2000r'
+                   : deviceType === 'ge350'     ? 'ge350'
+                   : deviceType === 're620'     ? 're620'
+                   : 'ansi';
+  Object.entries(CURVES).forEach(([name, p]) => {
+    if (p.type === filterType) {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MARKER LINES STATE
+// ═══════════════════════════════════════════════════════════════
+let ampLines     = [];
+let timeLines    = [];
+let lineIdCounter = 0;
+let draggingLine = null;
+let hoveredLine  = null;
+
+function addAmpLine(val) {
+  const def = Math.pow(10, (log10(view.xMin) + log10(view.xMax)) / 2);
+  const v   = val != null ? val : parseFloat(def.toFixed(1));
+  ampLines.push({ id: ++lineIdCounter, value: v });
+  renderLineChips();
+  drawAll();
+}
+
+function addTimeLine(val) {
+  const def = Math.pow(10, (log10(view.yMin) + log10(view.yMax)) / 2);
+  const v   = val != null ? val : parseFloat(def.toFixed(4));
+  timeLines.push({ id: ++lineIdCounter, value: v });
+  renderLineChips();
+  drawAll();
+}
+
+function resetAllLines() {
+  ampLines = []; timeLines = []; lineIdCounter = 0;
+  renderLineChips(); drawAll();
+}
+
+function removeAmpLine(id) {
+  ampLines = ampLines.filter(l => l.id !== id);
+  renderLineChips(); drawAll();
+}
+
+function removeTimeLine(id) {
+  timeLines = timeLines.filter(l => l.id !== id);
+  renderLineChips(); drawAll();
+}
+
+function renderLineChips() {
+  const ar = el('ampLinesRow');
+  ar.innerHTML = '';
+  ampLines.forEach(line => {
+    const chip = document.createElement('div');
+    chip.className = 'line-chip';
+    chip.innerHTML = `
+      <span class="line-chip-label" style="color:#618A31;">I${line.id}</span>
+      <input type="number" class="amp-input" step="any" min="0.01" value="${line.value}"
+        onchange="updateAmpLine(${line.id},this.value)"
+        oninput="updateAmpLine(${line.id},this.value)"
+        title="Current (A) — or drag line on graph">
+      <span class="line-chip-label">A</span>
+      <button class="line-remove-btn" onclick="removeAmpLine(${line.id})" title="Remove">✕</button>`;
+    ar.appendChild(chip);
+  });
+
+  const tr = el('timeLinesRow');
+  tr.innerHTML = '';
+  timeLines.forEach(line => {
+    const chip = document.createElement('div');
+    chip.className = 'line-chip';
+    chip.innerHTML = `
+      <span class="line-chip-label" style="color:#1F3A7A;">t${line.id}</span>
+      <input type="number" class="time-input" step="any" min="0.0001" value="${line.value}"
+        onchange="updateTimeLine(${line.id},this.value)"
+        oninput="updateTimeLine(${line.id},this.value)"
+        title="Time (s) — or drag line on graph">
+      <span class="line-chip-label">s</span>
+      <button class="line-remove-btn" onclick="removeTimeLine(${line.id})" title="Remove">✕</button>`;
+    tr.appendChild(chip);
+  });
+
+  updateLenLabel('amp');
+  updateLenLabel('time');
+}
+
+function updateLenLabel(type) {
+  if (type === 'amp') {
+    document.getElementById('ampLenVal').textContent  = el('ampLenSlider').value  + '%';
+  } else {
+    document.getElementById('timeLenVal').textContent = el('timeLenSlider').value + '%';
+  }
+}
+
+function updateAmpLine(id, val) {
+  const v    = parseFloat(val);
+  const line = ampLines.find(l => l.id === id);
+  if (line && isFinite(v) && v > 0) { line.value = v; drawAll(); }
+}
+
+function updateTimeLine(id, val) {
+  const v    = parseFloat(val);
+  const line = timeLines.find(l => l.id === id);
+  if (line && isFinite(v) && v > 0) { line.value = v; drawAll(); }
+}
+
+function syncLineInput(type, id, val) {
+  const selector = type === 'amp' ? '#ampLinesRow .amp-input' : '#timeLinesRow .time-input';
+  const inputs   = document.querySelectorAll(selector);
+  const lines    = type === 'amp' ? ampLines : timeLines;
+  lines.forEach((line, i) => {
+    if (line.id === id && inputs[i]) inputs[i].value = val;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CANVAS & VIEW STATE
+// ═══════════════════════════════════════════════════════════════
+const canvas   = el('ocCanvas');
+const ctx      = canvas.getContext('2d');
+const tciChip  = el('tciChip');
+const hoverTip = el('hoverTooltip');
+
+const X_MIN_DEFAULT = 1,     X_MAX_DEFAULT = 100000;
+const Y_MIN_DEFAULT = 0.001, Y_MAX_DEFAULT = 1000;
+const PAD_L = 76, PAD_R = 24, PAD_T = 22, PAD_B = 52;
+
+let view = { xMin: X_MIN_DEFAULT, xMax: X_MAX_DEFAULT, yMin: Y_MIN_DEFAULT, yMax: Y_MAX_DEFAULT };
+
+function resetView() {
+  view = { xMin: X_MIN_DEFAULT, xMax: X_MAX_DEFAULT, yMin: Y_MIN_DEFAULT, yMax: Y_MAX_DEFAULT };
+}
+
+const log10 = v => Math.log(v) / Math.LN10;
+
+function sx(I) {
+  const span = log10(view.xMax) - log10(view.xMin);
+  return PAD_L + ((log10(Math.max(I, 1e-10)) - log10(view.xMin)) / span) * (canvas.width - PAD_L - PAD_R);
+}
+function sy(t) {
+  const span = log10(view.yMax) - log10(view.yMin);
+  return PAD_T + ((log10(view.yMax) - log10(Math.max(t, 1e-10))) / span) * (canvas.height - PAD_T - PAD_B);
+}
+function ixs(px) {
+  const span = log10(view.xMax) - log10(view.xMin);
+  return Math.pow(10, log10(view.xMin) + ((px - PAD_L) / (canvas.width - PAD_L - PAD_R)) * span);
+}
+function iys(py) {
+  const span = log10(view.yMax) - log10(view.yMin);
+  return Math.pow(10, log10(view.yMax) - ((py - PAD_T) / (canvas.height - PAD_T - PAD_B)) * span);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ZOOM / PAN
+// ═══════════════════════════════════════════════════════════════
+let isDragging = false, dragStartX = 0, dragStartY = 0, dragViewStart = null, dragMoved = false;
+const DRAG_THRESHOLD = 5;
+
+function zoomAtPoint(canvasX, canvasY, factor) {
+  const dataX  = ixs(canvasX), dataY = iys(canvasY);
+  const xSpan  = log10(view.xMax) - log10(view.xMin);
+  const ySpan  = log10(view.yMax) - log10(view.yMin);
+  const nxSpan = xSpan * factor, nySpan = ySpan * factor;
+  const fracX  = (canvasX - PAD_L) / (canvas.width  - PAD_L - PAD_R);
+  const fracY  = (canvasY - PAD_T) / (canvas.height - PAD_T - PAD_B);
+  view.xMin = Math.pow(10, log10(dataX) - fracX * nxSpan);
+  view.xMax = Math.pow(10, log10(dataX) + (1-fracX) * nxSpan);
+  view.yMax = Math.pow(10, log10(dataY) + fracY * nySpan);
+  view.yMin = Math.pow(10, log10(dataY) - (1-fracY) * nySpan);
+  view.xMin = Math.max(view.xMin, 0.1);   view.xMax = Math.min(view.xMax, 1e7);
+  view.yMin = Math.max(view.yMin, 1e-5);  view.yMax = Math.min(view.yMax, 1e6);
+  drawAll(); updateZoomInfo();
+}
+
+function getCanvasPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (canvas.width  / r.width),
+    y: (e.clientY - r.top)  * (canvas.height / r.height),
+  };
+}
+
+function hitTestLines(cx, cy) {
+  const HIT = 8;
+  for (const line of ampLines) {
+    const x = sx(line.value);
+    if (Math.abs(cx - x) < HIT && cy >= PAD_T && cy <= canvas.height - PAD_B)
+      return { type: 'amp', id: line.id };
+  }
+  for (const line of timeLines) {
+    const y = sy(line.value);
+    if (Math.abs(cy - y) < HIT && cx >= PAD_L && cx <= canvas.width - PAD_R)
+      return { type: 'time', id: line.id };
+  }
+  return null;
+}
+
+const isOverlayOpen = () => !!el('disclaimerOverlay');
+
+canvas.addEventListener('wheel', e => {
+  if (isOverlayOpen()) return;
+  e.preventDefault();
+  const { x, y } = getCanvasPos(e);
+  zoomAtPoint(x, y, e.deltaY > 0 ? 1.25 : 0.8);
+}, { passive: false });
+
+canvas.addEventListener('mousedown', e => {
+  if (isOverlayOpen()) return;
+  const { x, y } = getCanvasPos(e);
+  const hit = hitTestLines(x, y);
+  if (hit) { draggingLine = hit; canvas.style.cursor = hit.type==='amp' ? 'col-resize' : 'row-resize'; return; }
+  isDragging = true; dragMoved = false;
+  dragStartX = x; dragStartY = y;
+  dragViewStart = { ...view };
+});
+
+window.addEventListener('mousemove', e => {
+  if (isOverlayOpen()) return;
+  if (draggingLine) {
+    const { x, y } = getCanvasPos(e);
+    if (draggingLine.type === 'amp') {
+      const line = ampLines.find(l => l.id === draggingLine.id);
+      if (line) { const v = Math.max(0.01, ixs(x)); line.value = parseFloat(v.toFixed(2)); syncLineInput('amp', draggingLine.id, line.value); }
+    } else {
+      const line = timeLines.find(l => l.id === draggingLine.id);
+      if (line) { const v = Math.max(0.0001, iys(y)); line.value = parseFloat(v.toFixed(5)); syncLineInput('time', draggingLine.id, line.value); }
+    }
+    drawAll(); return;
+  }
+  if (!isDragging) {
+    const { x, y } = getCanvasPos(e);
+    const hit = hitTestLines(x, y);
+    canvas.style.cursor = hit ? (hit.type==='amp' ? 'col-resize' : 'row-resize') : '';
+    hoveredLine = hit || null;
+    return;
+  }
+  const { x, y } = getCanvasPos(e);
+  const dx = x - dragStartX, dy = y - dragStartY;
+  if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) dragMoved = true;
+  const xSpan = log10(dragViewStart.xMax) - log10(dragViewStart.xMin);
+  const ySpan = log10(dragViewStart.yMax) - log10(dragViewStart.yMin);
+  view.xMin = Math.pow(10, log10(dragViewStart.xMin) - dx / (canvas.width  - PAD_L - PAD_R) * xSpan);
+  view.xMax = Math.pow(10, log10(dragViewStart.xMax) - dx / (canvas.width  - PAD_L - PAD_R) * xSpan);
+  view.yMin = Math.pow(10, log10(dragViewStart.yMin) + dy / (canvas.height - PAD_T - PAD_B) * ySpan);
+  view.yMax = Math.pow(10, log10(dragViewStart.yMax) + dy / (canvas.height - PAD_T - PAD_B) * ySpan);
+  drawAll(); updateZoomInfo();
+});
+
+window.addEventListener('mouseup', () => {
+  if (draggingLine) { draggingLine = null; canvas.style.cursor = ''; return; }
+  isDragging = false;
+});
+
+let hoverAnimFrame = null;
+
+canvas.addEventListener('mousemove', e => {
+  if (isDragging || draggingLine) { hoverTip.style.display = 'none'; return; }
+  const { x, y } = getCanvasPos(e);
+  if (x < PAD_L || x > canvas.width-PAD_R || y < PAD_T || y > canvas.height-PAD_B) {
+    hoverTip.style.display = 'none'; return;
+  }
+  const hit = hitTestLines(x, y);
+  if (hit) {
+    const line = hit.type==='amp' ? ampLines.find(l=>l.id===hit.id) : timeLines.find(l=>l.id===hit.id);
+    if (line) {
+      const label = hit.type==='amp'
+        ? `<span style="color:#618A31">I = ${line.value>=1000?(line.value/1000).toFixed(2)+' kA':line.value.toFixed(1)+' A'}</span>`
+        : `<span style="color:#1F3A7A">t = ${line.value>=1?line.value.toFixed(4)+' s':(line.value*1000).toFixed(2)+' ms'}</span>`;
+      hoverTip.innerHTML = label + ' <span style="color:var(--muted-2);font-size:0.85em">drag to move</span>';
+      positionTooltip(x, y); hoverTip.style.display = 'block'; return;
+    }
+  }
+  if (hoverAnimFrame) cancelAnimationFrame(hoverAnimFrame);
+  hoverAnimFrame = requestAnimationFrame(() => {
+    const I = ixs(x), t = iys(y);
+    const iL = I>=1000?(I/1000).toFixed(2)+' kA':I.toFixed(1)+' A';
+    const tL = t>=1?t.toFixed(3)+' s':(t*1000).toFixed(2)+' ms';
+    hoverTip.innerHTML = `<span style="color:var(--muted-2)">I =</span> <b>${iL}</b>&nbsp;&nbsp;<span style="color:var(--muted-2)">t =</span> <b>${tL}</b>`;
+    positionTooltip(x, y); hoverTip.style.display = 'block';
+    drawAll();
+    ctx.save();
+    ctx.setLineDash([4,4]); ctx.lineWidth=1; ctx.strokeStyle='rgba(20,33,75,0.40)';
+    ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(20,33,75,0.55)';
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+});
+
+function positionTooltip(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  const sx2 = r.width/canvas.width, sy2 = r.height/canvas.height;
+  const cssX = cx*sx2, cssY = cy*sy2;
+  const tipW=220, margin=14;
+  let left = cssX+margin, top = cssY-30-8;
+  if (left+tipW > r.width-8) left = cssX-tipW-margin;
+  if (top < 4) top = cssY+margin;
+  hoverTip.style.left = left+'px'; hoverTip.style.top = top+'px';
+}
+
+canvas.addEventListener('mouseleave', () => {
+  hoverTip.style.display = 'none';
+  hoveredLine = null;
+  if (hoverAnimFrame) { cancelAnimationFrame(hoverAnimFrame); hoverAnimFrame=null; }
+  drawAll();
+});
+
+let lastTouchDist = null;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    const t=e.touches[0]; const r=canvas.getBoundingClientRect();
+    const cx=(t.clientX-r.left)*(canvas.width/r.width);
+    const cy=(t.clientY-r.top)*(canvas.height/r.height);
+    const hit=hitTestLines(cx,cy);
+    if (hit) { draggingLine=hit; return; }
+    dragStartX=cx; dragStartY=cy; dragViewStart={...view}; isDragging=true;
+  } else if (e.touches.length===2) {
+    isDragging=false;
+    lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (draggingLine && e.touches.length===1) {
+    const t=e.touches[0]; const r=canvas.getBoundingClientRect();
+    const cx=(t.clientX-r.left)*(canvas.width/r.width);
+    const cy=(t.clientY-r.top)*(canvas.height/r.height);
+    if (draggingLine.type==='amp') {
+      const line=ampLines.find(l=>l.id===draggingLine.id);
+      if (line) { line.value=parseFloat(Math.max(0.01,ixs(cx)).toFixed(2)); syncLineInput('amp',draggingLine.id,line.value); }
+    } else {
+      const line=timeLines.find(l=>l.id===draggingLine.id);
+      if (line) { line.value=parseFloat(Math.max(0.0001,iys(cy)).toFixed(5)); syncLineInput('time',draggingLine.id,line.value); }
+    }
+    drawAll(); return;
+  }
+  if (e.touches.length===1 && isDragging && dragViewStart) {
+    const t=e.touches[0]; const r=canvas.getBoundingClientRect();
+    const cx=(t.clientX-r.left)*(canvas.width/r.width);
+    const cy=(t.clientY-r.top)*(canvas.height/r.height);
+    const dx=cx-dragStartX, dy=cy-dragStartY;
+    const xSpan=log10(dragViewStart.xMax)-log10(dragViewStart.xMin);
+    const ySpan=log10(dragViewStart.yMax)-log10(dragViewStart.yMin);
+    view.xMin=Math.pow(10,log10(dragViewStart.xMin)-dx/(canvas.width-PAD_L-PAD_R)*xSpan);
+    view.xMax=Math.pow(10,log10(dragViewStart.xMax)-dx/(canvas.width-PAD_L-PAD_R)*xSpan);
+    view.yMin=Math.pow(10,log10(dragViewStart.yMin)+dy/(canvas.height-PAD_T-PAD_B)*ySpan);
+    view.yMax=Math.pow(10,log10(dragViewStart.yMax)+dy/(canvas.height-PAD_T-PAD_B)*ySpan);
+    drawAll();
+  } else if (e.touches.length===2 && lastTouchDist) {
+    const dx=e.touches[0].clientX-e.touches[1].clientX;
+    const dy=e.touches[0].clientY-e.touches[1].clientY;
+    const dist=Math.hypot(dx,dy);
+    const midX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const midY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    const r=canvas.getBoundingClientRect();
+    zoomAtPoint((midX-r.left)*(canvas.width/r.width),(midY-r.top)*(canvas.height/r.height),lastTouchDist/dist);
+    lastTouchDist=dist;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { draggingLine=null; isDragging=false; lastTouchDist=null; dragViewStart=null; });
+
+el('zoomInBtn') .addEventListener('click', () => zoomAtPoint(canvas.width/2,canvas.height/2,0.7));
+el('zoomOutBtn').addEventListener('click', () => zoomAtPoint(canvas.width/2,canvas.height/2,1.4));
+el('zoomResetBtn').addEventListener('click', () => { resetView(); drawAll(); updateZoomInfo(); });
+
+function updateZoomInfo() {
+  const xL = view.xMin.toFixed(0);
+  const xH = view.xMax>=10000 ? (view.xMax/1000).toFixed(0)+'K' : view.xMax.toFixed(0);
+  el('zoomInfo').textContent = `X: ${xL}–${xH} A  ·  Scroll=zoom · Drag=pan`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MATH
+// ═══════════════════════════════════════════════════════════════
+function parseFractionOrFloat(t) {
+  t = String(t).trim();
+  if (!t) throw new Error('Empty');
+  if (t.includes('/')) {
+    const [a, b] = t.split('/',2).map(s => parseFloat(s.trim()));
+    if (!isFinite(a)||!isFinite(b)||b===0) throw new Error('Invalid fraction');
+    return a/b;
+  }
+  const v = parseFloat(t);
+  if (!isFinite(v)) throw new Error('Invalid number');
+  return v;
+}
+
+/**
+ * computeTime — unified trip time calculator.
+ *
+ * GE Multilin 350 (5-constant):  T = M×(A + B/(M−C) + D/(M−C)² + E/(M−C)³) × TM + TS
+ * ABB RE620 IDMT (Eq. 57):       t = (A / ((I/I>)^C − 1) + B) × k + TS
+ * ABB DPU2000R:                  T = (A/(M^P−C) + B) × (14·TM−5)/9 + TS
+ * Standard ANSI / K-Speed:       T = (A/(M^P−C) + B) × TM + TS
+ */
+function computeTime(I, Ip, params, TM, TS) {
+  if (Ip <= 0) throw new Error('Ip must be > 0');
+  if (TM <= 0) throw new Error('Time multiplier/dial must be > 0');
+  const M = I / Ip;
+
+  // ── GE Multilin 350: T = M×(A + B/(M−C) + D/(M−C)² + E/(M−C)³) × TM ──
+  if (params.type === 'ge350') {
+    if (M <= params.C) return Infinity;   // below inflection — not meaningful
+    const d  = M - params.C;
+    const d2 = d * d;
+    const d3 = d2 * d;
+    const base = M * (params.A + params.B / d + params.D / d2 + params.E / d3);
+    if (!isFinite(base) || base <= 0) return Infinity;
+    return base * TM + TS;
+  }
+
+  // ── ABB RE620: t = (A / (M^C − 1) + B) × k ──────────────────────────────
+  if (params.type === 're620') {
+    const mc = Math.pow(M, params.C);
+    if (mc <= 1) return Infinity;          // M must be > 1 (above pickup)
+    const base = params.A / (mc - 1) + params.B;
+    if (!isFinite(base) || base <= 0) return Infinity;
+    return base * TM + TS;
+  }
+
+  // ── Standard ANSI / DPU2000R / K-Speed ───────────────────────────────────
+  const C     = params.C !== undefined ? params.C : 1;
+  const denom = Math.pow(M, params.P) - C;
+  if (denom <= 0) return Infinity;
+  const base = params.A / denom + params.B;
+  if (params.isDPU) {
+    const timeMult = (14 * TM - 5) / 9;
+    if (timeMult <= 0) return Infinity;
+    return base * timeMult + TS;
+  }
+  if (params.isEI) {
+    return (6.407 / denom + 0.025) * TM + TS;
+  }
+  return base * TM + TS;
+}
+
+function extraToSeconds(freq, val, unit) {
+  if (!val && val !== 0) return 0;
+  if (unit === 'cycles') return val / freq;
+  if (unit === 'ms')     return val / 1000;
+  return val;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GRAPH DRAWING
+// ═══════════════════════════════════════════════════════════════
+function drawGrid() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(PAD_L,PAD_T,canvas.width-PAD_L-PAD_R,canvas.height-PAD_T-PAD_B);
+  ctx.save();
+
+  const xDecStart = Math.ceil(log10(view.xMin)), xDecEnd = Math.floor(log10(view.xMax));
+  const yDecStart = Math.ceil(log10(view.yMin)), yDecEnd = Math.floor(log10(view.yMax));
+
+  ctx.strokeStyle='rgba(20,33,75,0.22)'; ctx.lineWidth=1;
+  for (let e=xDecStart; e<=xDecEnd; e++) {
+    const v=Math.pow(10,e); if (v<view.xMin||v>view.xMax) continue;
+    const x=sx(v);
+    ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
+    ctx.fillStyle='#4E5C7E'; ctx.font='12px Dubai, sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(v>=1000?(v/1000)+'K':String(v), x, canvas.height-PAD_B+7);
+  }
+  for (let e=yDecStart; e<=yDecEnd; e++) {
+    const v=Math.pow(10,e); if (v<view.yMin||v>view.yMax) continue;
+    const y=sy(v);
+    ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
+    ctx.fillStyle='#4E5C7E'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(String(v), PAD_L-8, y);
+  }
+
+  ctx.strokeStyle='rgba(20,33,75,0.10)';
+  for (let e=xDecStart-1; e<=xDecEnd; e++) {
+    const base=Math.pow(10,e);
+    for (let m=2; m<10; m++) {
+      const v=base*m; if (v<view.xMin||v>view.xMax) continue;
+      ctx.beginPath(); ctx.moveTo(sx(v),PAD_T); ctx.lineTo(sx(v),canvas.height-PAD_B); ctx.stroke();
+    }
+  }
+  for (let e=yDecStart-1; e<=yDecEnd; e++) {
+    const base=Math.pow(10,e);
+    for (let m=2; m<10; m++) {
+      const v=base*m; if (v<view.yMin||v>view.yMax) continue;
+      ctx.beginPath(); ctx.moveTo(PAD_L,sy(v)); ctx.lineTo(canvas.width-PAD_R,sy(v)); ctx.stroke();
+    }
+  }
+
+  ctx.fillStyle='#14214B'; ctx.font='bold 13px Dubai, sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText('Current (A · log scale)',(PAD_L+canvas.width-PAD_R)/2, canvas.height-22);
+  ctx.save();
+  ctx.translate(16,(PAD_T+canvas.height-PAD_B)/2);
+  ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('Operating Time (s · log scale)',0,0);
+  ctx.restore(); ctx.restore();
+}
+
+function drawMarkerLines() {
+  const ampLenPct  = parseFloat(el('ampLenSlider').value)  / 100;
+  const timeLenPct = parseFloat(el('timeLenSlider').value) / 100;
+  const plotH = canvas.height - PAD_T - PAD_B;
+  const plotW = canvas.width  - PAD_L - PAD_R;
+
+  ctx.save(); ctx.lineCap='round';
+
+  ampLines.forEach(line => {
+    if (line.value<view.xMin||line.value>view.xMax) return;
+    const x       = sx(line.value);
+    const lineH   = plotH * ampLenPct;
+    const yStart  = PAD_T + (plotH-lineH)/2;
+    const yEnd    = yStart + lineH;
+    const active  = (hoveredLine&&hoveredLine.id===line.id) || (draggingLine&&draggingLine.id===line.id);
+
+    ctx.save();
+    ctx.strokeStyle = `rgba(97,138,49,${active?1:0.8})`;
+    ctx.lineWidth   = active ? 2.5 : 1.5;
+    ctx.shadowColor = 'rgba(97,138,49,0.5)'; ctx.shadowBlur = active ? 8 : 0;
+    ctx.beginPath(); ctx.moveTo(x,yStart); ctx.lineTo(x,yEnd); ctx.stroke();
+    ctx.restore();
+
+    const iLabel = line.value>=1000?(line.value/1000).toFixed(2)+' kA':line.value.toFixed(1)+' A';
+    ctx.save();
+    ctx.font      = active ? 'bold 11px monospace' : '10px monospace';
+    ctx.fillStyle = active ? '#3F5C1E' : 'rgba(97,138,49,0.95)';
+    ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillText(iLabel, x, yStart-3);
+    ctx.restore();
+  });
+
+  timeLines.forEach(line => {
+    if (line.value<view.yMin||line.value>view.yMax) return;
+    const y      = sy(line.value);
+    const lineW  = plotW * timeLenPct;
+    const xStart = PAD_L + (plotW-lineW)/2;
+    const xEnd   = xStart + lineW;
+    const active = (hoveredLine&&hoveredLine.id===line.id) || (draggingLine&&draggingLine.id===line.id);
+
+    ctx.save();
+    ctx.strokeStyle = `rgba(31,58,122,${active?1:0.8})`;
+    ctx.lineWidth   = active ? 2.5 : 1.5;
+    ctx.shadowColor = 'rgba(31,58,122,0.5)'; ctx.shadowBlur = active ? 8 : 0;
+    ctx.beginPath(); ctx.moveTo(xStart,y); ctx.lineTo(xEnd,y); ctx.stroke();
+    ctx.restore();
+
+    const tLabel = line.value>=1?line.value.toFixed(4)+' s':(line.value*1000).toFixed(2)+' ms';
+    ctx.save();
+    ctx.font      = active ? 'bold 11px monospace' : '10px monospace';
+    ctx.fillStyle = active ? '#14214B' : 'rgba(31,58,122,0.95)';
+    ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+    ctx.textAlign='left'; ctx.textBaseline='bottom';
+    ctx.fillText(tLabel, xEnd+4, y+3);
+    ctx.restore();
+  });
+
+  ctx.restore();
+}
+
+function buildCurvePoints(Ip, params, TM, TS) {
+  const N       = 800;
+  const logXmin = log10(Math.max(view.xMin, Ip*1.001));
+  const logXmax = log10(view.xMax);
+  if (logXmin >= logXmax) return { pts:[], data:[] };
+  const pts=[], data=[];
+  for (let i=0; i<N; i++) {
+    const I = Math.pow(10, logXmin + (logXmax-logXmin)*i/(N-1));
+    let t;
+    try { t = computeTime(I, Ip, params, TM, TS); } catch { pts.push(null); data.push(null); continue; }
+    if (!isFinite(t)||t<=0) { pts.push(null); data.push(null); continue; }
+    if (t < view.yMin*0.5 || t > view.yMax*2) { pts.push(null); data.push(null); continue; }
+    t = Math.max(view.yMin, Math.min(view.yMax, t));
+    pts.push([sx(I), sy(t)]); data.push({ I, t });
+  }
+  return { pts, data };
+}
+
+function strokeCurve(pts, color, dashed) {
+  if (pts.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  if (dashed) ctx.setLineDash([6,4]);
+  ctx.beginPath();
+  let penDown=false;
+  for (const p of pts) {
+    if (!p) { penDown=false; continue; }
+    if (!penDown) { ctx.moveTo(p[0],p[1]); penDown=true; }
+    else ctx.lineTo(p[0],p[1]);
+  }
+  ctx.stroke(); ctx.restore();
+}
+
+function fillBetween(baseData, totalData, fill) {
+  const bClean = baseData.filter(Boolean), tClean = totalData.filter(Boolean);
+  if (bClean.length<2||tClean.length<2) return;
+  const n = Math.min(bClean.length, tClean.length);
+  ctx.save(); ctx.fillStyle=fill;
+  ctx.beginPath();
+  for (let i=0; i<n; i++) {
+    const x=sx(tClean[i].I), y=sy(tClean[i].t);
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  for (let i=n-1; i>=0; i--) ctx.lineTo(sx(bClean[i].I), sy(bClean[i].t));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function setLabelBox(lb, canvasX, canvasY, I, t) {
+  const r=canvas.getBoundingClientRect();
+  const cssX=canvasX*(r.width/canvas.width), cssY=canvasY*(r.height/canvas.height);
+  lb.style.left    = Math.min(cssX+14, r.width-175) + 'px';
+  lb.style.top     = Math.max(8, cssY-22) + 'px';
+  lb.textContent   = `${I.toFixed(1)} A  ·  ${t.toFixed(4)} s`;
+  lb.style.display = 'block';
+}
+function hideLabel(lb) { if (lb) lb.style.display='none'; }
+
+function drawOperatingPoint(I, t, dotColor, lb) {
+  if (!isFinite(t)||t<=0||t<view.yMin||t>view.yMax||I<view.xMin||I>view.xMax) { hideLabel(lb); return; }
+  const x=sx(I), y=sy(Math.min(Math.max(t,view.yMin),view.yMax));
+  ctx.save();
+  ctx.setLineDash([6,5]); ctx.lineWidth=1.4; ctx.strokeStyle='rgba(20,33,75,0.35)';
+  ctx.beginPath(); ctx.moveTo(x,PAD_T); ctx.lineTo(x,canvas.height-PAD_B); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD_L,y); ctx.lineTo(canvas.width-PAD_R,y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=dotColor; ctx.strokeStyle='#FFFFFF'; ctx.lineWidth=1.5; ctx.shadowColor='rgba(20,33,75,0.4)'; ctx.shadowBlur=6;
+  ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  setLabelBox(lb, x, y, I, t);
+}
+
+function devColor(idx) {
+  const c=DEV_COLORS[idx%DEV_COLORS.length];
+  return { line:`rgba(${c.rgb},1)`, fill:`rgba(${c.rgb},0.13)`, dot:`rgba(${c.rgb},0.9)`, hex:c.hex };
+}
+
+function getSetParams(h) {
+  if (!h.device) return null;
+  const curveName = h.curve.value;
+  if (isSMU20(h)) {
+    if (!curveName||!curveName.startsWith('smu20__')) return null;
+    const fuseKey = curveName.replace('smu20__','');
+    const fuse    = SMU20_DATA[fuseKey];
+    if (!fuse) return null;
+    return { smu20:true, fuseKey, fuse, f:60 };
+  }
+  const rawP = CURVES[curveName];
+  if (!rawP) return null;
+  const TM = parseFloat(h.n.value);
+  const f  = parseFloat(h.freq.value || '60');
+  if (!isFinite(TM)||TM<=0) return null;
+  let Ip;
+  if (isKSpeed(h)) {
+    Ip = rawP.pickup;
+  } else {
+    Ip = parseFloat(h.Ip.value);
+    if (!isFinite(Ip)||Ip<=0) return null;
+  }
+  const p = isDPU2000R(h) ? { ...rawP, isDPU: true } : rawP;
+  const raw = (h.extra.value||'').trim();
+  let TS = 0;
+  if (raw) { try { TS = extraToSeconds(f, parseFractionOrFloat(raw), h.extraUnit.value); } catch { TS=0; } }
+  return { p, Ip, TM, TS, f };
+}
+
+function redrawForSet(h, idx) {
+  const lb = h.labelBox;
+  if (!lb) return null;
+  if (!h.show||!h.show.checked) { hideLabel(lb); return { hidden:true }; }
+
+  const sp  = getSetParams(h);
+  if (!sp) { hideLabel(lb); return null; }
+  const col = devColor(idx);
+
+  if (sp.smu20) {
+    const mmCurve = buildSMU20CurvePoints(sp.fuse.mm);
+    const tcCurve = buildSMU20CurvePoints(sp.fuse.tc);
+    fillBetween(mmCurve.data, tcCurve.data, col.fill);
+    strokeCurve(mmCurve.pts, col.line, false);
+    strokeCurve(tcCurve.pts, col.line, true);
+    hideLabel(lb);
+    return { baseT:Infinity, totalT:Infinity, smu20:true, f:sp.f };
+  }
+
+  const { p, Ip, TM, TS, f } = sp;
+  const base  = buildCurvePoints(Ip, p, TM, 0);
+  const total = buildCurvePoints(Ip, p, TM, TS);
+  if (TS>0) fillBetween(base.data, total.data, col.fill);
+  strokeCurve(base.pts, col.line, false);
+  if (TS>0) strokeCurve(total.pts, col.line, false);
+  hideLabel(lb);
+  return { baseT:Infinity, totalT:Infinity, f };
+}
+
+function updateTCI(results) {
+  const visible = results.filter(r => r && !r.hidden);
+  if (visible.length < 2) { tciChip.style.display='none'; return; }
+  const rUp = visible[0], rDn = visible[1];
+  const upT = rUp.totalT;
+  const dnT = rDn.totalT;
+  if (!isFinite(upT)||!isFinite(dnT)) { tciChip.style.display='none'; return; }
+  const delta = upT - dnT;
+  const sign  = delta>=0 ? '+' : '−';
+  const abs   = Math.abs(delta);
+  let text    = `Δt (TCI): ${sign}${abs.toFixed(5)} s`;
+  const fUp   = rUp.f || 60, fDn = rDn.f || 60;
+  if (Math.abs(fUp-fDn) < 1e-9) text += `  ·  ${(abs*fUp).toFixed(2)} cyc @ ${fUp}Hz`;
+  tciChip.textContent  = text;
+  tciChip.style.display = 'inline-block';
+}
+
+function drawAll() {
+  drawGrid();
+  drawMarkerLines();
+  devices.forEach(dev => hideLabel(el(`d${dev.id}_label`)));
+  devices.forEach(dev => {
+    const chip = el(`chip${dev.id}`);
+    if (chip) chip.style.opacity = dev.show ? '1' : '0.3';
+  });
+  const results = devices.map((dev, idx) => redrawForSet(getH(dev.id), idx));
+  updateTCI(results);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SMU-20 DATA & HELPERS
+// ═══════════════════════════════════════════════════════════════
+function buildSMU20CurvePoints(points) {
+  const pts=[], data=[];
+  for (const [ci,ti] of points) {
+    if (ci<view.xMin||ci>view.xMax) { pts.push(null); data.push(null); continue; }
+    if (ti<view.yMin*0.5||ti>view.yMax*2) { pts.push(null); data.push(null); continue; }
+    const t = Math.max(view.yMin, Math.min(view.yMax, ti));
+    pts.push([sx(ci), sy(t)]); data.push({ I:ci, t });
+  }
+  return { pts, data };
+}
+
+function logLogInterp(i1,t1,i2,t2,I) {
+  if (i1===i2) return t1;
+  const logI1=Math.log10(i1), logT1=Math.log10(t1);
+  const logI2=Math.log10(i2), logT2=Math.log10(t2);
+  return Math.pow(10, logT1 + (Math.log10(I)-logI1)/(logI2-logI1)*(logT2-logT1));
+}
+
+function smu20Lookup(points, I) {
+  if (!points||points.length===0) return null;
+  const exact = points.find(p => Math.abs(p[0]-I)/I < 1e-6);
+  if (exact) return { t:exact[1], exact:true, outOfRange:false };
+  let lo=null, hi=null;
+  for (const pt of points) {
+    if (pt[0]<=I) lo=pt;
+    if (pt[0]>=I && hi===null) hi=pt;
+  }
+  if (lo&&hi) return { t:logLogInterp(lo[0],lo[1],hi[0],hi[1],I), exact:false, outOfRange:false };
+  if (!lo)    return { t:null, exact:false, outOfRange:'below' };
+  return { t:null, exact:false, outOfRange:'above' };
+}
+
+// SMU-20 tabular data
+const SMU20_DATA = {"3K":{"mm":[[5.9532,196.7337],[5.9771,375.723],[5.9771,105.0935],[5.9831,602.3588],[6.0311,59.91032],[6.153,37.78255],[6.3151,26.09768],[6.5728,16.62397],[6.8684,11.40264],[7.2062,8.678462],[7.5078,6.95071],[7.822,5.82899],[8.3473,4.68255],[9.0788,3.713009],[9.9935,2.932461],[10.9785,2.339276],[12.4901,1.738184],[13.9843,1.334879],[16.1341,0.96932],[18.0823,0.751893],[20.347,0.58616],[23.3112,0.437726],[26.2571,0.33988],[30.5064,0.24705],[35.9071,0.180114],[43.2041,0.12466],[53.4066,0.081662],[62.8615,0.059121],[75.6362,0.04096],[93.4974,0.026885],[117.9114,0.016955],[153.997,0.01]],"tc":[[7.2206,227.659],[7.2206,351.374],[7.2206,506.16],[7.2206,605.378],[7.2786,125.568],[7.3665,73.1015],[7.4629,45.5972],[7.5832,32.0997],[7.7519,24.0912],[7.9481,18.0988],[8.1249,14.3801],[8.3891,11.2441],[8.6015,9.49575],[8.8901,7.77446],[9.3366,6.18943],[9.7079,5.38083],[10.0939,4.65919],[10.548,4.16969],[11.1221,3.59967],[12.1939,2.86292],[13.9703,2.05822],[16.5922,1.37004],[18.7451,1.04064],[21.1139,0.798388],[23.8059,0.617448],[27.1651,0.471818],[30.7514,0.371516],[36.051,0.277714],[41.1381,0.220433],[46.1979,0.182106],[54.54,0.141117],[60.8818,0.120613],[66.7486,0.106547],[72.3079,0.095927],[77.7839,0.087846],[85.6213,0.079011],[93.591,0.071923],[101.385,0.066993],[111.489,0.061596],[121.017,0.057317],[133.344,0.053335],[149.296,0.049432],[164.998,0.046274],[203.961,0.040633],[222.946,0.03869],[243.211,0.036877],[262.416,0.035431],[287.129,0.034008],[309.801,0.03297],[339.655,0.03174],[366.475,0.030864],[403.401,0.029952],[448.51,0.028922],[497.17,0.027927],[552.764,0.027047],[609.678,0.026327],[661.779,0.025651],[700.596,0.025295],[758.188,0.024893],[854.0,0.024278],[1045.16,0.02349],[1240.07,0.022933],[2286.84,0.021234],[5895.4,0.018682],[17960.4,0.015968]]},"6K":{"mm":[[13.1043,601.1553],[13.1043,150.483],[13.1043,92.93023],[13.1043,55.24891],[13.1305,297.6304],[13.1305,33.40973],[13.1568,21.06992],[13.3824,13.42133],[13.6254,10.62112],[14.1249,8.043338],[14.716,6.226682],[15.5792,4.640597],[16.5757,3.510794],[17.3386,2.912005],[18.2458,2.384148],[19.143,1.99739],[20.883,1.520198],[23.8775,1.079869],[27.4656,0.775567],[33.3793,0.496505],[37.7481,0.376001],[45.6469,0.251035],[56.5958,0.163464],[71.5885,0.101961],[90.9158,0.063408],[118.2656,0.03736],[164.5037,0.019367],[228.5906,0.01]],"tc":[[14.4246,605.984],[14.5114,245.882],[14.5114,431.321],[14.5114,543.948],[14.5695,140.169],[14.5841,39.839],[14.5841,76.8495],[14.5987,24.2847],[14.6426,16.7742],[14.7602,13.5156],[15.0584,10.3796],[15.3779,8.66112],[15.8146,7.1338],[16.4765,5.7537],[17.3733,4.44083],[18.5401,3.33623],[19.4906,2.707],[20.3674,2.33693],[21.866,1.8273],[23.8297,1.42026],[26.0739,1.12394],[29.8425,0.812077],[33.1796,0.64716],[36.9636,0.514705],[42.2217,0.395675],[49.0546,0.298447],[54.54,0.246557],[59.8555,0.208428],[66.0845,0.176548],[74.3612,0.146436],[82.0997,0.125913],[94.5316,0.103398],[105.84,0.089353],[116.738,0.080527],[131.096,0.07071],[147.368,0.062777],[165.163,0.05652],[180.356,0.052331],[199.324,0.048259],[227.45,0.043798],[256.706,0.040512],[292.636,0.037697],[328.958,0.035325],[396.601,0.032382],[446.273,0.030864],[498.663,0.029654],[570.738,0.028123],[647.378,0.026939],[710.473,0.026091],[784.409,0.025194],[894.201,0.02423],[1044.12,0.023561],[1377.36,0.022614],[3391.16,0.020057],[17960.4,0.015968]]},"8K":{"mm":[[16.4107,602.3588],[16.4107,384.465],[16.526,239.5714],[16.5757,142.2876],[16.6588,80.54768],[16.7423,46.3327],[16.8094,30.87191],[16.9613,20.46766],[17.2694,14.6706],[17.6535,11.77343],[18.2458,8.987585],[18.9336,7.227143],[19.6866,5.858205],[20.6545,4.67787],[22.2632,3.510794],[24.0212,2.772756],[26.4151,2.093508],[29.7234,1.512616],[32.4901,1.19344],[37.0006,0.852007],[41.51,0.653664],[46.3367,0.509583],[51.3125,0.404476],[59.6166,0.293416],[68.3017,0.220433],[76.6258,0.174442],[90.9158,0.125913],[104.6827,0.095258],[126.0821,0.066062],[156.0121,0.043667],[196.3567,0.027649],[250.8695,0.017057],[326.9908,0.01]],"tc":[[18.264,562.197],[18.264,607.197],[18.3189,467.712],[18.3923,292.613],[18.4291,176.24],[18.5401,99.868],[18.5586,58.4896],[18.633,35.6891],[18.6516,22.7336],[18.8014,17.0448],[19.1621,12.7667],[19.5687,10.4734],[20.2455,8.26347],[20.9457,6.82671],[21.9537,5.56693],[23.0562,4.55326],[24.58,3.65042],[26.1522,3.03388],[27.825,2.49638],[29.7531,2.03163],[31.6562,1.69357],[33.2792,1.46938],[35.6566,1.21755],[37.5222,1.06698],[40.2832,0.910137],[43.3772,0.771699],[52.2445,0.533572],[60.6387,0.406504],[71.7318,0.302352],[79.9126,0.249035],[95.5771,0.184121],[110.27,0.146144],[126.208,0.117871],[143.585,0.098553],[162.379,0.083646],[183.999,0.071421],[204.165,0.063281],[229.966,0.055511],[262.679,0.049087],[290.015,0.045042],[331.932,0.040674],[379.529,0.037472],[422.391,0.035149],[483.442,0.032707],[545.079,0.031112],[630.133,0.029359],[726.277,0.027788],[825.452,0.026565],[926.979,0.025523],[1067.34,0.024522],[1280.4,0.023467],[1640.78,0.022345],[1919.71,0.021749],[5425.84,0.018833],[17960.4,0.015968]]},"10K":{"mm":[[20.49,604.7734],[20.49,424.4749],[20.5515,245.3907],[20.6752,138.9133],[20.7166,81.1946],[20.7788,47.2687],[20.7996,29.89966],[20.9039,20.67337],[21.3689,16.10043],[21.8661,12.6271],[22.487,10.27634],[23.3112,8.304888],[24.2141,6.819892],[25.4047,5.364716],[26.4415,4.467562],[28.1046,3.475862],[29.7234,2.897481],[31.9105,2.367517],[35.0907,1.84198],[38.8588,1.417423],[42.9027,1.096189],[47.9392,0.834301],[52.6641,0.668873],[60.3967,0.489602],[69.3339,0.358738],[77.5508,0.282476],[92.7524,0.197471],[108.6285,0.144112],[127.4767,0.104542],[157.7376,0.06862],[205.3946,0.040633],[278.3647,0.022389],[417.7704,0.01]],"tc":[[22.6902,607.197],[22.7812,566.147],[22.804,453.889],[22.8268,247.609],[22.8954,37.707],[22.8954,60.7549],[22.8954,128.489],[22.9641,25.7091],[23.2646,19.1987],[23.5219,15.6715],[23.9971,12.703],[24.6539,10.547],[25.532,8.57494],[26.8411,6.61833],[28.1046,5.23749],[29.3395,4.38786],[30.7514,3.62133],[32.2957,3.04299],[33.8498,2.61128],[35.8712,2.22074],[38.1274,1.88295],[41.1381,1.54935],[44.6089,1.26218],[48.9077,1.018],[53.034,0.856278],[56.6524,0.745902],[65.1006,0.568269],[78.9594,0.400852],[94.4371,0.292245],[111.044,0.221981],[130.182,0.171845],[152.008,0.134773],[173.111,0.111452],[195.572,0.094216],[218.095,0.081989],[244.43,0.071065],[270.678,0.063471],[297.356,0.057431],[331.269,0.052018],[366.842,0.047731],[408.679,0.043449],[462.169,0.03963],[518.495,0.036547],[590.477,0.033737],[669.768,0.03174],[765.042,0.029922],[859.139,0.028662],[960.958,0.027511],[1083.47,0.026432],[1285.53,0.025244],[1504.07,0.024278],[1699.23,0.023774],[2203.78,0.02266],[3515.47,0.021022],[5028.76,0.019877],[17960.4,0.015968]]},"12K":{"mm":[[27.138,215.261],[27.138,124.6924],[27.1923,358.8314],[27.1923,46.98591],[27.1923,29.83993],[27.2196,78.089],[27.2468,22.6429],[27.274,612.6865],[27.6033,18.7998],[28.1891,14.71468],[29.1349,11.24411],[30.233,8.523646],[31.8786,6.320786],[33.2128,5.097975],[34.9506,4.054563],[37.2978,3.176698],[41.2205,2.408108],[46.2441,1.75741],[52.2968,1.288966],[57.9126,1.006863],[66.8154,0.726759],[79.0384,0.508565],[92.3821,0.360897],[110.16,0.248786],[132.6791,0.170817],[166.3232,0.108917],[210.5942,0.067666],[262.4165,0.043667],[327.9734,0.027843],[416.519,0.017246],[544.5348,0.01]],"tc":[[30.0822,32.8465],[30.0822,52.6069],[30.0822,104.047],[30.0822,203.741],[30.0822,378.362],[30.0822,543.948],[30.0822,604.773],[30.1123,23.5434],[30.5063,18.135],[31.1537,13.7748],[32.1025,10.685],[33.3125,8.3132],[34.6721,6.63158],[36.2679,5.29542],[37.8994,4.32254],[39.4461,3.65407],[40.892,3.21826],[42.5608,2.81184],[44.2978,2.49638],[46.6155,2.18112],[49.9956,1.81274],[53.9973,1.50507],[58.4946,1.23348],[62.7359,1.04377],[67.2848,0.891223],[72.1635,0.764785],[80.0726,0.618065],[91.1889,0.480868],[103.33,0.378643],[117.206,0.301447],[134.819,0.235237],[158.528,0.177433],[178.561,0.146144],[206.63,0.115653],[231.35,0.097767],[257.477,0.083981],[284.272,0.073302],[307.026,0.066592],[331.932,0.060618],[358.86,0.055623],[396.601,0.050632],[437.436,0.04609],[479.59,0.042546],[534.286,0.039393],[585.187,0.037062],[646.731,0.034904],[704.812,0.033334],[778.159,0.031772],[855.709,0.030404],[947.598,0.029212],[1056.72,0.028067],[1189.07,0.026886],[1333.99,0.025987],[1540.6,0.024868],[1724.91,0.024206],[1919.71,0.023514],[2416.14,0.022367],[4889.91,0.019917],[17960.4,0.015968]]},"15K":{"mm":[[33.2793,605.3782],[33.2793,40.84758],[33.3793,184.5371],[33.3793,102.9094],[33.4127,335.2417],[33.4461,62.66787],[33.7485,29.01599],[34.3271,20.94388],[35.3725,13.98305],[36.4498,10.62112],[37.8994,8.14044],[39.9622,6.103386],[42.1795,4.777143],[43.9009,3.966335],[46.1979,3.25386],[48.5665,2.731475],[50.9546,2.332268],[54.3223,1.938357],[58.4361,1.585406],[62.3606,1.34157],[66.2168,1.14894],[70.4522,0.990881],[74.8835,0.86835],[79.1966,0.767083],[92.2898,0.558131],[111.3784,0.38552],[138.786,0.249533],[166.4896,0.172879],[197.736,0.122436],[238.3959,0.084065],[296.7626,0.054195],[388.3597,0.031614],[504.1792,0.018814],[692.9318,0.01]],"tc":[[36.8529,609.021],[37.0006,381.02],[37.0006,551.065],[37.0747,36.5926],[37.0747,65.095],[37.0747,118.019],[37.0747,222.483],[37.3725,25.2252],[37.8615,19.0648],[38.5106,15.2235],[39.5646,12.0353],[41.0559,9.22433],[42.6034,7.14808],[44.3864,5.77099],[47.1311,4.38348],[48.9077,3.74283],[50.5991,3.31296],[52.7168,2.89458],[55.6418,2.45675],[61.3708,1.86981],[66.6153,1.49756],[72.8887,1.19105],[78.7229,0.996845],[88.1406,0.788865],[101.792,0.587922],[118.147,0.439481],[138.508,0.328847],[164.998,0.241433],[184.737,0.198461],[207.458,0.162486],[234.611,0.134773],[257.477,0.116349],[287.129,0.099842],[320.516,0.085849],[362.104,0.073596],[393.441,0.066326],[433.951,0.059715],[485.38,0.053335],[540.736,0.048598],[598.204,0.044594],[662.441,0.041413],[747.647,0.038459],[857.423,0.03536],[958.08,0.033201],[1091.08,0.031205],[1222.83,0.029683],[1358.22,0.028491],[1498.06,0.027429],[1667.24,0.026512],[1879.81,0.025549],[2081.67,0.024893],[2307.52,0.024303],[2892.65,0.02321],[3597.26,0.022056],[4656.08,0.020689],[6038.6,0.019406],[17960.4,0.015968]]},"20K":{"mm":[[42.6887,602.3588],[42.817,390.2752],[43.1609,227.6596],[43.5511,121.6137],[44.0328,60.33117],[44.7878,41.92354],[45.4192,27.76696],[46.3367,19.16041],[47.5573,14.23701],[48.81,10.70643],[51.0056,8.05944],[53.3532,6.327109],[56.9364,4.753319],[60.3967,3.754078],[65.3616,2.828769],[69.6814,2.286087],[74.0643,1.905684],[78.1737,1.63696],[86.4818,1.279974],[97.508,0.972232],[108.9548,0.758691],[120.6548,0.604616],[131.7536,0.501997],[146.6331,0.403668],[173.111,0.290787],[219.408,0.181198],[279.4805,0.111675],[348.2541,0.072428],[433.5175,0.046693],[543.9906,0.029892],[706.9299,0.017524],[934.4245,0.01]],"tc":[[47.6048,607.805],[47.7001,558.276],[47.8913,451.174],[48.3243,270.657],[48.6151,139.749],[48.9077,78.1671],[49.2512,46.7516],[50.0956,26.8656],[51.1588,19.1221],[52.5063,14.3944],[54.1595,11.0214],[56.3698,8.51513],[58.8466,6.55903],[61.4322,5.25848],[63.7478,4.42311],[67.4869,3.57099],[71.1602,3.0097],[77.1641,2.30445],[82.8419,1.87168],[88.7598,1.54009],[94.6261,1.30713],[101.183,1.11498],[109.501,0.939732],[123.215,0.733329],[138.924,0.571688],[160.924,0.431641],[179.995,0.351283],[203.758,0.282193],[234.143,0.221759],[257.477,0.188216],[295.873,0.150595],[326.011,0.129618],[367.576,0.107618],[405.829,0.092721],[450.758,0.080688],[483.926,0.07367],[523.706,0.066859],[571.881,0.060922],[624.487,0.055401],[675.147,0.051759],[740.948,0.047875],[814.79,0.044594],[894.201,0.041704],[994.192,0.038962],[1100.95,0.036767],[1232.66,0.034522],[1408.0,0.032382],[1582.76,0.03071],[1822.43,0.029067],[2119.48,0.027539],[2404.09,0.02638],[2689.01,0.02532],[2959.95,0.02467],[3165.06,0.024206],[3823.53,0.023141],[4527.51,0.022167],[6620.51,0.020117],[17960.4,0.016145]]},"25K":{"mm":[[54.0513,601.1553],[54.54,280.2976],[54.9231,150.483],[55.3643,78.63754],[55.9766,43.59088],[57.279,25.45333],[59.4975,15.56221],[61.6168,10.46299],[64.0033,7.987231],[66.5487,6.226682],[69.821,4.777143],[73.4742,3.872277],[78.7229,3.021768],[85.6213,2.292956],[93.1242,1.794705],[102.9181,1.375532],[112.4978,1.087455],[121.8674,0.886778],[132.5464,0.728213],[150.0447,0.556459],[174.8508,0.40895],[212.2857,0.279106],[267.9854,0.176901],[344.1,0.10805],[471.0348,0.058008],[637.7404,0.031931],[871.2519,0.017246],[1148.177,0.01]],"tc":[[59.6166,613.299],[59.8555,550.514],[60.2158,409.056],[60.5176,240.051],[60.8818,129.004],[61.3708,71.083],[61.8637,43.1571],[62.7359,28.958],[64.1956,20.3452],[66.4157,13.5969],[68.9881,9.62963],[70.9471,7.72023],[73.4742,6.28926],[75.9393,5.25848],[78.6442,4.40986],[81.8537,3.72789],[85.2795,3.18305],[89.2047,2.76168],[93.0311,2.43474],[95.1004,2.2543],[99.3783,1.98742],[103.848,1.73818],[109.282,1.52019],[115.115,1.33487],[122.6,1.1547],[147.073,0.780235],[178.383,0.530911],[217.224,0.366718],[263.731,0.257647],[307.64,0.196683],[373.879,0.140554],[427.49,0.113362],[490.748,0.092443],[541.277,0.081174],[604.216,0.070569],[662.441,0.064045],[716.18,0.058768],[777.381,0.054358],[863.446,0.050128],[934.424,0.046927],[1022.42,0.043974],[1134.48,0.041001],[1250.04,0.03869],[1374.61,0.036693],[1510.09,0.034834],[1662.25,0.033102],[1851.83,0.031487],[2104.7,0.029892],[2319.09,0.028605],[2557.86,0.027621],[2809.97,0.026618],[3139.84,0.025625],[3515.47,0.024794],[4150.27,0.02342],[5239.22,0.021771],[17960.4,0.016145]]},"30K":{"mm":[[67.2848,598.7557],[67.7574,384.0806],[68.2334,259.5245],[68.8503,172.7509],[68.9881,112.4884],[69.6814,69.60583],[70.4522,45.64288],[71.7318,29.42507],[73.7687,19.78346],[76.3199,12.50146],[78.4871,9.242797],[80.3936,7.499557],[83.2571,6.164724],[87.0893,4.997026],[92.8452,3.814625],[100.1765,2.903283],[105.5235,2.4226],[112.8358,1.961758],[121.5023,1.582239],[134.6843,1.219987],[151.7043,0.928523],[174.6761,0.675595],[201.9323,0.492056],[252.127,0.315637],[318.5988,0.197274],[417.7704,0.114731],[519.5338,0.074336],[676.4993,0.043842],[965.775,0.021404],[1416.481,0.01]],"tc":[[73.9903,573.555],[73.9903,611.462],[74.3612,493.663],[74.9584,332.238],[75.7118,204.149],[76.1674,137.393],[76.7792,90.5452],[77.3185,60.5124],[78.3302,41.7562],[79.2759,29.6614],[80.474,22.9391],[81.8537,18.1169],[83.4238,13.9551],[85.6213,10.9445],[87.5258,9.18751],[89.4727,7.73568],[92.1976,6.31447],[94.9104,5.43491],[98.0947,4.62207],[103.124,3.807],[109.282,3.10446],[116.155,2.50889],[120.654,2.18549],[127.222,1.8905],[134.549,1.59017],[141.873,1.38519],[149.894,1.19822],[159.482,1.0396],[178.919,0.808026],[206.424,0.5986],[258.251,0.388228],[301.247,0.289337],[354.579,0.215852],[398.191,0.176019],[459.864,0.138461],[515.909,0.114045],[586.358,0.09384],[646.085,0.082071],[712.608,0.072139],[789.919,0.064302],[902.285,0.056069],[1001.17,0.051192],[1192.64,0.044282],[1301.05,0.041537],[1432.14,0.03904],[1616.35,0.036255],[1781.0,0.034418],[1958.49,0.032642],[2119.48,0.031362],[2347.08,0.030012],[2573.26,0.028749],[2915.88,0.027183],[3235.47,0.025961],[3611.68,0.024918],[4092.57,0.023893],[4797.87,0.022637],[5709.74,0.021404],[7179.09,0.019977],[17960.4,0.016145]]},"40K":{"mm":[[80.0726,603.5646],[80.3132,465.3793],[81.0393,284.5338],[81.6085,173.0967],[82.264,106.3622],[82.9248,70.58717],[84.939,43.41684],[87.0022,28.46989],[89.7415,18.22594],[92.5671,13.38113],[96.731,9.843829],[101.5889,7.462152],[106.7974,5.82899],[112.1608,4.772369],[120.1731,3.78423],[133.2109,2.756169],[147.2207,2.078905],[168.3311,1.491587],[201.9323,0.959675],[229.0482,0.729671],[271.7636,0.503505],[314.4838,0.370403],[377.2591,0.252546],[470.0937,0.162648],[610.2885,0.096794],[803.4631,0.055678],[1097.654,0.029982],[1468.403,0.016703],[1893.023,0.01]],"tc":[[88.6711,602.961],[88.7598,526.817],[89.0265,402.563],[89.4727,280.017],[89.8313,196.93],[90.3719,131.348],[90.7341,91.9136],[91.3715,59.7906],[92.6597,42.3449],[93.9661,32.2929],[95.3862,25.9675],[97.3131,20.9858],[99.5772,16.8583],[101.487,14.1518],[104.16,11.5634],[106.584,9.82416],[109.173,8.43883],[113.514,7.01355],[117.675,5.8465],[121.745,5.1184],[127.094,4.41427],[133.21,3.77289],[139.342,3.27999],[149.147,2.6935],[155.389,2.40089],[167.157,1.95197],[181.079,1.57907],[196.946,1.29672],[214.419,1.07126],[238.634,0.842686],[273.672,0.630551],[305.189,0.499993],[342.383,0.398454],[384.111,0.318172],[441.391,0.244348],[486.351,0.206147],[557.761,0.1633],[603.612,0.143968],[667.094,0.122681],[737.991,0.106228],[824.627,0.090431],[898.683,0.081011],[988.245,0.071207],[1091.08,0.063535],[1241.32,0.054959],[1335.32,0.051192],[1433.58,0.047875],[1552.97,0.044638],[1678.96,0.041829],[1846.28,0.039236],[2058.9,0.036474],[2399.29,0.033168],[2702.49,0.031237],[3022.77,0.029594],[3470.06,0.027732],[3971.62,0.026143],[4582.17,0.024621],[5302.47,0.02335],[5996.48,0.022367],[6876.93,0.021276],[7676.57,0.020544],[8901.08,0.019562],[17960.4,0.016145]]},"50K":{"mm":[[109.3916,604.1687],[110.3805,332.2381],[111.2671,189.398],[112.1608,115.4514],[112.9487,73.98403],[114.198,51.87556],[115.9238,35.65352],[117.5582,26.89248],[119.5738,20.50863],[121.7456,15.79741],[124.5782,12.10774],[127.3492,9.824158],[132.2816,7.329034],[137.1305,5.840658],[142.7269,4.743821],[149.5953,3.919023],[158.2116,3.244114],[172.938,2.46907],[186.2208,2.015447],[206.8374,1.546262],[236.4963,1.110533],[262.4165,0.855422],[299.745,0.625526],[347.906,0.45559],[393.4413,0.349182],[452.5652,0.262852],[573.0262,0.164941],[693.625,0.11291],[829.5898,0.078617],[984.3002,0.055901],[1165.529,0.040028],[1413.65,0.027101],[1795.305,0.016787],[2326.057,0.01]],"tc":[[120.293,605.378],[120.654,543.948],[121.259,345.451],[122.6,197.127],[123.832,95.4736],[125.453,56.2524],[127.859,34.9824],[130.703,22.5525],[133.744,16.7575],[137.955,12.5014],[142.157,9.53381],[147.663,7.30708],[152.922,5.91117],[159.322,4.82515],[165.163,4.15305],[174.327,3.34625],[182.35,2.90038],[190.363,2.52651],[197.736,2.25656],[210.804,1.91332],[236.733,1.41317],[268.253,1.05426],[308.256,0.75945],[345.479,0.59146],[392.655,0.459709],[451.209,0.353044],[531.621,0.263115],[602.406,0.21349],[696.405,0.168105],[822.979,0.128843],[915.922,0.108917],[1000.17,0.09431],[1091.08,0.082813],[1178.42,0.07367],[1256.3,0.067599],[1369.13,0.061166],[1513.12,0.054304],[1663.91,0.04958],[1800.69,0.045998],[2002.05,0.042334],[2252.8,0.039157],[2596.52,0.035751],[3077.67,0.032414],[3586.49,0.030072],[4272.39,0.027566],[4953.89,0.02578],[6105.4,0.023608],[7287.59,0.022034],[8981.55,0.020299],[10828.4,0.018889],[17960.4,0.016145]]},"65K":{"mm":[[132.414,594.579],[133.7448,362.8002],[134.9539,236.0045],[136.0379,152.1476],[137.5426,92.55927],[138.9249,61.36552],[141.4482,44.11713],[144.7392,32.00356],[148.9981,21.90788],[153.0758,16.54106],[157.7376,12.22943],[161.5691,9.765389],[166.3232,8.05944],[172.42,6.500271],[179.9957,5.190567],[189.0351,4.249676],[204.5746,3.303037],[221.3915,2.582716],[240.3107,2.031636],[263.7317,1.612588],[294.9873,1.222429],[320.516,0.997842],[341.6997,0.857135],[375.3775,0.685806],[404.209,0.580909],[438.3124,0.488624],[519.5338,0.34022],[637.1031,0.221095],[811.5379,0.135991],[1022.423,0.08508],[1358.22,0.048163],[1802.501,0.027401],[2440.431,0.014963],[2995.689,0.01]],"tc":[[145.174,605.984],[145.901,549.414],[146.779,424.05],[147.81,287.681],[149.147,183.616],[150.345,123.205],[151.401,85.5285],[153.535,61.7348],[155.7,45.6429],[159.163,32.1639],[162.054,24.4308],[165.825,18.7998],[170.363,14.4666],[175.903,11.2666],[181.079,8.84493],[187.528,7.09112],[196.749,5.52809],[204.984,4.56694],[213.349,3.8684],[222.056,3.36303],[235.081,2.76998],[246.64,2.42988],[255.937,2.19206],[272.852,1.85863],[300.946,1.45913],[341.699,1.08419],[393.441,0.786502],[455.288,0.578012],[536.427,0.421826],[628.874,0.315953],[744.662,0.235472],[855.709,0.185785],[996.183,0.14527],[1137.89,0.118343],[1301.05,0.098849],[1535.99,0.080446],[1770.34,0.068346],[2058.9,0.058183],[2335.38,0.051346],[2654.28,0.045722],[3040.96,0.041083],[3497.94,0.037099],[4080.31,0.033368],[4688.78,0.030649],[5624.73,0.027566],[6502.41,0.0256],[7390.33,0.023917],[8552.06,0.022322],[10290.0,0.020442],[11636.8,0.019309],[13318.7,0.018221],[17960.4,0.016307]]},"80K":{"mm":[[165.825,593.9845],[166.157,394.1977],[166.823,235.7688],[169.5136,126.9572],[172.42,76.23716],[176.2552,43.94098],[182.1687,28.13029],[188.0923,19.76369],[194.987,13.96906],[203.758,9.942759],[212.7106,7.80562],[223.1697,6.0487],[237.2068,4.59902],[252.127,3.56742],[269.8679,2.834433],[290.0149,2.25656],[312.2901,1.823652],[334.9336,1.509594],[366.4756,1.229786],[404.209,0.96932],[453.9249,0.750391],[507.7208,0.594425],[584.6021,0.44301],[674.473,0.330165],[817.2385,0.223317],[1038.914,0.138877],[1301.055,0.088729],[1759.756,0.048598],[2330.714,0.02776],[3124.188,0.015434],[3885.198,0.01]],"tc":[[180.898,601.757],[181.804,562.76],[182.35,457.992],[183.631,312.265],[184.737,216.99],[186.034,146.181],[188.468,103.736],[190.744,75.0271],[194.792,48.8057],[197.933,37.22],[203.758,25.2252],[208.082,19.3336],[213.563,15.2998],[220.287,12.1441],[226.542,9.79473],[234.611,7.78224],[242.968,6.34612],[254.66,5.0523],[266.915,4.16552],[280.881,3.44472],[293.809,2.98274],[307.333,2.56213],[318.917,2.27923],[337.623,1.94807],[363.555,1.59494],[396.601,1.29154],[446.273,0.990882],[509.755,0.744412],[582.851,0.564305],[691.547,0.406504],[809.107,0.306002],[938.17,0.235237],[1048.3,0.193174],[1199.82,0.155647],[1350.09,0.129748],[1552.97,0.106654],[1806.1,0.087059],[2157.98,0.069867],[2447.76,0.060497],[2815.59,0.052122],[3235.47,0.045585],[3796.85,0.039709],[4389.31,0.035114],[5084.38,0.03133],[5854.28,0.028377],[6640.4,0.026065],[7539.63,0.024109],[8672.64,0.022322],[10785.1,0.020158],[12938.0,0.018552],[17960.4,0.016307]]},"100K":{"mm":[[202.7417,601.1553],[203.758,338.611],[206.0116,179.6214],[209.1252,118.4925],[213.1365,68.9133],[217.4421,46.3327],[223.393,33.01121],[229.7365,24.35766],[238.1576,17.14738],[248.8705,12.32766],[261.3688,8.871503],[273.9464,6.813076],[288.5685,5.300724],[306.1064,4.09941],[324.3854,3.393434],[347.2108,2.739681],[366.8424,2.332268],[395.4135,1.89618],[431.7868,1.502064],[485.3798,1.128444],[560.5574,0.807218],[642.8627,0.608863],[732.1104,0.462475],[861.7205,0.329505],[1085.646,0.20553],[1355.507,0.131314],[1743.989,0.079169],[2298.312,0.045631],[2956.997,0.027401],[3729.127,0.017333],[4889.91,0.01]],"tc":[[222.723,602.961],[224.512,542.861],[225.864,390.666],[226.769,268.232],[229.506,163.342],[232.742,98.6768],[238.395,53.8848],[245.165,35.3694],[251.623,25.8121],[257.735,20.0423],[263.468,16.2948],[274.22,12.2049],[285.126,9.33569],[294.692,7.50706],[307.948,6.0851],[324.061,4.89808],[339.655,4.05862],[355.644,3.41044],[372.759,2.95897],[388.359,2.59047],[403.401,2.31831],[424.933,2.01948],[453.018,1.69696],[486.351,1.4231],[534.286,1.1307],[572.453,0.958716],[607.244,0.838483],[673.798,0.669542],[756.673,0.524578],[832.082,0.434238],[929.764,0.351635],[1046.21,0.28446],[1169.03,0.234063],[1293.27,0.196879],[1504.07,0.153023],[1761.51,0.119294],[1998.05,0.098651],[2237.08,0.084402],[2484.75,0.072864],[2746.08,0.064302],[3093.1,0.055901],[3466.6,0.049283],[3924.24,0.043492],[4541.12,0.038038],[5187.09,0.033737],[5871.87,0.030435],[6633.77,0.027732],[7302.18,0.025805],[8224.95,0.023941],[9329.42,0.022322],[11036.1,0.020462],[13973.6,0.018294],[17960.4,0.016307]]},"140K":{"mm":[[319.7102,592.1046],[321.7266,527.4389],[327.8525,343.3577],[335.8501,220.0564],[346.5758,130.4322],[361.4112,73.46214],[381.2512,39.23425],[403.8693,22.35225],[435.063,12.4458],[474.5963,7.493084],[528.6867,4.534832],[622.5755,2.421937],[746.3148,1.437031],[882.5432,0.944307],[1001.847,0.700973],[1176.061,0.497027],[1421.676,0.336277],[1736.691,0.226807],[2112.631,0.154414],[2610.666,0.100732],[3343.119,0.061666],[4285.561,0.037398],[5137.333,0.02597],[6321.862,0.017101],[7554.571,0.012038],[8310.417,0.01001]],"tc":[[352.106,605.378],[353.164,558.276],[357.427,420.671],[362.104,316.667],[367.944,225.394],[376.505,158.356],[386.036,110.702],[395.413,77.933],[405.829,55.5814],[419.025,39.2067],[431.786,29.6614],[453.471,19.7044],[468.217,15.6089],[491.731,11.0435],[508.737,8.91597],[526.858,7.33637],[547.264,6.09728],[575.323,4.82033],[602.406,3.98621],[631.395,3.30634],[663.767,2.75341],[699.196,2.33227],[739.468,1.95783],[793.879,1.56649],[852.293,1.28767],[925.127,1.0532],[1013.26,0.85286],[1117.59,0.686492],[1208.25,0.578012],[1343.36,0.465259],[1472.81,0.38552],[1630.97,0.317854],[1813.34,0.262065],[2077.52,0.205325],[2323.73,0.170135],[2664.92,0.135991],[2995.69,0.11291],[3401.35,0.093092],[3916.4,0.075761],[4411.32,0.064302],[5043.87,0.053871],[5535.45,0.048067],[6253.7,0.041454],[6911.4,0.037062],[7738.23,0.032642],[8534.98,0.029594],[9546.48,0.026459],[10435.0,0.024376],[11636.8,0.022412],[12732.6,0.020938],[13959.6,0.019601],[15198.1,0.018664],[16662.6,0.017789],[17960.4,0.017229]]},"200K":{"mm":[[524.2307,602.3588],[538.5776,436.965],[554.9796,297.6304],[571.3099,207.8572],[587.5325,145.0169],[610.2885,90.09366],[630.7639,57.21684],[654.5391,38.20044],[675.1477,26.81192],[708.3451,18.37233],[741.69,12.92089],[777.3816,9.35438],[818.8749,6.532851],[860.8593,4.997026],[916.8384,3.795599],[996.183,2.786655],[1091.089,2.087237],[1184.328,1.658379],[1280.403,1.333544],[1440.766,0.986926],[1673.932,0.686492],[1900.61,0.505523],[2179.673,0.370774],[2568.121,0.262327],[3062.325,0.181561],[3736.592,0.120012],[4788.292,0.073522],[6216.291,0.043536],[7957.964,0.026591],[10208.01,0.016128],[12976.92,0.01]],"tc":[[579.364,602.359],[587.532,539.074],[598.204,423.203],[613.347,315.403],[628.246,231.563],[642.863,168.485],[660.456,119.205],[680.57,81.6833],[699.196,56.4778],[719.05,40.4411],[747.647,27.3809],[782.06,18.7434],[819.694,12.9986],[845.502,10.2558],[880.008,7.75893],[911.353,6.4099],[948.546,5.23749],[987.257,4.26671],[1032.69,3.58171],[1103.15,2.81184],[1165.52,2.351],[1243.8,1.93255],[1337.99,1.5712],[1468.4,1.2212],[1613.12,0.953935],[1747.48,0.783362],[1870.44,0.668205],[2006.06,0.567701],[2168.8,0.479428],[2316.77,0.417629],[2477.31,0.363069],[2664.92,0.315321],[2878.22,0.273306],[3165.06,0.232198],[3452.76,0.199855],[3889.08,0.164447],[4341.3,0.137771],[4745.39,0.119175],[5291.88,0.101554],[5790.24,0.088818],[6660.36,0.072864],[7442.25,0.063029],[8233.18,0.055401],[9153.83,0.048989],[9827.38,0.044907],[10656.5,0.041083],[11440.6,0.038267],[12418.3,0.035466],[13358.7,0.033168],[14213.2,0.031582],[14986.8,0.030283],[16073.5,0.028922],[17170.1,0.027649],[17960.4,0.026859]]}};
+
+(function sortSMU20() {
+  for (const fuse of Object.values(SMU20_DATA)) {
+    fuse.mm.sort((a,b) => a[0]-b[0]);
+    fuse.tc.sort((a,b) => a[0]-b[0]);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOTSTRAP
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('resize', drawAll);
+
+el('ampLenSlider') .addEventListener('input', function() { updateLenLabel('amp');  drawAll(); });
+el('timeLenSlider').addEventListener('input', function() { updateLenLabel('time'); drawAll(); });
+
+devices.push(makeDevice('intellirupter'));
+devices.push(makeDevice('tripsaver'));
+renderDeviceList();
+resetView(); updateZoomInfo(); drawAll();
+
+// Disclaimer modal
+(function() {
+  const overlay     = el('disclaimerOverlay');
+  const acceptBtn   = el('acceptBtn');
+  const discCheck   = el('discCheck');
+  const mainContent = el('mainContent');
+
+  discCheck.addEventListener('change', function() {
+    if (this.checked) {
+      acceptBtn.disabled = false;
+      acceptBtn.classList.add('ready');
+      acceptBtn.textContent = 'I Accept — Continue to Calculator';
+    } else {
+      acceptBtn.disabled = true;
+      acceptBtn.classList.remove('ready');
+      acceptBtn.textContent = 'Check the box above to continue';
+    }
+  });
+
+  acceptBtn.addEventListener('click', function() {
+    if (this.disabled) return;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity    = '0';
+    mainContent.style.filter         = 'none';
+    mainContent.style.pointerEvents  = 'auto';
+    mainContent.style.userSelect     = 'auto';
+    setTimeout(() => { overlay.remove(); resetView(); drawAll(); updateZoomInfo(); }, 320);
+  });
+})();
+</script>
+</body>
+</html>
